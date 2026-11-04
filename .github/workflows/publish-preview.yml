@@ -28,10 +28,10 @@ jobs:
       - run: npm ci
 
       - name: Build the preview site
-        # Assembles the landing page, the app under site/, and the mock-up
-        # screen gallery under review/. The app is built with the base path
-        # baked in, because a GitHub Pages project site is served from
-        # /<repo>/ rather than the domain root.
+        # Assembles the app at the Pages root, the mock-up screen gallery
+        # under review/, and the preview note under preview/. The app is built
+        # with the base path baked in, because a GitHub Pages project site is
+        # served from /<repo>/ rather than the domain root.
         run: python3 tools/build-pages-site.py
 
       - name: Publish to the gh-pages branch

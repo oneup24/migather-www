@@ -2,16 +2,22 @@
 """
 Assemble the GitHub Pages site for the public preview.
 
-Three things live under one Pages root:
+The repository root IS the website, so that the URL a client opens is the
+site itself and not an index page in front of it:
 
-    index.html   the landing page — where the team starts
-    site/        the built React app, served from a sub-path
-    review/      the mock-up screen gallery (60 screens + 3 contact sheets)
+    /              the built React app (index.html + assets/ + media/)
+    404.html       the app shell, so a deep link like /en/work still renders
+    review/        the mock-up screen gallery (60 screens + 3 contact sheets)
+    preview/       the preview note — mock-up disclosure, as-of date, links
 
 GitHub Pages serves `404.html` from the site root for any path it cannot
-find, so the app shell is copied there as well. That is what makes a deep
-link like /migather-www/site/en/work work: Pages returns the 404 file, the
-router reads the path, and the right page renders.
+find. Because that file is the app shell, the router reads the path and the
+right page renders.
+
+An earlier layout put the app under `/site/` behind a landing page at the
+root. It was changed because the landing page read as a different website
+from the design: the URL people were sent to did not look like the thing
+being reviewed.
 
 Run:
     python3 tools/build-pages-site.py
@@ -33,8 +39,9 @@ OUT = ROOT / "docs" / "pages-site"
 
 # The Pages project site path. GitHub serves a project site at
 # https<user>.github.io/<repo>/ — so everything lives under this prefix.
+# The app is served from that prefix root, so the URL opens on the site.
 REPO = "migather-www"
-SITE_PATH = f"/{REPO}/site"
+SITE_PATH = f"/{REPO}"
 
 AS_OF = "4 November 2026"
 
@@ -110,9 +117,10 @@ LANDING = f"""<!doctype html>
       <div class="eyebrow">Migather Limited · Website v3.0 · Design preview</div>
       <h1>Big-agency standards,<br /><em>from people who answer the phone.</em></h1>
       <p class="lede">
-        The rebuilt Migather website, published for review. Two ways in —
-        the working site, and the full-page mock-up screens of every page in
-        three languages.
+        The rebuilt Migather website, published for review. The site itself is
+        served from the root of this address — this page is the note that
+        travels with it. The full-page mock-up screens of every page in three
+        languages are under <b>/review/</b>.
       </p>
 
       <div class="notice">
@@ -129,13 +137,13 @@ LANDING = f"""<!doctype html>
     </header>
 
     <div class="cards">
-      <a class="card" href="site/">
+      <a class="card" href="../">
         <div class="kicker">Live build</div>
         <h2>Open the website</h2>
         <p>The working site — click through every page in English, 繁體中文 and 简体中文.</p>
-        <div class="go">→ /site/</div>
+        <div class="go">→ /</div>
       </a>
-      <a class="card" href="review/">
+      <a class="card" href="../review/">
         <div class="kicker">Mock-up screens</div>
         <h2>Browse the 60 screens</h2>
         <p>Every page, full page, at desktop and phone width, plus the three contact sheets.</p>
@@ -156,8 +164,9 @@ LANDING = f"""<!doctype html>
 
 def build_app() -> None:
     """Build the app with the Pages base path baked in."""
-    print("building the app with SITE_BASE=/{repo}/site ...".format(repo=REPO))
-    env = {"SITE_BASE": f"/{REPO}/site"}
+    print("building the app with SITE_BASE=/{repo} ...".format(repo=REPO))
+    env = {"SITE_BASE": f"/{REPO}"}
+
     import os
 
     merged = {**os.environ, **env}
@@ -179,29 +188,33 @@ def main() -> int:
 
     if OUT.exists():
         shutil.rmtree(OUT)
-    (OUT / "site").mkdir(parents=True)
+    OUT.mkdir(parents=True)
 
-    # The built app, served from /site/.
-    shutil.copytree(DIST, OUT / "site", dirs_exist_ok=True)
+    # The built app, served from the Pages root. index.html, assets/ and
+    # media/ all sit at the top level, so the repository URL opens the site.
+    shutil.copytree(DIST, OUT, dirs_exist_ok=True)
     # `_redirects` is a Netlify convention; Pages ignores it.
-    (OUT / "site" / "_redirects").unlink(missing_ok=True)
+    (OUT / "_redirects").unlink(missing_ok=True)
 
     # The SPA fallback. Pages serves the root 404.html for any path it does
     # not have, which is what lets a deep link into the app work.
-    shutil.copy2(OUT / "site" / "index.html", OUT / "404.html")
+    shutil.copy2(OUT / "index.html", OUT / "404.html")
 
-    # The mock-up screen gallery.
+    # The mock-up screen gallery. Its links are relative, so it can live at
+    # any depth without a rebuild.
     shutil.copytree(REVIEW, OUT / "review", dirs_exist_ok=True)
 
-    # The landing page.
-    (OUT / "index.html").write_text(LANDING, encoding="utf-8")
+    # The preview note, kept at /preview/ so the root can be the site.
+    (OUT / "preview").mkdir(parents=True, exist_ok=True)
+    (OUT / "preview" / "index.html").write_text(LANDING, encoding="utf-8")
 
     total = sum(f.stat().st_size for f in OUT.rglob("*") if f.is_file())
     print(f"\nPages site staged at {OUT.relative_to(ROOT)}")
     print(f"  {sum(1 for f in OUT.rglob('*') if f.is_file())} files · {total / 1024 / 1024:.1f} MB")
-    print(f"  landing  index.html")
-    print(f"  app      site/  (base {SITE_PATH})")
+    print(f"  site     /            (base {SITE_PATH})")
+    print(f"  fallback 404.html")
     print(f"  gallery  review/")
+    print(f"  note     preview/")
     return 0
 
 

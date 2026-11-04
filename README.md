@@ -42,6 +42,34 @@ python3 tools/build-review-set.py  # the handover-sized review set
 
 ---
 
+## The published preview
+
+<https://oneup24.github.io/migather-www/> — the repository URL opens the
+website itself, not an index page in front of it.
+
+| Path | What it is |
+| --- | --- |
+| `/` | The site. `/en`, `/zh-Hant`, `/zh-Hans`. |
+| `/review/` | The 60 full-page mock-up screens + 3 contact sheets. |
+| `/preview/` | The note that travels with the build: the mock-up disclosure, the as-of date, the record counts. |
+
+Source: <https://github.com/oneup24/migather-www>. The `main` branch holds
+the source; `gh-pages` holds the published build. `tools/build-pages-site.py`
+assembles it, and `.github/workflows/publish-preview.yml` runs it on every push
+to `main`.
+
+The app is built with its base path baked in (`SITE_BASE=/migather-www`),
+because a GitHub Pages project site is served from `/<repo>/` rather than the
+domain root. `404.html` is a copy of the app shell, so a deep link such as
+`/en/work` resolves: Pages serves the 404 file, the router reads the path, and
+the right page renders.
+
+> The repository is **public**. The client roster, the attributed testimonials
+> and the case figures are world-readable. Make the repo private before
+> sharing the link outside the team.
+
+---
+
 ## Stack
 
 React 19 · Vite 8 · Tailwind CSS v4 · React Router 7. No backend — the build
