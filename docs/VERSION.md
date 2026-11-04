@@ -70,6 +70,43 @@ are removed. See [`docs/LAUNCH_CHECKLIST.md`](docs/LAUNCH_CHECKLIST.md) §0.
 
 ---
 
+## The published preview — moved to the repository root
+
+**4 November 2026.** The preview was published with a plain index page at the
+repository root and the website one level deeper, at `/site/`.
+
+Opened from `oneup24.github.io/migather-www/`, that index page read as a
+different website from the design: a white page with two links and a mock-up
+notice, where the thing being reviewed is a dark cinematic hero over a
+harbour photograph. Anyone sent the repository address saw the notice, not
+the site. The design was never the problem — the address was.
+
+The app is now built at the Pages root.
+
+| Path | What it is |
+| --- | --- |
+| `/` | The website. `/en`, `/zh-Hant`, `/zh-Hans`. |
+| `/review/` | The 60 mock-up screens and 3 contact sheets. |
+| `/preview/` | The note that travels with the build — mock-up disclosure, as-of date, record counts. |
+
+The app is built with `SITE_BASE=/migather-www`, because a GitHub Pages
+project site is served from `/<repo>/` rather than the domain root. `404.html`
+remains a copy of the app shell, so a deep link such as `/en/work` resolves:
+Pages serves the 404 file, the router reads the path, and the right page
+renders.
+
+**The site itself did not change.** Same build, same data modules, same copy,
+same 37 route renders. `npm run verify` passes: 37 routes × 3 locales, the
+rendered-copy screen clean, the copy screen clean, the 75-URL sitemap
+unchanged.
+
+New: `tools/repackage-handover.py`, which refreshes the v3.0 handover zips.
+It does the job of `tools/package.sh` without `rsync --delete`, which the
+workspace command guard blocks. The v1.0 and v2.0 handovers are unaffected by
+this change and are left alone.
+
+---
+
 ## Payload and dead-code cleanup — 4 November 2026
 
 **4 November 2026.** Four items raised by independent QA against the running
