@@ -66,7 +66,7 @@ def screen_grid(folder: str) -> str:
         items.append(
             f"""      <figure class="card">
         <a href="{esc(path)}" target="_blank" rel="noreferrer">
-          <img src="{esc(path)}" alt="Mock-up screen — {esc(label)}" loading="lazy" decoding="async" />
+          <img src="{esc(path)}" alt="Mock-up screen — {esc(label)}" loading="lazy" />
         </a>
         <figcaption>{esc(label)}</figcaption>
       </figure>"""
@@ -89,7 +89,7 @@ def build() -> str:
     sheets = "\n".join(
         f"""      <figure class="card card--sheet">
         <a href="{esc(src)}" target="_blank" rel="noreferrer">
-          <img src="{esc(src)}" alt="{esc(label)}" loading="lazy" decoding="async" />
+          <img loading="eager" src="{esc(src)}" alt="{esc(label)}" />
         </a>
         <figcaption>{esc(label)}</figcaption>
       </figure>"""

@@ -63,8 +63,14 @@ export function LocaleShell() {
 }
 
 export default function App() {
+  // When the site is published under a sub-path (GitHub Pages project sites
+  // live at /<repo>/...), the router has to be told where the app starts, or
+  // every route 404s. BASE_URL comes from Vite's `base` config, so the two
+  // can never disagree. Locally BASE_URL is '/', and the basename is ''.
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, '');
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Routes>
         <Route path="/" element={<Navigate to={`/${DEFAULT_LOCALE}`} replace />} />
 

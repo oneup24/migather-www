@@ -25,6 +25,17 @@
  * ─────────────────────────────────────────────────────────────────────────
  */
 
+/**
+ * Resolve a media path against the deployment base path.
+ *
+ * The site is published under a sub-path on GitHub Pages (…/migather-www/site),
+ * so an absolute "/media/x.jpg" would look for the file at the domain root and
+ * 404. Vite bakes the base in at build time; locally it is empty and the
+ * paths stay exactly as they were.
+ */
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+export const asset = (path) => `${BASE}${path}`;
+
 export const mockUpNotice = {
   en: 'Mock-up imagery — generated placeholder artwork, not client photography.',
   'zh-Hant': '樣機圖片 — 生成的佔位視覺，並非客戶真實攝影作品。',
@@ -47,7 +58,7 @@ export const mockUpTag = {
  */
 export const banners = {
   home: {
-    src: '/media/hero-cinema.jpg',
+    src: asset('/media/hero-cinema.jpg'),
     alt: {
       en: 'Mock-up: night view across Victoria Harbour in Hong Kong, ferry lights on the water.',
       'zh-Hant': '樣機：香港維多利亞港夜景，渡輪燈光映在海面上。',
@@ -55,7 +66,7 @@ export const banners = {
     },
   },
   work: {
-    src: '/media/work-hero.jpg',
+    src: asset('/media/work-hero.jpg'),
     alt: {
       en: 'Mock-up: printed campaign layouts and storyboard frames laid out on a studio desk.',
       'zh-Hant': '樣機：工作桌上攤開的印刷稿件與分鏡稿。',
@@ -63,7 +74,7 @@ export const banners = {
     },
   },
   about: {
-    src: '/media/about-hero.jpg',
+    src: asset('/media/about-hero.jpg'),
     alt: {
       en: 'Mock-up: a quiet creative studio at dusk, paper layouts under a single lamp.',
       'zh-Hant': '樣機：黃昏時分的創意工作室，單盞燈照亮桌上的稿件。',
@@ -71,7 +82,7 @@ export const banners = {
     },
   },
   capabilities: {
-    src: '/media/capabilities-hero.jpg',
+    src: asset('/media/capabilities-hero.jpg'),
     alt: {
       en: 'Mock-up: layered translucent colour gels over a backlit lightbox.',
       'zh-Hant': '樣機：背光燈箱上層疊的半透明色片。',
@@ -79,7 +90,7 @@ export const banners = {
     },
   },
   careers: {
-    src: '/media/careers-hero.jpg',
+    src: asset('/media/careers-hero.jpg'),
     alt: {
       en: 'Mock-up: a small creative team working at a wall of printed layouts.',
       'zh-Hant': '樣機：小型創意團隊在滿牆印刷稿件前工作。',
@@ -87,7 +98,7 @@ export const banners = {
     },
   },
   contact: {
-    src: '/media/contact-banner.jpg',
+    src: asset('/media/contact-banner.jpg'),
     alt: {
       en: 'Mock-up: daytime view across a Hong Kong harbour frontage, ferry pier and terminal rooflines.',
       'zh-Hant': '樣機：白天的香港海港一帶，渡輪碼頭與碼頭大樓的輪廓。',
@@ -104,7 +115,7 @@ export const banners = {
  */
 export const features = {
   manifesto: {
-    src: '/media/home-manifesto.jpg',
+    src: asset('/media/home-manifesto.jpg'),
     alt: {
       en: 'Mock-up: a Hong Kong street in the rain at night, neon reflections out of focus.',
       'zh-Hant': '樣機：雨夜的香港街道，霓虹反光失焦。',
@@ -112,7 +123,7 @@ export const features = {
     },
   },
   aboutStudio: {
-    src: '/media/about-studio.jpg',
+    src: asset('/media/about-studio.jpg'),
     alt: {
       en: 'Mock-up: a studio shelf with printed boards, colour swatches and a small plant.',
       'zh-Hant': '樣機：工作室層架上的印刷板、色票與小植物。',
@@ -120,7 +131,7 @@ export const features = {
     },
   },
   contactCity: {
-    src: '/media/contact-city.jpg',
+    src: asset('/media/contact-city.jpg'),
     alt: {
       en: 'Mock-up: the central Hong Kong business district at golden hour.',
       'zh-Hant': '樣機：黃昏時分的中環商業區。',
@@ -139,7 +150,7 @@ export const features = {
  */
 export const caseImages = {
   'huatai-finance-hk': {
-    src: '/media/case-huatai.jpg',
+    src: asset('/media/case-huatai.jpg'),
     alt: {
       en: 'Mock-up: dawn over a Hong Kong financial district, glass towers catching the light.',
       'zh-Hant': '樣機：香港金融區破曉，玻璃幕牆映着晨光。',
@@ -147,7 +158,7 @@ export const caseImages = {
     },
   },
   '11-skies-gba-forum': {
-    src: '/media/case-forum.jpg',
+    src: asset('/media/case-forum.jpg'),
     alt: {
       en: 'Mock-up: a large business forum auditorium, stage lit, audience in silhouette.',
       'zh-Hant': '樣機：大型商業論壇會場，台上燈光明亮，觀眾成剪影。',
@@ -155,7 +166,7 @@ export const caseImages = {
     },
   },
   'bank-of-china-hk': {
-    src: '/media/case-boc.jpg',
+    src: asset('/media/case-boc.jpg'),
     alt: {
       en: 'Mock-up: hands holding a phone with an abstract banking interface.',
       'zh-Hant': '樣機：雙手拿着顯示抽象銀行介面的手機。',
@@ -163,7 +174,7 @@ export const caseImages = {
     },
   },
   'atfx-securities-hk': {
-    src: '/media/case-atfx.jpg',
+    src: asset('/media/case-atfx.jpg'),
     alt: {
       en: 'Mock-up: a Hong Kong commercial district at night, traffic light trails.',
       'zh-Hant': '樣機：香港商業區夜色，車流光軌。',
@@ -171,7 +182,7 @@ export const caseImages = {
     },
   },
   'wing-fung-financial-hk': {
-    src: '/media/case-wingfung.jpg',
+    src: asset('/media/case-wingfung.jpg'),
     alt: {
       en: 'Mock-up: gold bullion and coins under a single light.',
       'zh-Hant': '樣機：單一燈光下的金條與金幣。',
@@ -179,7 +190,7 @@ export const caseImages = {
     },
   },
   'new-world-development': {
-    src: '/media/case-newworld.jpg',
+    src: asset('/media/case-newworld.jpg'),
     alt: {
       en: 'Mock-up: an Asian megacity skyline at dusk.',
       'zh-Hant': '樣機：黃昏時分的亞洲城市天際線。',
@@ -187,7 +198,7 @@ export const caseImages = {
     },
   },
   'christies-auction': {
-    src: '/media/case-christies.jpg',
+    src: asset('/media/case-christies.jpg'),
     alt: {
       en: 'Mock-up: an auction viewing room, one sculpture lit on a pedestal.',
       'zh-Hant': '樣機：拍賣預展廳，基座上的雕塑被聚光照亮。',
@@ -195,7 +206,7 @@ export const caseImages = {
     },
   },
   'hang-seng-bank': {
-    src: '/media/case-hangseng.jpg',
+    src: asset('/media/case-hangseng.jpg'),
     alt: {
       en: 'Mock-up: a presenter at a desk in a modern broadcast set.',
       'zh-Hant': '樣機：現代錄影場景中坐在枱前的講者。',
@@ -203,7 +214,7 @@ export const caseImages = {
     },
   },
   'fubon-bank': {
-    src: '/media/case-fubon.jpg',
+    src: asset('/media/case-fubon.jpg'),
     alt: {
       en: 'Mock-up: abstract animated geometric forms on a deep blue field.',
       'zh-Hant': '樣機：深藍底上的抽象動態幾何圖形。',
@@ -211,7 +222,7 @@ export const caseImages = {
     },
   },
   '11-skies-social-management': {
-    src: '/media/case-social.jpg',
+    src: asset('/media/case-social.jpg'),
     alt: {
       en: 'Mock-up: a social content shoot in progress on a Hong Kong street.',
       'zh-Hant': '樣機：香港街頭進行中的社群內容拍攝。',
@@ -219,7 +230,7 @@ export const caseImages = {
     },
   },
   'marks-and-spencer': {
-    src: '/media/case-mands.jpg',
+    src: asset('/media/case-mands.jpg'),
     alt: {
       en: 'Mock-up: a retail window display of folded garments in warm light.',
       'zh-Hant': '樣機：暖光下的零售櫥窗服裝陳列。',
@@ -227,7 +238,7 @@ export const caseImages = {
     },
   },
   'h-queens': {
-    src: '/media/case-hqueens.jpg',
+    src: asset('/media/case-hqueens.jpg'),
     alt: {
       en: 'Mock-up: an art gallery opening in a Central heritage space.',
       'zh-Hant': '樣機：中環歷史建築內的藝術展覽開幕。',
@@ -235,7 +246,7 @@ export const caseImages = {
     },
   },
   'v-city-v-walk': {
-    src: '/media/case-vcity.jpg',
+    src: asset('/media/case-vcity.jpg'),
     alt: {
       en: 'Mock-up: a shopping mall interior under a glass roof.',
       'zh-Hant': '樣機：玻璃天幕下的購物城內景。',
@@ -243,7 +254,7 @@ export const caseImages = {
     },
   },
   'k11-musea': {
-    src: '/media/case-k11.jpg',
+    src: asset('/media/case-k11.jpg'),
     alt: {
       en: 'Mock-up: a retail atrium with a large artwork hanging above.',
       'zh-Hant': '樣機：懸掛大型藝術裝置的零售中庭。',
@@ -251,7 +262,7 @@ export const caseImages = {
     },
   },
   'lee-gardens': {
-    src: '/media/case-leegardens.jpg',
+    src: asset('/media/case-leegardens.jpg'),
     alt: {
       en: 'Mock-up: a tree-lined shopping street in a Chinese city in autumn.',
       'zh-Hant': '樣機：中國城市秋日的林蔭購物街。',
@@ -259,7 +270,7 @@ export const caseImages = {
     },
   },
   chinachem: {
-    src: '/media/case-chinachem.jpg',
+    src: asset('/media/case-chinachem.jpg'),
     alt: {
       en: 'Mock-up: residential tower facades at dusk, seen from below.',
       'zh-Hant': '樣機：黃昏時分仰拍的住宅樓立面。',

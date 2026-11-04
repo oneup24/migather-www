@@ -29,3 +29,8 @@ docs/mockups/
 # Working files for the media pipeline. The optimised images in
 # public/media/ are what the site ships; the masters are not site assets.
 tools/media/_masters/
+
+# ── The assembled preview site ─────────────────────────────────────────────
+# A build output. It is published to the gh-pages branch by
+# .github/workflows/publish-preview.yml, not committed to main.
+docs/pages-site/

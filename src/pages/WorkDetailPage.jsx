@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { cases, getCase, sectors } from '../data/cases';
 import { content } from '../data/content';
 import { contentV3 } from '../data/content.v3';
-import { caseImage } from '../data/media';
+import { asset, caseImage } from '../data/media';
 import { useLocale } from '../hooks/useLocale';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import Editorial from '../components/v3/Editorial';
@@ -37,7 +37,9 @@ export default function WorkDetailPage() {
   return (
     <>
       <PageBanner
-        image={image ?? { src: '/media/work-hero.jpg', alt: { en: '', 'zh-Hant': '', 'zh-Hans': '' } }}
+        image={
+          image ?? { src: asset('/media/work-hero.jpg'), alt: { en: '', 'zh-Hant': '', 'zh-Hans': '' } }
+        }
         eyebrow={t(sectors[item.sector].label)}
         title={
           <span className="flex flex-col gap-3">
