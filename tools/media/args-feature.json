@@ -1,0 +1,22 @@
+{
+  "requests": [
+    {
+      "prompt": "Vertical portrait of a Hong Kong street in the rain at night, neon reflections out of focus and abstracted, deep blue with crimson highlights, tall format, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "3:4",
+      "resolution": "1K",
+      "output_file": "home-manifesto.jpg"
+    },
+    {
+      "prompt": "Vertical detail of a studio shelf holding printed campaign boards, a fan of colour swatches and a small plant, morning light, calm and orderly, cinematic editorial photograph, natural light, muted filmic colour grade, subtle 35mm grain, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "3:4",
+      "resolution": "1K",
+      "output_file": "about-studio.jpg"
+    },
+    {
+      "prompt": "Aerial view over the central Hong Kong business district at golden hour, the harbour curve and long shadows falling between towers, cinematic editorial photograph, natural light, muted filmic colour grade, subtle 35mm grain, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "contact-city.jpg"
+    }
+  ]
+}

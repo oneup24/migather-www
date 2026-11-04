@@ -1,0 +1,208 @@
+@import 'tailwindcss';
+@import './v3.css';
+
+/* ==========================================================================
+   Migather Limited — Design tokens (v3.0)
+
+   Type and colour are taken from Migather's own credential decks so the
+   website and the proposals read as one agency.
+
+   Source: Migather/LIBRARY 2026 Q4/HK digital marketing campaign/
+           Agency Credential by Migather Limited - Ecom.pptx
+           (theme2 + theme3, and actual slide colour usage)
+
+     Latin face .... Century Gothic  (deck major + minor font)
+                     → shipped as Jost, a geometric face of the same class.
+                       Real Century Gothic is not licensed for web use.
+     Chinese face . 微軟正黑體 / Microsoft JhengHei
+                     → shipped as Noto Sans TC / Noto Sans SC.
+     Ground ........ #FFFFFF  — the most-used colour on our slides.
+     Primary ....... #016DA9  — deep blue.
+     Accent ........ #950534  — deep crimson.
+     Ink ........... #282828
+
+   ── The v3.0 change ──────────────────────────────────────────────────────
+   v3.0 adopts the structural grammar of two HK boutique peers:
+
+     Capsule48 — the editorial body. A high-contrast serif statement set
+                 against a geometric sans label, small caps service lists,
+                 a category filter row and an image-led project grid.
+     GAIA       — the hero communication. One big claim over a cinematic
+                 photograph, with the page index carried as large numerals
+                 anchored to the bottom of the hero.
+
+   That means the site now needs a second Latin face for editorial
+   statements. Playfair Display is a high-contrast Didone — the same class
+   of face Capsule48 sets its headlines in — and it pairs with the existing
+   geometric sans without competing with it. Chinese editorial statements
+   use Noto Serif TC / SC so the serif voice survives translation.
+
+   Chinese copy must always be reviewed against the 中国广告法 banned-word
+   list before it goes live.
+   ========================================================================== */
+@theme {
+  /* Neutrals */
+  --color-paper: #ffffff;
+  --color-surface: #f6f4f1;
+  --color-surfaceWarm: #f2f2f2;
+  --color-rule: #dedbd6;
+  --color-ruleSoft: #eceae6;
+  --color-ink: #1c1c1c;
+  --color-charcoal: #55555a;
+  --color-muted: #8c8c92;
+  --color-night: #14181d;
+
+  /* Brand */
+  --color-brandBlue: #016da9;
+  --color-brandBlueDeep: #005a8b;
+  --color-brandBluePale: #e8f1f7;
+  --color-brandCrimson: #950534;
+  --color-brandCrimsonDeep: #7a0429;
+  --color-brandCrimsonPale: #f7e9ec;
+  --color-brandGreen: #04a45d;
+  --color-brandPink: #ff94b7;
+
+  /* ------------------------------------------------------------------------
+     Crimson on a photographic ground.
+
+     House crimson #950534 is a deep, low-luminance colour. Measured against
+     the night-blue ground of the hero photograph it reaches only 2.0:1
+     contrast — not legible as display type. This is a *tint of the same
+     brand hue* (same 328° hue, lightness raised), used only where the
+     ground is a photograph. Measured contrast against #14181d is 4.4:1.
+
+     It is a display token. It never appears on white, where #950534 is
+     used instead.
+     ------------------------------------------------------------------------ */
+  --color-crimsonOnDark: #e04570;
+
+  /* Typography */
+  --font-display:
+    'Jost', 'Noto Sans TC', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
+  --font-body:
+    'Inter', 'Noto Sans TC', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
+  --font-editorial:
+    'Playfair Display', 'Noto Serif TC', 'Noto Serif SC', Georgia, 'Times New Roman',
+    serif;
+
+  /* Letter spacing */
+  --tracking-tightest: -0.03em;
+  --tracking-tighter: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-wide: 0.08em;
+  --tracking-technical: 0.14em;
+  --tracking-editorial: -0.015em;
+
+  /* Motion */
+  --animate-marquee: marquee 38s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: var(--tracking-tighter);
+    font-weight: 600;
+  }
+
+  ::selection {
+    background-color: var(--color-brandBlue);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brandBlue);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* Chinese body copy sits slightly looser than Latin — Noto Sans needs the
+     extra line height to stay comfortable at 16px. */
+  :lang(zh-Hant),
+  :lang(zh-Hans) {
+    line-height: 1.85;
+    letter-spacing: 0.01em;
+  }
+}
+
+/* ==========================================================================
+   Custom utilities
+   ========================================================================== */
+@utility hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* Shared card lift used across work / capability cards */
+@utility card-lift {
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px -24px rgb(20 24 29 / 0.32);
+  }
+}
+
+/* Eyebrow / kicker label — the small tracked-out caps used across sections */
+@utility eyebrow {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-technical);
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Capture mode — `?capture=1` on any URL
+   Forces every lazy image to load eagerly so a full-page screenshot shows
+   the whole page with no empty frames. See src/components/layout/CaptureMode.jsx.
+   ========================================================================== */
+html[data-capture='true'] {
+  scroll-behavior: auto !important;
+}
+
+/* Print — keep the page still. */
+@media print {
+  html {
+    scroll-behavior: auto !important;
+  }
+}

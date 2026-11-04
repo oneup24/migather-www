@@ -1,0 +1,34 @@
+{
+  "requests": [
+    {
+      "prompt": "Hands holding a smartphone showing an abstract banking interface, beside a bright window on a pale desk in daylight, soft cool screen glow, bright airy interior, shallow focus, cinematic editorial photograph, natural light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-boc.jpg"
+    },
+    {
+      "prompt": "A bright contemporary art gallery, a sculpture on a white plinth against a pale wall, soft daylight from a skylight, open airy room, cinematic editorial photograph, natural light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-christies.jpg"
+    },
+    {
+      "prompt": "A bright conference hall with a lit stage and an audience seated in rows, tall windows letting in daylight, wide view from the back of the room, cinematic editorial photograph, natural light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-forum.jpg"
+    },
+    {
+      "prompt": "A presenter seated at a pale desk in a bright daylight broadcast set, soft key light, pale background, a camera on a tripod blurred in the foreground, cinematic editorial photograph, natural light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-hangseng.jpg"
+    },
+    {
+      "prompt": "Vertical portrait of a Hong Kong street in the rain at blue hour, wet pavement reflecting lit shopfronts, deep blue sky with warm window light, brighter overall exposure, tall format, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "3:4",
+      "resolution": "1K",
+      "output_file": "home-manifesto.jpg"
+    }
+  ]
+}

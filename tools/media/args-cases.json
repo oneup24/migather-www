@@ -1,0 +1,100 @@
+{
+  "requests": [
+    {
+      "prompt": "Dawn over a Hong Kong financial district, glass towers catching the first light, a polished reflective podium, cinematic editorial photograph, natural light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, shallow depth of field, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-huatai.jpg"
+    },
+    {
+      "prompt": "A large business forum auditorium seen from the back of the hall, the stage lit, audience in silhouette, blank conference screens, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-forum.jpg"
+    },
+    {
+      "prompt": "A person's hands holding a smartphone showing an abstract banking interface, soft blue screen glow, dark interior, shallow focus, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-boc.jpg"
+    },
+    {
+      "prompt": "Night view over a dense Hong Kong commercial district, towers and light trails from passing traffic, abstract and cinematic, cinematic editorial photograph, practical light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-atfx.jpg"
+    },
+    {
+      "prompt": "Gold bullion bars and stacked coins on a dark reflective surface under a single warm light, macro, shallow focus, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-wingfung.jpg"
+    },
+    {
+      "prompt": "Aerial view of a dense Asian megacity skyline at dusk, layered residential and commercial towers, blue hour, cinematic editorial photograph, natural light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-newworld.jpg"
+    },
+    {
+      "prompt": "An empty auction house viewing room, a single sculpture lit on a pedestal under a focused spotlight, deep shadows, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-christies.jpg"
+    },
+    {
+      "prompt": "A presenter seated at a desk in a modern broadcast set, soft key light, a camera on a tripod blurred in the foreground, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-hangseng.jpg"
+    },
+    {
+      "prompt": "Abstract macro of animated geometric shapes on a dark blue field, motion-blurred, minimal and graphic, cinematic editorial photograph, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-fubon.jpg"
+    },
+    {
+      "prompt": "A social content shoot in progress on a Hong Kong street, a softbox and a phone on a rig, blurred figures behind the scenes, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-social.jpg"
+    },
+    {
+      "prompt": "A retail shop window at dusk, an abstract display of folded garments in warm light, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-mands.jpg"
+    },
+    {
+      "prompt": "An art gallery opening inside a Central heritage space, visitors silhouetted against white walls, warm spotlights, cinematic editorial photograph, practical light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-hqueens.jpg"
+    },
+    {
+      "prompt": "Interior of a large shopping mall, daylight through a glass roof, escalators, motion blur of shoppers, bright and airy, cinematic editorial photograph, natural light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-vcity.jpg"
+    },
+    {
+      "prompt": "A flagship retail atrium with a large artwork hanging above, shoppers small in the frame, daylight from a skylight, cinematic editorial photograph, natural light, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-k11.jpg"
+    },
+    {
+      "prompt": "A tree-lined shopping street in a Chinese city in autumn, warm afternoon light, blurred pedestrians, cinematic editorial photograph, natural light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-leegardens.jpg"
+    },
+    {
+      "prompt": "Residential tower facades at dusk with lit windows, a cool blue sky, seen from below, cinematic editorial photograph, natural light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "4:3",
+      "resolution": "1K",
+      "output_file": "case-chinachem.jpg"
+    }
+  ]
+}

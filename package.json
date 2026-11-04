@@ -1,0 +1,32 @@
+{
+  "name": "migather-site-v3",
+  "private": true,
+  "version": "3.0.0",
+  "type": "module",
+  "description": "Migather Limited \u2014 corporate website v2.0 (Vite + React + Tailwind v4). Homepage-led redesign on an Odoo-inspired design system.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check:routes": "vite build --ssr scripts/ssr-check.jsx --outDir .ssr-check --logLevel error && node .ssr-check/ssr-check.js",
+    "check:copy": "node scripts/check-copy.mjs",
+    "verify": "npm run build && npm run check:routes && npm run check:copy && npm run build:sitemap",
+    "lint": "echo \"no linter configured yet\"",
+    "build:sitemap": "node scripts/build-sitemap.mjs",
+    "audit:dom": "node tools/audit-dom.mjs",
+    "audit:dom:mobile": "node tools/audit-dom.mjs --width 390 --height 844",
+    "capture": "node tools/capture-pages.mjs",
+    "serve": "npm run build && vite preview --port 4176 --strictPort"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.5"
+  }
+}

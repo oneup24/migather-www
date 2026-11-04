@@ -1,0 +1,29 @@
+node_modules
+dist
+dist-ssr
+.ssr-check
+.DS_Store
+*.local
+.vite
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-error.log*
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# ── Generated review artefacts ────────────────────────────────────────────
+# The full-resolution page captures (225 MB) and the review set (21 MB) are
+# working files for showing the site to people. They are regenerated with
+#   node tools/capture-pages.mjs
+#   python3 tools/build-review-set.py
+# and are delivered separately as a handover folder, not as repository files.
+docs/mockups/
+docs/review-set/
+
+# ── Un-optimised image masters ────────────────────────────────────────────
+# Working files for the media pipeline. The optimised images in
+# public/media/ are what the site ships; the masters are not site assets.
+tools/media/_masters/

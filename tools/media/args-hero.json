@@ -1,0 +1,34 @@
+{
+  "requests": [
+    {
+      "prompt": "Wide cinematic night view across Victoria Harbour in Hong Kong, a ferry's wake catching light, distant tower windows glowing, rain-slick foreground, deep indigo sky with warm amber practical lights, generous empty sky in the upper left, cinematic editorial photograph, natural and practical light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, shallow depth of field, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "hero-cinema.jpg"
+    },
+    {
+      "prompt": "Overhead flat-lay of printed campaign layouts, storyboard frames and colour swatches arranged on a pale concrete desk, raking daylight, graphic and minimal, generous empty space on the left, cinematic editorial photograph, natural light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "work-hero.jpg"
+    },
+    {
+      "prompt": "Quiet creative studio interior at dusk, a long table covered with paper layouts and a single lamp casting a warm pool of light, empty of people, calm and considered, generous empty space on the left, cinematic editorial photograph, practical light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "about-hero.jpg"
+    },
+    {
+      "prompt": "Abstract close-up of layered translucent coloured gels spread over a backlit lightbox, deep blue and crimson overlapping, refracted light, graphic and quiet, generous empty space on the left, cinematic editorial photograph, backlit, muted filmic colour grade, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "capabilities-hero.jpg"
+    },
+    {
+      "prompt": "Three creative people seen from behind in a bright Hong Kong studio, working at a wall of printed layouts pinned up, warm daylight through venetian blinds, long soft shadows, generous empty space on the left, cinematic editorial photograph, natural light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "careers-hero.jpg"
+    }
+  ]
+}

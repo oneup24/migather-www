@@ -1,0 +1,342 @@
+/* ==========================================================================
+   v3.0 — editorial grammar
+
+   The two reference sites each own one part of the page, so the site reads
+   as a designed document rather than a template:
+
+   Capsule48 owns the body.
+     A wide left gutter carries a small caps label; the statement sits in
+     the right three-quarters of the measure. Service names are set as
+     small caps in two columns. Nothing is boxed, nothing is centred.
+
+   GAIA owns the hero.
+     One claim, one photograph, and the page index carried as large
+     numerals anchored to the bottom edge of the image.
+
+   Both are structural, not decorative — so they are expressed as layout
+   primitives here rather than as one-off class strings in each component.
+   ========================================================================== */
+
+@layer components {
+  /* ── The editorial row ──────────────────────────────────────────────────
+     label in the left gutter · statement in the right three-quarters. */
+  .editorial {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+  }
+
+  @media (min-width: 900px) {
+    .editorial {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+      gap: 3.5rem;
+    }
+  }
+
+  /* The small caps label — Capsule48's "OUR PHILOSOPHY". */
+  .editorial-label {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-technical);
+    text-transform: uppercase;
+    color: var(--color-ink);
+    padding-top: 0.55em;
+  }
+
+  .editorial-label--muted {
+    color: var(--color-muted);
+  }
+
+  /* The statement — a high-contrast serif set large and left. */
+  .editorial-statement {
+    font-family: var(--font-editorial);
+    font-weight: 400;
+    line-height: 1.14;
+    letter-spacing: var(--tracking-editorial);
+    color: var(--color-ink);
+    text-wrap: balance;
+    font-size: clamp(1.75rem, 3.3vw, 3rem);
+  }
+
+  .editorial-statement--lg {
+    font-size: clamp(2.1rem, 4.4vw, 4.1rem);
+    line-height: 1.06;
+  }
+
+  .editorial-statement--sm {
+    font-size: clamp(1.4rem, 2.3vw, 2.1rem);
+    line-height: 1.2;
+  }
+
+  .editorial-lede {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--color-charcoal);
+    max-width: 42rem;
+  }
+
+  @media (min-width: 768px) {
+    .editorial-lede {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* ── Service list — small caps in two columns, no bullets, no boxes ──── */
+  .service-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0 3rem;
+  }
+
+  @media (min-width: 700px) {
+    .service-list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .service-list__item {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--color-rule);
+    display: block;
+    transition: color 0.2s ease;
+  }
+
+  .service-list__item:hover {
+    color: var(--color-brandBlue);
+  }
+
+  /* ── Category filter row — Capsule48's ALL / Art + Music / … ────────── */
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 2.25rem;
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  .filter-row__item {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--color-charcoal);
+    padding: 0.85rem 0;
+    position: relative;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .filter-row__item:hover {
+    color: var(--color-ink);
+  }
+
+  .filter-row__item[aria-pressed='true'] {
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+
+  /* The active rule sits on the container's own bottom border line. */
+  .filter-row__item[aria-pressed='true']::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--color-brandCrimson);
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────────────────
+     A photographic ground, not a dark page. The house ground stays white;
+     the darkness here comes from the photograph and the scrim over it. */
+  .hero-scrim {
+    background:
+      linear-gradient(
+        to top,
+        rgba(10, 13, 17, 0.88) 0%,
+        rgba(10, 13, 17, 0.58) 26%,
+        rgba(10, 13, 17, 0.2) 56%,
+        rgba(10, 13, 17, 0.5) 100%
+      ),
+      linear-gradient(
+        to right,
+        rgba(10, 13, 17, 0.82) 0%,
+        rgba(10, 13, 17, 0.58) 38%,
+        rgba(10, 13, 17, 0.24) 68%,
+        rgba(10, 13, 17, 0.06) 100%
+      );
+  }
+
+  /* A fine grain over the photograph — the one piece of texture in the
+     system, and deliberately faint. */
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.055;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ── GAIA's numbered index ───────────────────────────────────────────
+     Large numerals under a small caps wordmark, anchored to the bottom
+     of the hero. */
+  .index-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+    padding-top: 1.4rem;
+  }
+
+  .index-nav__label {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-technical);
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+    transition: color 0.2s ease;
+  }
+
+  .index-nav__number {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2.25rem, 4.4vw, 3.75rem);
+    line-height: 1;
+    color: var(--color-crimsonOnDark);
+    letter-spacing: -0.02em;
+    transition: color 0.2s ease;
+  }
+
+  .index-nav__link:hover .index-nav__label {
+    color: #fff;
+  }
+
+  .index-nav__link:hover .index-nav__number {
+    color: #fff;
+  }
+
+  /* ── Section numbering — GAIA's "01" ────────────────────────────────── */
+  .section-number {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(2.75rem, 5.5vw, 5rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--color-brandCrimson);
+  }
+
+  /* ── Hairlines ──────────────────────────────────────────────────────── */
+  .rule-top {
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .rule-bottom {
+    border-bottom: 1px solid var(--color-rule);
+  }
+
+  /* ── Image treatment ─────────────────────────────────────────────────
+     Work and editorial images sit edge to edge with no card chrome. */
+  .frame {
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+
+  .frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .frame:hover img {
+    transform: scale(1.035);
+  }
+
+  /* ── The link that reads as a line, not a button ────────────────────── */
+  .link-line {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--color-ink);
+    transition: gap 0.25s ease, color 0.25s ease;
+  }
+
+  .link-line:hover {
+    gap: 1rem;
+    color: var(--color-brandBlue);
+    border-color: var(--color-brandBlue);
+  }
+
+  /* ── The client strip ────────────────────────────────────────────────── */
+  .marquee {
+    display: flex;
+    width: max-content;
+    animation: mig-marquee 46s linear infinite;
+  }
+
+  .marquee-track {
+    display: flex;
+    align-items: baseline;
+    gap: 3.25rem;
+    padding-right: 3.25rem;
+  }
+
+  .marquee-item {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 500;
+    color: rgb(28 28 28 / 0.72);
+    white-space: nowrap;
+  }
+
+  .marquee-item__local {
+    margin-left: 0.6rem;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  /* The edges fade rather than cut, so the strip reads as continuing
+     past the frame. */
+  .marquee-mask {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 8%,
+      #000 92%,
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 8%,
+      #000 92%,
+      transparent 100%
+    );
+  }
+
+  @keyframes mig-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}

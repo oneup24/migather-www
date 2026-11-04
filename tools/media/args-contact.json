@@ -1,0 +1,10 @@
+{
+  "requests": [
+    {
+      "prompt": "Wide daytime view across a Hong Kong harbour frontage, ferry pier and terminal rooflines in the middle distance, calm water, pale overcast sky with soft light, generous empty sky in the upper left, cinematic editorial photograph, natural light, muted filmic colour grade with warm highlights and cool shadows, subtle 35mm grain, restrained premium brand-film aesthetic, no text, no signage, no logos, no watermarks, no readable brand marks",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_file": "contact-banner.jpg"
+    }
+  ]
+}
