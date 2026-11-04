@@ -15,13 +15,15 @@ yarn-error.log*
 !.vscode/extensions.json
 
 # ── Generated review artefacts ────────────────────────────────────────────
-# The full-resolution page captures (225 MB) and the review set (21 MB) are
-# working files for showing the site to people. They are regenerated with
+# The full-resolution page captures (225 MB) are working files for showing
+# the site to people. They are regenerated with
 #   node tools/capture-pages.mjs
-#   python3 tools/build-review-set.py
 # and are delivered separately as a handover folder, not as repository files.
 docs/mockups/
-docs/review-set/
+
+# The review set itself (21 MB — 60 screens + 3 contact sheets + the gallery
+# page) IS committed: the team shares it by URL, so it needs to live in the
+# repository. See docs/review-set/index.html and the gh-pages branch.
 
 # ── Un-optimised image masters ────────────────────────────────────────────
 # Working files for the media pipeline. The optimised images in
