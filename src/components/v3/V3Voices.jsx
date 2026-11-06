@@ -11,6 +11,9 @@ import Editorial from './Editorial';
  * them. The attribution is printed exactly as the credential deck prints
  * it — name, job title, company — because a quote without its source is
  * an anonymous quote.
+ *
+ * This section sat on the homepage until November 2026; it now closes the
+ * About page, where the rest of the client material lives.
  */
 export default function V3Voices() {
   const { t } = useLocale();

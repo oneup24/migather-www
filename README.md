@@ -89,7 +89,7 @@ Three locales, URL-prefixed: `/en/*`, `/zh-Hant/*`, `/zh-Hans/*`.
 | `src/components/ui/` | `Button`, `Icon`, `Logo`. |
 | `src/pages/` | 9 route templates. |
 | `src/styles/` | `index.css` (tokens) and `v3.css` (the editorial grammar). |
-| `public/media/` | The 26 generated mock-up images. |
+| `public/media/` | The 24 generated mock-up images, plus the 23 client marks in `public/media/clients/`. |
 | `docs/` | `DESIGN_V3.md`, `LAUNCH_CHECKLIST.md`, `COPY_COMPLIANCE.md`, `REVIEW_GUIDE.md`, `VERSION.md`, `mockups/`. |
 | `tools/` | Screenshot and image tooling. |
 

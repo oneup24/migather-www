@@ -93,14 +93,20 @@ that carry their source.
 ## 4. What the v3.0 rebuild added to the screen
 
 v3.0 introduces one new data module, `src/data/content.v3.js`, holding the
-new structural copy: section labels, the hero index, and the mock-up
-disclosures. It is scanned like every other module.
+new structural copy: section labels, the hero index, the closing
+call-to-action, and the mock-up disclosures. It is scanned like every other
+module.
 
 Nothing in it is a claim. The new strings are:
 
 - Section labels — `Our philosophy`, `Selected work`, `How we work`,
-  `Who we work with`, `In their words`, `Next step`, `Where we work`.
-- The hero index — `Selected work`, `How we work`, `Start a conversation`.
+  `Who we work with`, `By the numbers`, `In their words`, `Next step`,
+  `Where we work`.
+- The hero index — `How we work`, `Selected work`, `Start a conversation`.
+- The closing call to action — `What we need from you`, and the three
+  lines beneath it: `The objective`, `The market`, `The deadline`.
+- The line under the client wall, which says the marks belong to their
+  owners.
 - The disclosures — the mock-up notices and the section labels for the
   work-grid note.
 - One phrase pointer, `hero.titleMark`, which names the words of the

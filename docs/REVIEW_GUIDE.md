@@ -208,7 +208,7 @@ Current state: **30/30 at 390 px, 26/26 at 768 px and 1920 px.**
 | `src/components/layout/` | Header, footer, capture mode. |
 | `src/data/content.v3.js` | The new structural copy for v3.0. |
 | `src/data/media.js` | The mock-up image manifest and the disclosure copy. |
-| `public/media/` | The 26 generated images. |
+| `public/media/` | The 24 generated images, plus the 23 client marks in `public/media/clients/`. |
 | `docs/mockups/` | The full-page screens. |
 | `tools/media/` | Image generation and optimisation. |
 | `tools/capture-pages.mjs` | The screenshot tool. |

@@ -283,55 +283,64 @@
     border-color: var(--color-brandBlue);
   }
 
-  /* ── The client strip ────────────────────────────────────────────────── */
-  .marquee {
-    display: flex;
-    width: max-content;
-    animation: mig-marquee 46s linear infinite;
-  }
-
-  .marquee-track {
-    display: flex;
-    align-items: baseline;
-    gap: 3.25rem;
-    padding-right: 3.25rem;
-  }
-
-  .marquee-item {
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 500;
-    color: rgb(28 28 28 / 0.72);
-    white-space: nowrap;
-  }
-
-  .marquee-item__local {
-    margin-left: 0.6rem;
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--color-muted);
-  }
-
-  /* The edges fade rather than cut, so the strip reads as continuing
-     past the frame. */
-  .marquee-mask {
+  /* ── The client wall ─────────────────────────────────────────────────── */
+  /* Two rows of marks travelling right to left. Each row is drawn twice —
+     the second copy carries the loop — so the animation shifts by exactly
+     half the row width and the seam never shows. */
+  .logo-wall {
+    overflow: hidden;
+    /* The edges fade rather than cut, so the rows read as continuing past
+       the frame. */
     -webkit-mask-image: linear-gradient(
       to right,
       transparent 0,
-      #000 8%,
-      #000 92%,
+      #000 7%,
+      #000 93%,
       transparent 100%
     );
     mask-image: linear-gradient(
       to right,
       transparent 0,
-      #000 8%,
-      #000 92%,
+      #000 7%,
+      #000 93%,
       transparent 100%
     );
   }
 
-  @keyframes mig-marquee {
+  .logo-wall__row {
+    display: flex;
+    width: max-content;
+    animation: mig-logo-wall 48s linear infinite;
+  }
+
+  .logo-wall__row + .logo-wall__row {
+    margin-top: 0.75rem;
+  }
+
+  .logo-wall__track {
+    display: flex;
+    align-items: center;
+  }
+
+  /* A reader who does not want movement can stop it, and can drag the rows
+     sideways instead. */
+  .logo-wall:hover .logo-wall__row {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo-wall {
+      overflow-x: auto;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+
+    .logo-wall__row {
+      animation: none;
+    }
+  }
+
+  @keyframes mig-logo-wall {
     from {
       transform: translateX(0);
     }

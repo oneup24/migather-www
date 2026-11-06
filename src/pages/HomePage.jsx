@@ -1,31 +1,35 @@
 import { banners } from '../data/media';
-import V3Clients from '../components/v3/V3Clients';
 import V3Cta from '../components/v3/V3Cta';
 import V3Hero from '../components/v3/V3Hero';
-import V3Marquee from '../components/v3/V3Marquee';
+import V3LogoWall from '../components/v3/V3LogoWall';
 import V3Principles from '../components/v3/V3Principles';
 import V3Stats from '../components/v3/V3Stats';
-import V3Voices from '../components/v3/V3Voices';
-import V3WorkSection from '../components/v3/V3WorkSection';
 
 /**
  * The homepage.
  *
- * The order follows Capsule48's: a claim, then the body in editorial rows,
- * then the work, then the proof. GAIA's numbered index at the foot of the
- * hero points at the three sections that matter.
+ * The order was reset by management in November 2026:
+ *
+ *   1. Hero — the claim, the picked-out phrase, the page index.
+ *   2. Who we work with — the client wall, moved up from the foot.
+ *   3. How we work — the principles, moved up from fourth.
+ *   4. By the numbers — the four countable facts.
+ *   5. Next step — the closing call to action.
+ *
+ * The "In their words" section and the full "Who we work with" editorial
+ * were removed; the testimonials now live on the About page, where they
+ * were always meant to sit. The selected work was removed from the
+ * homepage in November 2026 as well — the work has its own page, and the
+ * hero index now points there.
  */
 export default function HomePage() {
   return (
     <>
       <V3Hero image={banners.home} />
 
-      <V3Clients />
-      <V3WorkSection />
+      <V3LogoWall />
       <V3Principles />
       <V3Stats />
-      <V3Marquee />
-      <V3Voices />
       <V3Cta />
     </>
   );

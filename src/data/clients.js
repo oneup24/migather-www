@@ -24,41 +24,41 @@
  */
 export const clients = [
   // Finance & investment
-  { name: 'Huatai Finance', local: '華泰證券', group: 'finance' },
-  { name: 'Bank of China HK', local: '中銀香港', group: 'finance' },
-  { name: 'Hang Seng Bank', local: '恒生銀行', group: 'finance' },
-  { name: 'Fubon Bank', local: '永明金融', group: 'finance' },
-  { name: 'Wing Fung Financial Group', local: '永豐金融集團', group: 'finance' },
-  { name: 'ATFX Securities', local: '', group: 'finance' },
-  { name: 'ICBC Asia', local: '', group: 'finance' },
-  { name: 'CTFlife', local: '', group: 'finance' },
+  { name: 'Huatai Finance', slug: 'huatai-finance', local: '華泰證券', group: 'finance' },
+  { name: 'Bank of China HK', slug: 'bank-of-china-hk', local: '中銀香港', group: 'finance' },
+  { name: 'Hang Seng Bank', slug: 'hang-seng-bank', local: '恒生銀行', group: 'finance' },
+  { name: 'Fubon Bank', slug: 'fubon-bank', local: '永明金融', group: 'finance' },
+  { name: 'Wing Fung Financial Group', slug: 'wing-fung', local: '永豐金融集團', group: 'finance' },
+  { name: 'ATFX Securities', slug: 'atfx', local: '', group: 'finance' },
+  { name: 'ICBC Asia', slug: 'icbc-asia', local: '', group: 'finance' },
+  { name: 'CTFlife', slug: 'ctf-life', local: '', group: 'finance' },
 
   // Property & development
-  { name: 'New World Development', local: '新世界發展', group: 'property' },
-  { name: 'Chinachem Group', local: '信和集團', group: 'property' },
-  { name: 'Lee Gardens', local: '利園', group: 'property' },
+  { name: 'New World Development', slug: 'new-world-development', local: '新世界發展', group: 'property' },
+  { name: 'Chinachem Group', slug: 'chinachem', local: '信和集團', group: 'property' },
+  { name: 'Lee Gardens', slug: 'lee-gardens', local: '利園', group: 'property' },
 
   // Retail, travel & lifestyle
-  { name: 'K11 Musea', local: '', group: 'lifestyle' },
-  { name: 'Marks & Spencer', local: '', group: 'lifestyle' },
-  { name: '11 SKIES', local: '11 天空之城', group: 'lifestyle' },
-  { name: 'V City & V Walk', local: '', group: 'lifestyle' },
-  { name: "H Queen's", local: '', group: 'lifestyle' },
-  { name: 'HKTDC', local: '香港貿發局', group: 'lifestyle' },
-  { name: 'Beauty Express', local: '', group: 'lifestyle' },
-  { name: 'Beauty Avenue', local: '', group: 'lifestyle' },
-  { name: 'Invisalign', local: '', group: 'lifestyle' },
-  { name: '伊比利亚火腿CH', local: '', group: 'lifestyle' },
-  { name: 'mando', local: '', group: 'lifestyle' },
-  { name: 'QPET', local: '', group: 'lifestyle' },
-  { name: '中環街市', local: '', group: 'lifestyle' },
+  { name: 'K11 Musea', slug: 'k11-musea', local: '', group: 'lifestyle' },
+  { name: 'Marks & Spencer', slug: 'marks-spencer', local: '', group: 'lifestyle' },
+  { name: '11 SKIES', slug: '11-skies', local: '11 天空之城', group: 'lifestyle' },
+  { name: 'V City & V Walk', slug: 'v-city', local: '', group: 'lifestyle' },
+  { name: "H Queen's", slug: 'h-queens', local: '', group: 'lifestyle' },
+  { name: 'HKTDC', slug: 'hktdc', local: '香港貿發局', group: 'lifestyle' },
+  { name: 'Beauty Express', slug: 'beauty-express', local: '', group: 'lifestyle' },
+  { name: 'Beauty Avenue', slug: 'beauty-avenue', local: '', group: 'lifestyle' },
+  { name: 'Invisalign', slug: 'invisalign', local: '', group: 'lifestyle' },
+  { name: '伊比利亚火腿CH', slug: 'iberico', local: '', group: 'lifestyle' },
+  { name: 'mando', slug: 'mando', local: '', group: 'lifestyle' },
+  { name: 'QPET', slug: 'qpet', local: '', group: 'lifestyle' },
+  { name: '中環街市', slug: 'central-market', local: '', group: 'lifestyle' },
 
   // Luxury & culture
-  { name: "Christie's", local: '佳士得', group: 'luxury' },
+  { name: "Christie's", slug: 'christies', local: '佳士得', group: 'luxury' },
 
   // Media, events & institutions
-  { name: 'MTR', local: '港鐵', group: 'institution' },
-  { name: 'HKJC', local: '香港賽馬會', group: 'institution' },
+  { name: 'MTR', slug: 'mtr', local: '港鐵', group: 'institution' },
+  { name: 'HKJC', slug: 'hkjc', local: '香港賽馬會', group: 'institution' },
 ];
 
 export const clientGroups = {

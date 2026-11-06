@@ -15,10 +15,15 @@ live, in priority order.
 
 ## 0. Blocker — every photograph on the site is placeholder artwork
 
-**No image in v3.0 is client photography.** All 26 files in `public/media/`
-are generated mock-ups: a Hong Kong harbour at night, a forum hall, a gallery,
-a mall atrium, a residential tower at dusk. They are there so the layout can
-be judged at full size.
+**No image in v3.0 is client photography.** The 24 photographs in
+`public/media/` are generated mock-ups: a Hong Kong harbour at night, a forum
+hall, a gallery, a mall atrium, a residential tower at dusk. They are there
+so the layout can be judged at full size.
+
+The other images on the site are the client marks in `public/media/clients/` —
+the brands' own logos, used only to identify the clients they belong to.
+They are not photography and they are not mock-ups; the wall that carries
+them prints that line underneath.
 
 They are labelled — a `MOCK-UP` tag on every image, "mock-up" in the alt
 text, a disclosure in the footer of every page, and a second disclosure on

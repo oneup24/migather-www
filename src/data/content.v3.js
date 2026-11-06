@@ -5,9 +5,10 @@
  * `cases.js` and `clients.js`, so the two builds cannot drift apart: the
  * same facts, the same claims, the same sources, laid out differently.
  *
- * What is new here is *structure* — section labels, the hero index and the
- * disclosure copy. None of it states a result, a client, an award, a
- * headcount or a standing. It is navigation and housekeeping.
+ * What is new here is *structure* — section labels, the hero index, the
+ * closing call-to-action and the disclosure copy. None of it states a
+ * result, a client, an award, a headcount or a standing. It is navigation
+ * and housekeeping.
  *
  * Rules that apply here too:
  *   · Chinese copy is authored separately for zh-Hant (Hong Kong) and
@@ -30,13 +31,15 @@ export const contentV3 = {
     items: [
       {
         number: '01',
-        label: { en: 'Selected work', 'zh-Hant': '精選案例', 'zh-Hans': '精选案例' },
-        href: '#work',
+        label: { en: 'How we work', 'zh-Hant': '工作方式', 'zh-Hans': '工作方式' },
+        href: '#approach',
       },
       {
         number: '02',
-        label: { en: 'How we work', 'zh-Hant': '工作方式', 'zh-Hans': '工作方式' },
-        href: '#approach',
+        label: { en: 'Selected work', 'zh-Hant': '精選案例', 'zh-Hans': '精选案例' },
+        // The selected work left the homepage in November 2026, so this
+        // entry points at the work page rather than a section of this one.
+        to: '/work',
       },
       {
         number: '03',
@@ -92,11 +95,61 @@ export const contentV3 = {
     work: { en: 'Selected work', 'zh-Hant': '精選案例', 'zh-Hans': '精选案例' },
     approach: { en: 'How we work', 'zh-Hant': '工作方式', 'zh-Hans': '工作方式' },
     clients: { en: 'Who we work with', 'zh-Hant': '合作客戶', 'zh-Hans': '合作客户' },
+    numbers: { en: 'By the numbers', 'zh-Hant': '以數字說明', 'zh-Hans': '以数字说明' },
     voices: { en: 'In their words', 'zh-Hant': '他們怎麼說', 'zh-Hans': '他们怎么说' },
+    markOwner: {
+      en: 'Client marks are the property of their owners and appear here to identify the clients they belong to.',
+      'zh-Hant': '客戶標誌為其擁有者之財產，僅用作識別所屬客戶。',
+      'zh-Hans': '客户标志为其拥有者之财产，仅用作识别所属客户。',
+    },
     nextStep: { en: 'Next step', 'zh-Hant': '下一步', 'zh-Hans': '下一步' },
     markets: { en: 'Where we work', 'zh-Hant': '工作範圍', 'zh-Hans': '工作范围' },
     allWork: { en: 'All client work', 'zh-Hant': '全部客戶案例', 'zh-Hans': '全部客户案例' },
     client: { en: 'Client', 'zh-Hant': '客戶', 'zh-Hans': '客户' },
+  },
+
+  /* ───────────────────────────────────────────────────────────────────────
+     The closing call to action — the brief, in three lines.
+
+     The old "Next step" section was a claim and a button. This one is a
+     claim, a button and the three things an enquiry has to carry, which
+     are the same three the contact form asks for.
+     ─────────────────────────────────────────────────────────────────────── */
+  cta: {
+    bringLabel: {
+      en: 'What we need from you',
+      'zh-Hant': '我們需要的資料',
+      'zh-Hans': '我们需要的资料',
+    },
+    bring: [
+      {
+        number: '01',
+        title: { en: 'The objective', 'zh-Hant': '目標', 'zh-Hans': '目标' },
+        body: {
+          en: 'What the work has to achieve.',
+          'zh-Hant': '這份工作要達成甚麼。',
+          'zh-Hans': '这份工作要达成什么。',
+        },
+      },
+      {
+        number: '02',
+        title: { en: 'The market', 'zh-Hant': '市場', 'zh-Hans': '市场' },
+        body: {
+          en: 'Where it has to land.',
+          'zh-Hant': '它要在哪裡落地。',
+          'zh-Hans': '它要在哪里落地。',
+        },
+      },
+      {
+        number: '03',
+        title: { en: 'The deadline', 'zh-Hant': '期限', 'zh-Hans': '期限' },
+        body: {
+          en: 'When it has to be live.',
+          'zh-Hant': '甚麼時候要上線。',
+          'zh-Hans': '什么时候要上线。',
+        },
+      },
+    ],
   },
 
   /* ───────────────────────────────────────────────────────────────────────

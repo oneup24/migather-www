@@ -15,6 +15,9 @@
  * is labelled on screen as a mock-up (see `MockUpTag` in
  * `src/components/v3/`) and the footer carries a standing disclosure.
  *
+ * The one exception is `clientLogos` below — the logo wall, which carries
+ * the clients' own marks rather than generated artwork.
+ *
  * The site is NOT publishable until this artwork is replaced with real
  * client photography or the pages that use it are removed. This is listed
  * as a launch blocker in `docs/LAUNCH_CHECKLIST.md`.
@@ -46,6 +49,115 @@ export const mockUpTag = {
   en: 'Mock-up',
   'zh-Hant': '樣機',
   'zh-Hans': '样机',
+};
+
+/**
+ * Client marks for the logo wall.
+ *
+ * These are the one set of images on the site that are NOT generated
+ * placeholder artwork: they are the clients' own marks, used to identify
+ * the clients they belong to. Each was fetched from the brand's own site,
+ * from Wikimedia, or from our own credential deck — never from an
+ * aggregator. `tools/media/fetch-client-logos.py` re-fetches them and
+ * records where each one came from in `source` below.
+ *
+ * A client's mark is its property, not ours. The wall carries a standing
+ * line saying so (`contentV3.labels.markOwner`), and the alt text is the
+ * brand's own name, which does not change with the language.
+ */
+export const clientLogos = {
+  'huatai-finance': {
+    src: asset('/media/clients/huatai-finance.png'),
+    source: 'agency credential deck',
+  },
+  'bank-of-china-hk': {
+    src: asset('/media/clients/bank-of-china-hk.png'),
+    source: 'bochk.com',
+  },
+  'fubon-bank': {
+    src: asset('/media/clients/fubon-bank.png'),
+    source: 'fubonbank.com.hk',
+  },
+  'icbc-asia': {
+    src: asset('/media/clients/icbc-asia.png'),
+    source: 'icbcasia.com',
+  },
+  'atfx': {
+    src: asset('/media/clients/atfx.svg'),
+    source: 'atfx.com',
+  },
+  'ctf-life': {
+    src: asset('/media/clients/ctf-life.svg'),
+    source: 'ctflife.com.hk',
+  },
+  'new-world-development': {
+    src: asset('/media/clients/new-world-development.png'),
+    source: 'agency credential deck',
+  },
+  'chinachem': {
+    src: asset('/media/clients/chinachem.svg'),
+    source: 'Wikimedia — SinoGroup logo',
+  },
+  'lee-gardens': {
+    src: asset('/media/clients/lee-gardens.png'),
+    source: 'agency credential deck',
+  },
+  'k11-musea': {
+    src: asset('/media/clients/k11-musea.svg'),
+    source: 'k11musea.com',
+  },
+  'marks-spencer': {
+    src: asset('/media/clients/marks-spencer.png'),
+    source: 'agency credential deck',
+  },
+  'v-city': {
+    src: asset('/media/clients/v-city.png'),
+    source: 'vcity.com.hk',
+  },
+  'h-queens': {
+    src: asset('/media/clients/h-queens.png'),
+    source: 'agency credential deck',
+  },
+  'hktdc': {
+    src: asset('/media/clients/hktdc.svg'),
+    source: 'agency credential deck',
+  },
+  'beauty-express': {
+    src: asset('/media/clients/beauty-express.svg'),
+    source: 'bexgrp.com',
+  },
+  'beauty-avenue': {
+    src: asset('/media/clients/beauty-avenue.png'),
+    source: 'agency credential deck',
+  },
+  'invisalign': {
+    src: asset('/media/clients/invisalign.svg'),
+    source: 'Wikimedia',
+  },
+  iberico: {
+    src: asset('/media/clients/iberico.png'),
+    source: 'agency credential deck',
+  },
+  mando: {
+    src: asset('/media/clients/mando.png'),
+    source: 'agency credential deck',
+  },
+  'central-market': {
+    src: asset('/media/clients/central-market.png'),
+    source: 'centralmarket.hk',
+  },
+  christies: {
+    src: asset('/media/clients/christies.svg'),
+    source: 'Wikimedia',
+  },
+  mtr: {
+    src: asset('/media/clients/mtr.svg'),
+    source: 'Wikipedia',
+  },
+  hkjc: {
+    src: asset('/media/clients/hkjc.svg'),
+    source: 'Wikipedia',
+  },
 };
 
 /**
@@ -114,14 +226,6 @@ export const banners = {
  * that nothing renders would ship its file to `dist/` for nothing.
  */
 export const features = {
-  manifesto: {
-    src: asset('/media/home-manifesto.jpg'),
-    alt: {
-      en: 'Mock-up: a Hong Kong street in the rain at night, neon reflections out of focus.',
-      'zh-Hant': '樣機：雨夜的香港街道，霓虹反光失焦。',
-      'zh-Hans': '样机：雨夜的香港街道，霓虹反光失焦。',
-    },
-  },
   aboutStudio: {
     src: asset('/media/about-studio.jpg'),
     alt: {

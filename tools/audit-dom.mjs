@@ -208,22 +208,25 @@ async function main() {
       )
     `);
     check(
-      'the hero index points at three on-page anchors',
-      JSON.parse(heroLinks).every((h) => h && h.startsWith('#')),
+      'the hero index points at two on-page anchors and one page',
+      JSON.parse(heroLinks).filter((h) => h && h.startsWith('#')).length === 2 &&
+        JSON.parse(heroLinks).filter((h) => h && !h.startsWith('#')).length === 1,
       JSON.parse(heroLinks).join(', '),
     );
 
-    // The anchors must resolve to a real element.
+    // The anchors must resolve to a real element; the page entry must point
+    // at a route the site serves.
     const anchorTargets = await evaluate(`
       JSON.stringify(
         Array.from(document.querySelectorAll('.index-nav__link')).map((a) => {
-          const id = a.getAttribute('href').slice(1);
-          return !!document.getElementById(id);
+          const href = a.getAttribute('href');
+          if (!href.startsWith('#')) return href.endsWith('/work');
+          return !!document.getElementById(href.slice(1));
         })
       )
     `);
     check(
-      'every hero index anchor resolves to a section',
+      'every hero index entry resolves',
       JSON.parse(anchorTargets).every(Boolean),
       JSON.parse(anchorTargets).join(', '),
     );
@@ -367,14 +370,9 @@ async function main() {
     `);
     check('the footer carries the mock-up disclosure', footerDisclosure === true);
 
-    const taggedImages = await evaluate(`
-      Array.from(document.images).filter((img) => {
-        const wrap = img.closest('.frame');
-        return wrap && wrap.querySelector('span');
-      }).length
-    `);
-    check('the homepage case images are tagged', taggedImages >= 3, `${taggedImages} tagged`);
-
+    /* The homepage no longer carries case cards — the selected work moved to
+       its own page in November 2026 — so the case images are checked there,
+       and the banner check below covers the one image left on the homepage. */
     await goto(`${BASE}/en/work?capture=1`);
     const workTagged = await evaluate(`
       Array.from(document.querySelectorAll('.frame')).filter((f) => f.querySelector('span')).length
@@ -428,18 +426,23 @@ async function main() {
     );
 
     /* ── 5c. The hero index ─────────────────────────────────────────── */
-    /* The 01/02/03 index is the homepage table of contents. Each entry must
-       point at a section that exists, scroll to it, and — because the header
-       is fixed — land clear of the header rather than behind it. */
+    /* The 01/02/03 index is the homepage table of contents. An entry that
+       points at a section of the page must find that section, scroll to it,
+       and — because the header is fixed — land clear of the header rather
+       than behind it. An entry that points at a page of the site (the
+       selected work has its own page) must point at a route that exists. */
     await goto(`${BASE}/en`);
     const heroIndexCheck = await evaluate(`
       (async () => {
         const links = Array.from(document.querySelectorAll('a.index-nav__link'));
         const hrefs = links.map((a) => a.getAttribute('href'));
-        const targetsExist = hrefs.every((h) => h && document.querySelector(h));
+        const anchors = hrefs.filter((h) => h && h.startsWith('#'));
+        const routes = hrefs.filter((h) => h && !h.startsWith('#'));
+        const targetsExist = anchors.every((h) => document.querySelector(h));
         const scrolls = [];
         for (const a of links) {
           const id = a.getAttribute('href');
+          if (!id.startsWith('#')) continue;
           window.scrollTo(0, 0);
           await new Promise((r) => setTimeout(r, 400));
           const before = window.scrollY;
@@ -454,27 +457,32 @@ async function main() {
             clearOfHeader: rect.top >= 60,
           });
         }
-        return { count: links.length, hrefs, targetsExist, scrolls };
+        return { count: links.length, hrefs, anchors, routes, targetsExist, scrolls };
       })()
     `);
     check(
       'the hero index points at real sections',
       heroIndexCheck.count === 3 &&
         heroIndexCheck.targetsExist === true &&
-        JSON.stringify(heroIndexCheck.hrefs) === JSON.stringify(['#work', '#approach', '#contact']),
+        // The index follows the order of the sections on the page: how we
+        // work sits above the closing call to action, and the selected work
+        // points at its own page since November 2026.
+        JSON.stringify(heroIndexCheck.anchors) === JSON.stringify(['#approach', '#contact']) &&
+        heroIndexCheck.routes.length === 1 &&
+        heroIndexCheck.routes[0].endsWith('/work'),
       JSON.stringify(heroIndexCheck.hrefs),
     );
     check(
       'every hero index entry scrolls to its section',
       Array.isArray(heroIndexCheck.scrolls) &&
-        heroIndexCheck.scrolls.length === 3 &&
+        heroIndexCheck.scrolls.length === 2 &&
         heroIndexCheck.scrolls.every((s) => s.moved),
       JSON.stringify(heroIndexCheck.scrolls),
     );
     check(
       'every hero index entry lands clear of the fixed header',
       Array.isArray(heroIndexCheck.scrolls) &&
-        heroIndexCheck.scrolls.length === 3 &&
+        heroIndexCheck.scrolls.length === 2 &&
         heroIndexCheck.scrolls.every((s) => s.clearOfHeader),
       JSON.stringify(heroIndexCheck.scrolls),
     );

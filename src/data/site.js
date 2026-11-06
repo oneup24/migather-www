@@ -48,15 +48,23 @@ export const CONTACT = {
 
 /**
  * Primary navigation.
+ *
+ * Order: About us · Services · Works · Contact — set by management in
+ * November 2026. The order is the one thing here that is a design decision
+ * rather than a fact about the agency, so it lives in one place.
  */
 export const primaryNav = [
-  { key: 'work', to: '/work', label: { en: 'Work', 'zh-Hant': '案例', 'zh-Hans': '案例' } },
+  {
+    key: 'about',
+    to: '/about',
+    label: { en: 'About us', 'zh-Hant': '關於我們', 'zh-Hans': '关于我们' },
+  },
   {
     key: 'capabilities',
     to: '/capabilities',
-    label: { en: 'Capabilities', 'zh-Hant': '服務範疇', 'zh-Hans': '服务范围' },
+    label: { en: 'Services', 'zh-Hant': '服務範疇', 'zh-Hans': '服务范围' },
   },
-  { key: 'about', to: '/about', label: { en: 'About', 'zh-Hant': '關於我們', 'zh-Hans': '关于我们' } },
+  { key: 'work', to: '/work', label: { en: 'Works', 'zh-Hant': '案例', 'zh-Hans': '案例' } },
   {
     key: 'contact',
     to: '/contact',

@@ -8,6 +8,7 @@ import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import Editorial from '../components/v3/Editorial';
 import MockUpTag from '../components/v3/MockUpTag';
 import PageBanner from '../components/v3/PageBanner';
+import V3Voices from '../components/v3/V3Voices';
 
 export default function AboutPage() {
   const { locale, t } = useLocale();
@@ -185,6 +186,9 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials — moved here from the homepage in November 2026 */}
+      <V3Voices />
     </>
   );
 }

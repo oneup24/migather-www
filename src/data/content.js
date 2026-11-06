@@ -56,10 +56,14 @@ export const content = {
      ─────────────────────────────────────────────────────────────────────── */
   home: {
     hero: {
+      /**
+       * The eyebrow names what the agency is; the three markets moved into
+       * the lede, which now leads with the offer rather than the boilerplate.
+       */
       eyebrow: {
-        en: 'Hong Kong · Mainland China · Southeast Asia',
-        'zh-Hant': '香港 · 中國內地 · 東南亞',
-        'zh-Hans': '香港 · 中国内地 · 东南亚',
+        en: 'Performance digital creative & media agency',
+        'zh-Hant': '效能型數位創意及媒體代理公司',
+        'zh-Hans': '效能型数字创意及媒体代理机构',
       },
       title: {
         en: 'Big-agency standards, from people who answer the phone.',
@@ -67,9 +71,9 @@ export const content = {
         'zh-Hans': '大机构的标准，由会接电话的人交付。',
       },
       lede: {
-        en: 'Migather Limited is a boutique performance digital creative and media agency. We build the brand, grow the audience and convert the demand — across Hong Kong, Mainland China and Southeast Asia — with the senior people doing the work on your account from day one.',
-        'zh-Hant': 'Migather Limited 是一間精品效能型數位創意及媒體代理公司。我們建立品牌、擴展受眾、轉化需求——於香港、中國內地及東南亞——由親自落手操作的資深團隊，自第一天起即在你的項目上。',
-        'zh-Hans': 'Migather Limited 是一家精品效能型数字创意及媒体代理机构。我们建立品牌、扩展受众、转化需求——于香港、中国内地及东南亚——由亲自落手操作的资深团队，自第一天起就在你的项目上。',
+        en: 'We build the brand, grow the audience and convert the demand — across Hong Kong, Mainland China and Southeast Asia. Every account is run by the senior people doing the work, from day one.',
+        'zh-Hant': '我們建立品牌、擴展受眾、轉化需求——於香港、中國內地及東南亞。每個項目都由親自落手操作的資深團隊，自第一天起即在你的項目上。',
+        'zh-Hans': '我们建立品牌、扩展受众、转化需求——于香港、中国内地及东南亚。每个项目都由亲自落手操作的资深团队，自第一天起就在你的项目上。',
       },
       primaryCta: { en: 'See the work', 'zh-Hant': '查看案例', 'zh-Hans': '查看案例' },
       secondaryCta: { en: 'Start a conversation', 'zh-Hant': '開始對話', 'zh-Hans': '开始对话' },
@@ -100,6 +104,16 @@ export const content = {
         en: 'Four things we do not compromise on.',
         'zh-Hant': '四件我們不會妥協的事。',
         'zh-Hans': '四件我们不会妥协的事。',
+      },
+      /**
+       * The homepage carries the first three principles only, so its
+       * statement counts three, not four. The About page shows the full
+       * set and keeps `title` above.
+       */
+      homeTitle: {
+        en: 'Three things we do not compromise on.',
+        'zh-Hant': '三件我們不會妥協的事。',
+        'zh-Hans': '三件我们不会妥协的事。',
       },
       lede: {
         en: 'A boutique only works if the way it works is visible. These are ours.',
@@ -278,9 +292,9 @@ export const content = {
       'zh-Hans': '我们规划及投放的媒体平台，以及团队持有的认证。',
     },
     testimonialsTitle: {
-      en: 'In their words',
-      'zh-Hant': '客戶怎麼說',
-      'zh-Hans': '客户怎么说',
+      en: 'What they say about the work.',
+      'zh-Hant': '他們如何談這份工作。',
+      'zh-Hans': '他们如何谈这份工作。',
     },
   },
 

@@ -139,14 +139,29 @@ not as one-off class strings in each component.
 
 ### Homepage
 
+The order was reset by management in November 2026 — the client wall moved
+up, "How we work" moved up, and three sections were removed.
+
 1. **Hero** — photograph, one claim, the picked-out phrase, the numbered index.
-2. **Who we work with** — editorial row + the vertical image + the market list.
-3. **Selected work** — editorial row + three cases spanning three sectors.
-4. **How we work** — the four principles, numbered `01`–`04`.
-5. **The mix** — the four countable facts.
-6. **Client wall** — the 27 confirmed names, scrolling.
-7. **In their words** — the four attributed testimonials.
-8. **Next step** — the closing statement and one button.
+2. **Who we work with** — the small caps label, the client claim set large, and the 27 clients as marks in two rows travelling right to left.
+3. **How we work** — the first three principles, numbered `01`–`03`.
+4. **By the numbers** — the four countable facts.
+5. **Next step** — the closing statement, two actions, and the three things an enquiry has to carry.
+
+The full "Who we work with" editorial (the vertical image and the market
+list) and the "In their words" testimonials section were removed from the
+homepage. The testimonials moved to the About page, where the rest of the
+client material already sits; the client claim now appears once, above the
+client wall. The selected work went with them — the work has its own page,
+and the hero index now points there instead of at a section of the
+homepage.
+
+The client wall follows the reference the client named: a label, a large
+claim, and the marks below — in two rows that travel right to left,
+continuously. Each row is drawn twice, the second copy carrying the loop and
+hidden from assistive technology; hovering stops the movement, and a reader
+who asks for reduced motion gets a row they can drag sideways instead. The
+marks are the clients' own — see §6.
 
 ### Inner pages
 
@@ -194,9 +209,10 @@ The labelling is what keeps the page honest.
 
 ### How the imagery was made
 
-26 images were generated, then resized and re-encoded for the web. **25 ship** —
-one candidate was never placed on a page and was removed rather than carried as
-dead weight:
+26 images were generated, then resized and re-encoded for the web. **24 ship** —
+two were removed rather than carried as dead weight: one was never placed on a
+page, and the homepage manifesto photograph came off the page in November
+2026, when the closing call to action was rebuilt without it.
 
 - 2K sources for the page banners (2400px wide shipped).
 - 1K sources for the case grid and editorial images (1200–1400px shipped).
@@ -210,6 +226,26 @@ now flags any shipped image below that threshold.
 **The unoptimised masters live outside `public/`**, in `tools/media/_masters/`.
 They are working files, not site assets — leaving them in `public/media/` put
 3.8 MB of unreferenced masters into every build.
+
+### The client marks
+
+The logo wall is the one place where the site shows images it did not make.
+Twenty-three client marks live in `public/media/clients/`; each was fetched
+from the brand's own site, from Wikimedia, or from our own credential deck —
+never from a logo aggregator — and every one is registered in
+`src/data/media.js` with the place it came from.
+
+- `tools/media/fetch-client-logos.py` re-fetches them, cuts the blank border
+  off, scales them to a common height, and re-inks the ones cut for a dark
+  header.
+- `tools/media/tighten-client-logos.mjs` asks Chrome for the tight bounding
+  box of each vector mark and rewrites its viewBox, so a logo does not
+  arrive as a speck inside a large empty canvas.
+- Four clients publish no mark we could fetch honestly — Hang Seng Bank,
+  Wing Fung Financial Group, 11 SKIES and QPET — so their cell in the wall
+  carries the name in the house display face instead of an image.
+
+A mark is its owner's property. The wall prints that line underneath it.
 
 ---
 

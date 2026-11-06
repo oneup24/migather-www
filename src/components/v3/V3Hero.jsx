@@ -74,12 +74,26 @@ export default function V3Hero({ image, className }) {
         </div>
 
         <nav className="index-nav mt-14 md:mt-20" aria-label={t(contentV3.labels.work)}>
-          {contentV3.index.items.map((item) => (
-            <a key={item.number} href={item.href} className="index-nav__link group">
-              <div className="index-nav__label">{t(item.label)}</div>
-              <div className="index-nav__number">{item.number}</div>
-            </a>
-          ))}
+          {contentV3.index.items.map((item) => {
+            const label = (
+              <>
+                <div className="index-nav__label">{t(item.label)}</div>
+                <div className="index-nav__number">{item.number}</div>
+              </>
+            );
+
+            // An entry points at a section of this page, or — where the
+            // section has moved to its own page — at that page.
+            return item.to ? (
+              <Link key={item.number} to={path(item.to)} className="index-nav__link group">
+                {label}
+              </Link>
+            ) : (
+              <a key={item.number} href={item.href} className="index-nav__link group">
+                {label}
+              </a>
+            );
+          })}
         </nav>
       </div>
     </section>

@@ -32,8 +32,12 @@ GAIA's cinematic hero.
   anchored to the bottom of the image. The site header now floats
   transparent over it and turns solid on scroll.
 - **All 9 page templates rebuilt** in the new grammar.
-- **26 generated mock-up photographs**, labelled on screen, in the alt text,
+- **24 generated mock-up photographs**, labelled on screen, in the alt text,
   in the footer of every page and on every case page.
+- **A client wall on the homepage** — 23 client marks in a static grid,
+  fetched from the brands themselves, from Wikimedia and from our own
+  credential deck, each registered with where it came from.
+  → `tools/media/fetch-client-logos.py`
 - **New tooling.** `tools/capture-pages.mjs` (full-page mock-up screens,
   failing loudly on any image that did not load), `tools/contact-sheet.py`,
   `tools/media/` (generation, download, optimisation).
