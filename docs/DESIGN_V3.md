@@ -142,7 +142,7 @@ not as one-off class strings in each component.
 The order was reset by management in November 2026 — the client wall moved
 up, "How we work" moved up, and three sections were removed.
 
-1. **Hero** — photograph, one claim, the picked-out phrase, the numbered index.
+1. **Hero** — photograph, one claim, the picked-out phrase, the lede with the belief card opposite it, the numbered index.
 2. **Who we work with** — the small caps label, the client claim set large, and the 27 clients as marks in two rows travelling right to left.
 3. **How we work** — the first three principles, numbered `01`–`03`.
 4. **By the numbers** — the four countable facts.
@@ -288,10 +288,16 @@ opposite of the restraint the references use.
 ## 9. What did not change
 
 - **Every fact on the site.** Same data modules, same sources, same
-  attribution. v3.0 introduced no new claim, no new client, no new figure.
-- **The copy.** `content.js`, `capabilities.js`, `cases.js` and `clients.js`
-  are unchanged from v1.0. The only new copy is structural — section labels,
-  the hero index, the disclosures — in `src/data/content.v3.js`.
+  attribution. v3.0 introduced no new client and no new figure. The hero
+  headline now carries one claim — that global brands trust us to enter and
+  scale in China — and it is sourced in
+  [`COPY_COMPLIANCE.md`](COPY_COMPLIANCE.md) §4.
+- **The copy.** `capabilities.js`, `cases.js` and `clients.js` are unchanged
+  from v1.0. `content.js` changed in November 2026: the hero eyebrow,
+  headline and lede were rewritten to the agency's own positioning, the
+  third principle now counts three markets, and the belief card was added.
+  The structural copy — section labels, the hero index, the disclosures —
+  lives in `src/data/content.v3.js`.
 - **The routes.** 9 templates × 3 locales, 75 URLs in the sitemap.
 - **The compliance screen.** `npm run check:copy` screens every translatable
   string against the 中国广告法 restricted terms and Migather's own banned

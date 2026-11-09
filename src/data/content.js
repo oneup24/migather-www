@@ -65,15 +65,42 @@ export const content = {
         'zh-Hant': '效能型數位創意及媒體代理公司',
         'zh-Hans': '效能型数字创意及媒体代理机构',
       },
+      /**
+       * The hero claim, rewritten in November 2026 to the agency's own
+       * positioning line: the agency global brands trust to enter and scale
+       * in China, and to expand to overseas markets.
+       *
+       * The second half of that line — the overseas expansion — is carried by
+       * the lede below. The claim rests on the case list: Christie's and Lee
+       * Gardens and Chinachem for mainland work, New World Development for
+       * the multi-market programmes, ATFX for Hong Kong and Southeast Asia.
+       */
       title: {
-        en: 'Big-agency standards, from people who answer the phone.',
-        'zh-Hant': '大機構的標準，由會接電話的人交付。',
-        'zh-Hans': '大机构的标准，由会接电话的人交付。',
+        en: 'Global brands trust us to enter and scale in China.',
+        'zh-Hant': '跨國品牌信任我們，進入中國內地並擴張。',
+        'zh-Hans': '跨国品牌信任我们，进入中国内地并扩张。',
       },
       lede: {
-        en: 'We build the brand, grow the audience and convert the demand — across Hong Kong, Mainland China and Southeast Asia. Every account is run by the senior people doing the work, from day one.',
-        'zh-Hant': '我們建立品牌、擴展受眾、轉化需求——於香港、中國內地及東南亞。每個項目都由親自落手操作的資深團隊，自第一天起即在你的項目上。',
-        'zh-Hans': '我们建立品牌、扩展受众、转化需求——于香港、中国内地及东南亚。每个项目都由亲自落手操作的资深团队，自第一天起就在你的项目上。',
+        en: 'We build the brand, grow the audience and convert the demand — for brands entering China and expanding into overseas markets. Every account is run by the senior people doing the work, from day one.',
+        'zh-Hant': '我們建立品牌、擴展受眾、轉化需求——為進入中國並拓展海外市場的品牌而做。每個項目都由親自落手操作的資深團隊，自第一天起即在你的項目上。',
+        'zh-Hans': '我们建立品牌、扩展受众、转化需求——为进入中国并拓展海外市场的品牌而做。每个项目都由亲自落手操作的资深团队，自第一天起就在你的项目上。',
+      },
+
+      /**
+       * The belief card in the hero.
+       *
+       * The house view, quoted and attributed. It is a citation, not a
+       * claim about us — Jef I. Richards' line is the agency's own position
+       * on how creative work is judged, and it is printed with his name.
+       */
+      belief: {
+        label: { en: 'Our belief', 'zh-Hant': '我們的信念', 'zh-Hans': '我们的信念' },
+        quote: {
+          en: 'Creativity without strategy is called art. Creativity with strategy is called advertising.',
+          'zh-Hant': '沒有策略的創意是藝術，有策略的創意才是廣告。',
+          'zh-Hans': '没有策略的创意是艺术，有策略的创意才是广告。',
+        },
+        attribution: { en: 'Jef I. Richards', 'zh-Hant': 'Jef I. Richards', 'zh-Hans': 'Jef I. Richards' },
       },
       primaryCta: { en: 'See the work', 'zh-Hant': '查看案例', 'zh-Hans': '查看案例' },
       secondaryCta: { en: 'Start a conversation', 'zh-Hant': '開始對話', 'zh-Hans': '开始对话' },
@@ -141,11 +168,11 @@ export const content = {
         },
         {
           number: '03',
-          title: { en: 'Two markets, two voices', 'zh-Hant': '兩個市場，兩種語氣', 'zh-Hans': '两个市场，两种语气' },
+          title: { en: 'Three markets, three voices', 'zh-Hant': '三個市場，三種語氣', 'zh-Hans': '三个市场，三种语气' },
           body: {
-            en: 'Hong Kong and Mainland China are not one audience. We work in both, in the language and the idiom of each — not one campaign translated twice.',
-            'zh-Hant': '香港與中國內地並非同一個受眾。我們在兩地都做，用各自的語言與習慣——而不是同一個項目翻譯兩次。',
-            'zh-Hans': '香港与中国内地并非同一个受众。我们在两地都做，用各自的语言与习惯——而不是同一个项目翻译两次。',
+            en: 'Hong Kong, Mainland China and Southeast Asia are not one audience. We work in all three, in the language and the idiom of each — not one campaign translated three times.',
+            'zh-Hant': '香港、中國內地及東南亞並非同一個受眾。我們在三地都做，用各自的語言與習慣——而不是同一個項目翻譯三次。',
+            'zh-Hans': '香港、中国内地及东南亚并非同一个受众。我们在三地都做，用各自的语言与习惯——而不是同一个项目翻译三次。',
           },
         },
         {

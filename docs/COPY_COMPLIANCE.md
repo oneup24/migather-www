@@ -110,11 +110,47 @@ Nothing in it is a claim. The new strings are:
 - The disclosures — the mock-up notices and the section labels for the
   work-grid note.
 - One phrase pointer, `hero.titleMark`, which names the words of the
-  existing hero headline that carry the accent colour. The headline wording
-  itself is unchanged and still lives in `content.home.hero.title`.
+  hero headline that carry the accent colour. The headline wording itself
+  lives in `content.home.hero.title`.
 
-**The v3.0 rebuild introduced no new factual claim.** No new result, client,
-figure, award, headcount or standing.
+**The v3.0 rebuild introduced no new result, client, figure, award,
+headcount or standing.** The hero headline did change, in November 2026 —
+see below.
+
+### The one claim the headline makes
+
+The hero headline now reads:
+
+> Global brands trust us to enter and scale in China.
+> 跨國品牌信任我們，進入中國內地並擴張。
+
+This is the agency's own positioning line, taken from the company video.
+It is a claim about third parties' trust, so it has to be sourced like any
+other:
+
+| | |
+|---|---|
+| **Claim** | Global brands trust Migather to enter and scale in China |
+| **Source** | The agency video — the line "Global brands trust us to enter and scale in China" (file name to be filled in by the agency) |
+| **Supporting evidence on the site** | `cases.js` — Christie's (China social creative), Lee Gardens and Chinachem (mainland China social maintenance), New World Development (multi-market programmes across China, Singapore, Australia, Thailand, Malaysia and Indonesia), ATFX (Hong Kong and Southeast Asia acquisition) |
+| **Screened words** | "Global brands" is not "global agency" — the banned term is the one that would describe *us* |
+
+Until the file name is filled in, this is the only claim on the site whose
+source is a file rather than a deck, a PDF or a spreadsheet. Fill it in
+before launch.
+
+The second half of the positioning line — expanding into overseas markets —
+is carried by the hero lede, which names it, and by the case list behind it.
+
+### The belief card is a citation, not a claim
+
+The card opposite the hero lede quotes Jef I. Richards: *Creativity without
+strategy is called art. Creativity with strategy is called advertising.*
+
+It is printed with his name, so it is a citation of someone else's line
+rather than a claim about Migather. Nothing on the site asserts that Migather
+is creative, strategic, or any better than another agency — the site
+differentiates on evidence, and this is the house view, not a boast.
 
 ---
 
@@ -131,10 +167,12 @@ That is a design decision, not a copy decision, and it is documented in
 
 ## 6. Nothing was inherited by accident
 
-The Chinese copy in `content.js`, `capabilities.js`, `cases.js` and
-`clients.js` is unchanged from v1.0 and v2.0 — v3.0 is a design rebuild, and
-the wording was not touched. zh-Hant and zh-Hans remain separately authored
-strings, never machine-converted between them.
+The Chinese copy in `capabilities.js`, `cases.js` and `clients.js` is
+unchanged from v1.0 and v2.0. `content.js` has been touched — the hero
+eyebrow, headline and lede were rewritten in November 2026, and the third
+principle now counts three markets rather than two — but each change was
+made deliberately, in both scripts, and the zh-Hant and zh-Hans strings
+remain separately authored, never machine-converted between them.
 
 The KOL Disclosure page still states the 报备 / 非报备 position: that 非报备
 cooperation risks 限流 and client-account sanction, and that it must be

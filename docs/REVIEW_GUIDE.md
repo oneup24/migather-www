@@ -59,14 +59,20 @@ before shooting, so lazy-loaded photography is actually requested.
 
 Open `docs/mockups/en/home.png` and scroll to the top.
 
-- One claim, one photograph, two buttons, nothing else.
-- The picked-out phrase (*answer the phone*) is in crimson-on-photograph.
-  In Chinese it is 會接電話的人 / 会接电话的人, in the same serif.
+- One claim, one photograph, two buttons, and the belief card opposite the
+  lede.
+- The claim reads *Global brands trust us to enter and scale in China.* The
+  picked-out phrase (*enter and scale*) is in crimson-on-photograph. In
+  Chinese it is 進入中國內地 / 进入中国内地, in the same serif.
+- The belief card quotes Jef I. Richards — *Creativity without strategy is
+  called art. Creativity with strategy is called advertising.* — and carries
+  his name. It is a citation, not a claim about us.
 - The header floats transparent over the photograph and turns solid on
   scroll.
 - The `01 / 02 / 03` row at the foot of the hero is a **table of contents**
-  for the page — `Selected work`, `How we work`, `Start a conversation`. It
-  jumps to `#work`, `#approach`, `#contact`.
+  for the page — `How we work`, `Selected work`, `Start a conversation`. The
+  first jumps to `#approach`, the third to `#contact`, and the second goes
+  to the work page, because the selected work has its own page.
 - The `V3.0 DESIGN PREVIEW` badge is a marker so a screen-capture is never
   mistaken for the live site. Remove it before launch —
   `src/data/content.v3.js` → `hero.versionBadge`.

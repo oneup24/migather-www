@@ -59,11 +59,16 @@ export const contentV3 = {
      * The wording itself stays in `content.home.hero.title` — this only
      * says which words are picked out. A phrase that is not found in the
      * title is simply not marked; nothing breaks.
+     *
+     * The phrase is kept short on purpose. It is set on one line without
+     * wrapping, so a long mark would push past the measure of the headline
+     * on a phone. Fifteen Latin characters, or six Chinese ones, is what
+     * fits at the hero's largest size.
      */
     titleMark: {
-      en: 'answer the phone',
-      'zh-Hant': '會接電話的人',
-      'zh-Hans': '会接电话的人',
+      en: 'enter and scale',
+      'zh-Hant': '進入中國內地',
+      'zh-Hans': '进入中国内地',
     },
 
     /**
