@@ -21,6 +21,7 @@ export default function MockUpTag({ className, placement = 'inline' }) {
   return (
     <span
       className={cn(
+        'mock-up-tag',
         'absolute z-10 bg-night/70 text-white/90 font-display font-medium',
         'text-[9px] uppercase tracking-[0.16em] px-2 py-[5px] leading-none',
         'backdrop-blur-[2px]',

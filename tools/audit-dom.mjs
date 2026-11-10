@@ -375,7 +375,7 @@ async function main() {
        and the banner check below covers the one image left on the homepage. */
     await goto(`${BASE}/en/work?capture=1`);
     const workTagged = await evaluate(`
-      Array.from(document.querySelectorAll('.frame')).filter((f) => f.querySelector('span')).length
+      Array.from(document.querySelectorAll('.frame')).filter((f) => f.querySelector('.mock-up-tag')).length
     `);
     check(
       'every work-grid image is tagged as a mock-up',
@@ -393,9 +393,7 @@ async function main() {
           if (!h1) return false;
           const section = h1.closest('section');
           if (!section) return false;
-          return Array.from(section.querySelectorAll('span')).some(
-            (s) => s.textContent.trim() === 'Mock-up'
-          );
+          return !!section.querySelector('.mock-up-tag');
         })()
       `);
       check(`${route} labels its banner as a mock-up`, bannerTagged === true);
@@ -466,7 +464,8 @@ async function main() {
         heroIndexCheck.targetsExist === true &&
         // The index follows the order of the sections on the page: how we
         // work sits above the closing call to action, and the selected work
-        // points at its own page since November 2026.
+        // points at its own page since November 2026. (The delivery spine
+        // sits on the page but is not indexed from the hero.)
         JSON.stringify(heroIndexCheck.anchors) === JSON.stringify(['#approach', '#contact']) &&
         heroIndexCheck.routes.length === 1 &&
         heroIndexCheck.routes[0].endsWith('/work'),

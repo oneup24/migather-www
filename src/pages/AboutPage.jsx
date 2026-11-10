@@ -31,19 +31,19 @@ export default function AboutPage() {
         lede={t(c.lede)}
       />
 
-      {/* The story */}
+      {/* The story — rewritten from the reference about copy, in Migather's voice */}
       <section className="bg-paper py-20 md:py-28">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid gap-14 lg:grid-cols-12 lg:gap-16">
             <div className="lg:col-span-7">
               <Editorial
                 label={t({ en: 'The short version', 'zh-Hant': '簡單說', 'zh-Hans': '简单说' })}
-                statement={t(c.story[0])}
+                statement={t(contentV3.aboutStory.paragraphs[0])}
                 statementSize="sm"
               />
 
               <div className="mt-10 space-y-6">
-                {c.story.slice(1).map((para, i) => (
+                {contentV3.aboutStory.paragraphs.slice(1).map((para, i) => (
                   <p key={i} className="text-[17px] leading-relaxed text-charcoal">
                     {t(para)}
                   </p>

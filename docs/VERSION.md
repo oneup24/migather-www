@@ -74,6 +74,50 @@ are removed. See [`docs/LAUNCH_CHECKLIST.md`](docs/LAUNCH_CHECKLIST.md) §0.
 
 ---
 
+## The reference about-copy rewritten — 10 November 2026
+
+The user supplied a screenshot of another agency's (PRIZM Group's) about
+copy — "Our Delivery. Inspiration. Conversion. Retention." plus a paragraph
+that says the agency "has grown into a **global** digital marketing agency
+that **conjugates** … **best of breed** … **end to end** solutions".
+
+That wording could not be used as-is: `global agency` and `end-to-end
+solutions` are on Migather's banned-claim list, and the growth story implies a
+scale Migather does not claim. The rewrite keeps the *shape* — three outcomes,
+one team — and re-authors it in Migather's voice.
+
+- **New `V3Delivery` section on the homepage**, between the client wall and the
+  work grid. Label "Our delivery", heading "Three outcomes, one team, no
+  hand-off.", then 01 **Inspire** / 02 **Convert** / 03 **Compound**. The third
+  outcome is "Compound" rather than the reference's "Retention" — compounding
+  the learning is what a small senior team actually does, whereas a retention
+  promise would be a number we do not have. Copy lives in
+  `contentV3.delivery` in `src/data/content.v3.js`.
+- **The About-page story rewritten** as `contentV3.aboutStory`: what the
+  agency is, where it works, why the boutique structure *is* the offer ("not a
+  stage before something bigger"), how the work is planned, and what that
+  buys — senior attention, speed, no layers. No scale claim, no growth story.
+- **The hero index updated** to point at the delivery section: `01 Our
+  delivery → #delivery`, `02 Selected work → #work`, `03 Start a conversation
+  → #contact`. `V3Delivery` carries `id="delivery"` with `scroll-mt-24`.
+- **`MockUpTag` gained a stable `.mock-up-tag` class**, and the three DOM-audit
+  selectors that matched on a bare `span` now match the class — the bare-span
+  match silently broke when the tag's markup was touched.
+- The audit's hero-index expectation was updated to the new three anchors.
+
+Two compliance catches during the rewrite, both by the existing screens: the
+zh-Hans string "第一份簡報" tripped the `第一` restricted term (changed to
+首份), and the English "a service we sell on top of the rest" tripped the banned
+word `top` (reworded to "bolted on to the rest"). This is the screen doing its
+job.
+
+Verified: `npm run verify` — 37 routes × 3 locales, rendered-copy screen clean,
+copy screen clean, 75-URL sitemap. `npm run audit:dom` 40/40, `audit:dom:mobile`
+44/44. Mock-up screens re-captured for all 10 routes × 3 locales; the review set
+and gallery regenerated.
+
+---
+
 ## The published preview — moved to the repository root
 
 **4 November 2026.** The preview was published with a plain index page at the
