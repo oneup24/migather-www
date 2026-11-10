@@ -455,6 +455,10 @@ function save_(payload, publish) {
     next[column] = values[column] === undefined ? '' : values[column];
   });
 
+  /* The slug is the row's own identity, and a new case has no row yet to
+     read it from. */
+  next.slug = slug;
+
   var shared = [
     'client',
     'sector',
@@ -504,21 +508,28 @@ function save_(payload, publish) {
   writeResults_(slug, locale, payload.results || []);
   writeScope_(slug, locale, payload.scope || []);
 
-  /* The image file name has to be the same in every tab. */
-  if (imageName) {
-    LOCALES.forEach(function (other) {
-      if (other === locale) return;
-      var entry = cases[slug];
-      if (!entry || !entry.values[other]) return;
-      var otherValues = {};
-      CASE_COLUMNS.forEach(function (column) {
-        otherValues[column] = entry.values[other][column];
-      });
-      otherValues.image = imageName;
-      otherValues.published = published ? 'true' : 'false';
-      writeCaseRow_(slug, other, otherValues, cases);
+  /* The locale-independent fields have to read the same in all three tabs,
+     because the sync refuses to compile a case whose tabs disagree. So they
+     are written into all three — and where the case does not exist yet, a
+     row is created. That is how a new case starts: three rows, one language
+     filled in, the other two still empty, and the case stays a draft until
+     all three are ready. */
+  LOCALES.forEach(function (other) {
+    if (other === locale) return;
+    var entry = cases[slug];
+    var otherValues = {};
+    CASE_COLUMNS.forEach(function (column) {
+      otherValues[column] =
+        entry && entry.values[other] ? entry.values[other][column] : '';
     });
-  }
+    otherValues.slug = slug;
+    shared.forEach(function (column) {
+      otherValues[column] = next[column];
+    });
+    otherValues.image = next.image;
+    otherValues.published = next.published;
+    writeCaseRow_(slug, other, otherValues, cases);
+  });
 
   var triggered = false;
   if (publish && published) {

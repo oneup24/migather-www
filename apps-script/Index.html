@@ -104,6 +104,13 @@
           <div class="row">
             <label for="slug">Case</label>
             <div>
+              <div style="margin-bottom: 12px">
+                <button type="button" id="newCase" class="secondary">＋ New case</button>
+                <span class="hint" style="margin-left: 10px">
+                  A new case starts as a draft in all three languages, and publishes when all
+                  three are filled in.
+                </span>
+              </div>
               <div class="case-list" id="caseList">
                 <? for (var i = 0; i < cases.length; i++) { ?>
                   <button type="button" data-slug="<?= cases[i].slug ?>">
@@ -287,6 +294,10 @@
     <script>
       var CURRENT = null;
 
+      /* The vocabulary, from the sheet's settings tab. */
+      var SECTORS = <?= JSON.stringify(sectors) ?>;
+      var SERVICES = <?= JSON.stringify(services) ?>;
+
       function el(id) { return document.getElementById(id); }
       function val(id) { var node = el(id); return node ? node.value.trim() : ''; }
 
@@ -323,6 +334,57 @@
 
       el('locale').addEventListener('change', function () {
         if (CURRENT) load(CURRENT.slug);
+      });
+
+      /* ── A new case ────────────────────────────────────────────────── */
+      el('newCase').addEventListener('click', function () {
+        var slug = window.prompt(
+          'The case id — lowercase letters, digits and single hyphens.\n\n' +
+            'This becomes the page address: /en/work/<id>\n\n' +
+            'For example: acme-hk-2026'
+        );
+        if (!slug) return;
+        slug = slug.trim().toLowerCase();
+
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+          setStatus('That id is not valid — lowercase letters, digits and single hyphens only.', 'bad');
+          return;
+        }
+
+        var client = window.prompt('The client name, for example: Acme HK') || '';
+
+        CURRENT = {
+          slug: slug,
+          locale: el('locale').value,
+          values: {
+            slug: slug,
+            client: client,
+            clientLocal: '',
+            projectLocal: '',
+            sector: SECTORS[0] || 'finance',
+            services: '',
+            partnershipSince: '',
+            summary: '',
+            source: '',
+            imageAlt: '',
+            image: '',
+            mockup: true,
+            featured: false,
+            published: false,
+          },
+          results: [],
+          scope: [],
+          readiness: { ready: 0, total: 3 },
+          published: false,
+        };
+
+        el('editor').classList.remove('hidden');
+        paint();
+        setStatus(
+          'A new draft. Fill in the copy, then save. Do the same for the other two ' +
+            'languages — it publishes when all three are ready.',
+          'ok'
+        );
       });
 
       /* ── Painting the form ───────────────────────────────────────────── */

@@ -317,6 +317,7 @@ so.
 | `npm run check:content` | Checks the compiled content: every published case has an image, a source, and alt text in all three languages. |
 | `npm run cms:preview` | Renders the editor form locally with mock data, so it can be reviewed without a Google project. |
 | `npm run cms:editors` | Shows, adds to or removes from the editor allow-list in the sheet's `settings` tab. |
+| `npm run cms:test` | Runs the Apps Script against a mocked sheet — a new case, an edited case, the publish rule and the allow-list. |
 
 The library the three share is in `tools/cms/lib/`: `schema.mjs` (the
 contract), `records.mjs` (records ↔ rows), `compile.mjs` (the validator and

@@ -22,7 +22,8 @@
     "cms:seed": "node tools/cms/seed-sheet.mjs",
     "cms:sync": "node tools/cms/sync-cases.mjs",
     "cms:preview": "node tools/cms/preview-form.mjs",
-    "cms:editors": "node tools/cms/editors.mjs"
+    "cms:editors": "node tools/cms/editors.mjs",
+    "cms:test": "node tools/cms/test-apps-script.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",
