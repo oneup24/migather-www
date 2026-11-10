@@ -74,6 +74,34 @@ are removed. See [`docs/LAUNCH_CHECKLIST.md`](docs/LAUNCH_CHECKLIST.md) §0.
 
 ---
 
+## The "Our delivery" spine removed from the homepage — 10 November 2026
+
+The three-outcome section — "Our delivery — Three outcomes, one team, no
+hand-off.", then 01 Inspire / 02 Convert / 03 Compound — was taken off the
+homepage and deleted rather than parked.
+
+- **`V3Delivery` deleted**, along with `contentV3.delivery` in
+  `src/data/content.v3.js` and its entry in `HomePage.jsx`. No copy is left
+  behind on the site.
+- **The homepage order is now** Hero → How we work → Who we work with →
+  Next step — which is the order `docs/DESIGN_V3.md` §5 already describes.
+- **The hero index was not touched.** It reads `01 How we work → #approach`,
+  `02 Selected work → /work`, `03 Start a conversation → #contact`, and none
+  of the three pointed at the delivery spine.
+
+The section had been added the same day by the reference about-copy rewrite
+below, on the shape of another agency's "Our Delivery" heading. It said
+nothing the site did not already say — "How we work" carries the same three
+outcomes in the agency's own words, with the evidence attached — and it put
+a claim-shaped band between the hero and the client wall.
+
+Verified: `npm run verify` — 49/49 route renders across 3 locales, copy
+screen clean, content check clean. `npm run audit:dom` and
+`audit:dom:mobile` unchanged. The homepage screens re-captured for all three
+locales; the review set regenerated.
+
+---
+
 ## The works page becomes CMS-driven — 10 November 2026
 
 The 16 case studies moved out of `src/data/cases.js` into

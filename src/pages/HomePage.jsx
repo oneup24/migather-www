@@ -1,6 +1,5 @@
 import { banners } from '../data/media';
 import V3Cta from '../components/v3/V3Cta';
-import V3Delivery from '../components/v3/V3Delivery';
 import V3Hero from '../components/v3/V3Hero';
 import V3LogoWall from '../components/v3/V3LogoWall';
 import V3Principles from '../components/v3/V3Principles';
@@ -12,15 +11,19 @@ import V3Principles from '../components/v3/V3Principles';
  *
  *   1. Hero — the claim, the picked-out phrase, the page index.
  *   2. How we work — the principles, moved up to sit under the hero.
- *   3. Our delivery — the three outcomes of the work (the delivery spine).
- *   4. Who we work with — the client wall and the four figures.
- *   5. Next step — the closing call to action.
+ *   3. Who we work with — the client wall and the four figures.
+ *   4. Next step — the closing call to action.
  *
  * The "In their words" section and the full "Who we work with" editorial
  * were removed; the testimonials now live on the About page, where they
  * were always meant to sit. The selected work was removed from the
  * homepage in November 2026 as well — the work has its own page, and the
  * hero index now points there.
+ *
+ * The "Our delivery" spine — three outcomes, one team — was added in
+ * November 2026 and removed again the same day. Its copy had said nothing
+ * the site did not already say, and the homepage was carrying a claim
+ * section it did not need.
  */
 export default function HomePage() {
   return (
@@ -28,7 +31,6 @@ export default function HomePage() {
       <V3Hero image={banners.home} />
 
       <V3Principles />
-      <V3Delivery />
       <V3LogoWall />
       <V3Cta />
     </>
