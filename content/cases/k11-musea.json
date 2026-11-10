@@ -1,0 +1,61 @@
+{
+  "slug": "k11-musea",
+  "order": 13,
+  "client": "K11 Musea",
+  "clientLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "travel",
+  "services": [
+    "paid-media",
+    "kol",
+    "community"
+  ],
+  "partnershipSince": {
+    "en": "2021",
+    "zh-Hant": "2021年",
+    "zh-Hans": "2021年"
+  },
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "Campaign-based Hong Kong content and media support for a flagship retail and art destination — media strategy, buying and execution, plus KOL and micro-influencer seeding with on-site tagging.",
+    "zh-Hant": "為旗艦零售及藝術地標提供的香港活動內容及媒體支援——媒體策略、投放及執行，並結合 KOL 及微型 KOL 的現場打卡 seeding。",
+    "zh-Hans": "为旗舰零售及艺术地标提供的香港活动内容及媒体支持——媒体策略、投放及执行，并结合 KOL 及微型 KOL 的现场打卡 seeding。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "Media strategy planning, buying and execution",
+      "zh-Hant": "媒體策略規劃、投放及執行",
+      "zh-Hans": "媒体策略规划、投放及执行"
+    },
+    {
+      "en": "KOL and micro-influencer seeding with on-site tagging",
+      "zh-Hant": "KOL 及微型 KOL 現場打卡 seeding",
+      "zh-Hans": "KOL 及微型 KOL 现场打卡 seeding"
+    },
+    {
+      "en": "Facebook and Instagram content",
+      "zh-Hant": "Facebook 及 Instagram 內容",
+      "zh-Hans": "Facebook 及 Instagram 内容"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/HK digital marketing campaign/Agency Credential by Migather Limited - Ecom.pptx",
+  "image": {
+    "src": "/media/cases/k11-musea/case-k11.jpg",
+    "alt": {
+      "en": "Mock-up: a retail atrium with a large artwork hanging above.",
+      "zh-Hant": "樣機：懸掛大型藝術裝置的零售中庭。",
+      "zh-Hans": "样机：悬挂大型艺术装置的零售中庭。"
+    },
+    "mockup": true
+  }
+}

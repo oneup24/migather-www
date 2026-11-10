@@ -1,0 +1,66 @@
+{
+  "slug": "lee-gardens",
+  "order": 14,
+  "client": "Lee Gardens",
+  "clientLocal": {
+    "en": "利園",
+    "zh-Hant": "利園",
+    "zh-Hans": "利園"
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "travel",
+  "services": [
+    "community",
+    "paid-media",
+    "kol"
+  ],
+  "partnershipSince": {
+    "en": "2021",
+    "zh-Hant": "2021年",
+    "zh-Hans": "2021年"
+  },
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "Mainland China social media maintenance — WeChat, 小红书 and Weibo account management, content, analytics, strategy planning and KOL collaboration.",
+    "zh-Hant": "中國內地社群媒體維護——微信、小紅書及微博的帳戶管理、內容、數據分析、策略規劃及 KOL 合作。",
+    "zh-Hans": "中国内地社群媒体维护——微信、小红书及微博的账户管理、内容、数据分析、策略规划及 KOL 合作。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "WeChat content and management",
+      "zh-Hant": "微信內容及管理",
+      "zh-Hans": "微信内容及管理"
+    },
+    {
+      "en": "小红书 content and management, plus 小红书 KOL",
+      "zh-Hant": "小紅書內容及管理，以及小紅書 KOL",
+      "zh-Hans": "小红书内容及管理，以及小红书 KOL"
+    },
+    {
+      "en": "Weibo content and management",
+      "zh-Hant": "微博內容及管理",
+      "zh-Hans": "微博内容及管理"
+    },
+    {
+      "en": "Paid social advertising",
+      "zh-Hant": "付費社群廣告",
+      "zh-Hans": "付费社群广告"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/HK digital marketing campaign/Social Retainer Showcase.pptx — slide 3",
+  "image": {
+    "src": "/media/cases/lee-gardens/case-leegardens.jpg",
+    "alt": {
+      "en": "Mock-up: a tree-lined shopping street in a Chinese city in autumn.",
+      "zh-Hant": "樣機：中國城市秋日的林蔭購物街。",
+      "zh-Hans": "样机：中国城市秋日的林荫购物街。"
+    },
+    "mockup": true
+  }
+}

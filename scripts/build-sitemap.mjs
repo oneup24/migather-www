@@ -1,17 +1,22 @@
 /**
  * Sitemap generator.
  *
- * Builds `public/sitemap.xml` from the route table and the case slugs, so
- * the sitemap can never drift from the routes the site actually serves.
+ * Builds `public/sitemap.xml` from the route table and the published cases,
+ * so the sitemap can never drift from the routes the site actually serves.
+ *
+ * The case slugs come from the compiled content in `content/cases/`, which
+ * is what the site itself reads. They used to be scraped out of the data
+ * module with a regex, which broke the moment the cases became files.
  *
  * Run with:  npm run build:sitemap
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const DATA_DIR = join(ROOT, 'src', 'data');
+const CONTENT_DIR = join(ROOT, 'content', 'cases');
 
 const SITE_URL = 'https://migather.com';
 const LOCALES = ['en', 'zh-Hant', 'zh-Hans'];
@@ -28,17 +33,27 @@ const STATIC_PATHS = [
   '/legal/disclosure',
 ];
 
-/** Pull the case slugs straight out of the data module. */
-function readCaseSlugs() {
-  const source = readFileSync(join(DATA_DIR, 'cases.js'), 'utf8');
-  return [...source.matchAll(/^\s{4}slug: '([^']+)',/gm)].map((m) => m[1]);
+/** The published cases, in the order the sheet lists them. */
+function readCases() {
+  let files = [];
+  try {
+    files = readdirSync(CONTENT_DIR).filter((f) => f.endsWith('.json'));
+  } catch {
+    return [];
+  }
+
+  return files
+    .map((file) => JSON.parse(readFileSync(join(CONTENT_DIR, file), 'utf8')))
+    .filter((record) => record.published !== false)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
 
 /** Pull the service keys out of the service menu. The module is plain
  *  JavaScript with no dependencies, so it can simply be imported. */
 const { allServices } = await import(join(DATA_DIR, 'services.js'));
 
-const slugs = readCaseSlugs();
+const cases = readCases();
+const slugs = cases.map((record) => record.slug);
 const serviceKeys = allServices.map((service) => service.key);
 
 const urls = [];

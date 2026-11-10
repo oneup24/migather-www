@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom';
-import { cases, sectors } from '../data/cases';
+import { cases, hasMockUpCases, sectors } from '../data/cases';
 import { content } from '../data/content';
 import { contentV3 } from '../data/content.v3';
 import { banners } from '../data/media';
@@ -70,9 +70,13 @@ export default function WorkIndexPage() {
           )}
 
           <div className="mt-16 border-t border-rule pt-8">
-            <p className="max-w-2xl text-[13.5px] leading-relaxed text-muted">
-              {t(contentV3.disclosure.workNote)}
-            </p>
+            {/* The note explains the placeholder artwork, so it only makes
+                sense while there is placeholder artwork on the page. */}
+            {hasMockUpCases() && (
+              <p className="max-w-2xl text-[13.5px] leading-relaxed text-muted">
+                {t(contentV3.disclosure.workNote)}
+              </p>
+            )}
             <div className="mt-6">
               <Link to={path('/contact')} className="link-line">
                 {t(content.home.cta.button)}

@@ -163,6 +163,13 @@ directly beside **real, sourced client results**, and an unmarked photograph
 of Hong Kong next to a `+38%` figure reads as a photograph of the work that
 produced it.
 
+**Since the works page became CMS-driven, the label is per case.** A case
+whose picture is still generated artwork carries the tag and the `Mock-up: `
+alt prefix; a case whose picture is real client photography carries neither.
+The footer's standing disclosure and the work-grid note show only while at
+least one published case still carries a mock-up. So the labelling gets
+smaller as the photography improves, without anyone editing the site.
+
 > **The site is not publishable until the mock-up imagery is replaced with
 > real client photography, or the pages that use it are removed.** See
 > [`LAUNCH_CHECKLIST.md`](LAUNCH_CHECKLIST.md) §0 for the three options.
@@ -180,9 +187,10 @@ This runs, in order:
 | Step | What it checks |
 | --- | --- |
 | `npm run build` | The site compiles. |
-| `npm run check:routes` | All 37 routes render in all three locales, each producing its own heading — so no route silently falls through to the 404 — and the **rendered text** of every route is screened for banned terms. |
-| `npm run check:copy` | No 中国广告法 restricted term and no Migather banned claim word in any translatable string in `src/data/`. |
-| `npm run build:sitemap` | Regenerates `public/sitemap.xml` — 75 URLs. |
+| `npm run check:routes` | All 49 routes render in all three locales, each producing its own heading — so no route silently falls through to the 404 — and the **rendered text** of every route is screened for banned terms. |
+| `npm run check:copy` | No 中国广告法 restricted term and no Migather banned claim word in any translatable string in `src/data/` **or in the compiled case files**. |
+| `npm run check:content` | Every published case has an image, a source, and alt text in all three languages; a mock-up's alt text says so, and a real photograph's does not. |
+| `npm run build:sitemap` | Regenerates `public/sitemap.xml` — 150 URLs. |
 
 After a change that touches the data modules, also re-run the capture:
 
@@ -211,10 +219,28 @@ npm run audit:dom:mobile   # 390 × 844
 | The header | Transparent over the hero, solid after scrolling. |
 | The mobile drawer | Starts off-screen, opens on screen, is exposed to assistive technology, and closes again — checked by geometry, not by the transform property. |
 | Every route | Renders its own heading rather than falling through to the 404, and has no broken images. |
-| The mock-up disclosure | Present in the footer of every page; every work-grid image carries its `MOCK-UP` tag. |
+| The mock-up disclosure | Present in the footer of every page **while a published case still carries generated artwork**, and gone when the last one does. |
+| Every published case | Shows its image, names its source, and carries a `MOCK-UP` tag exactly when its record says it is a mock-up. |
 | The sector filter | Sets its state, is held in the URL, and narrows the grid. |
 
-Current state: **30/30 at 390 px, 26/26 at 768 px and 1920 px.**
+Current state: **49/49 at 1440 px, 53/53 at 390 px.**
+
+### Reviewing a published change
+
+The works content is edited in the CMS, and every published change is a
+commit. To review one:
+
+```bash
+git log --oneline -- content/cases
+git show <commit> -- content/cases
+```
+
+The diff shows the copy that changed, in the three languages, and nothing
+else — the picture, the alt text and the mock-up flag travel with the case in
+one record, so they cannot disagree. To undo it, revert the commit.
+
+The screens a change has to pass are `npm run verify` above, plus
+`npm run audit:dom`. The CMS itself is documented in [`CMS.md`](CMS.md).
 
 ---
 
@@ -227,8 +253,12 @@ Current state: **30/30 at 390 px, 26/26 at 768 px and 1920 px.**
 | `src/components/v3/` | The v3.0 component library. |
 | `src/components/layout/` | Header, footer, capture mode. |
 | `src/data/content.v3.js` | The new structural copy for v3.0. |
-| `src/data/media.js` | The mock-up image manifest and the disclosure copy. |
-| `public/media/` | The 24 generated images, plus the 23 client marks in `public/media/clients/`. |
+| `src/data/media.js` | The page-banner image manifest and the disclosure copy. |
+| `src/data/sectors.js` | The sector taxonomy the CMS dropdown is checked against. |
+| `content/cases/` | The compiled case files — one per case, all three locales merged. The CMS writes them; the site reads them. |
+| `public/media/` | The generated images, plus the 23 client marks in `public/media/clients/`. |
+| `tools/cms/` | The CMS tooling: the pull, the seed, the compiler and the validator. |
+| `apps-script/` | The Google Apps Script web app the editor works in. |
 | `docs/mockups/` | The full-page screens. |
 | `tools/media/` | Image generation and optimisation. |
 | `tools/capture-pages.mjs` | The screenshot tool. |

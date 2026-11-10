@@ -10,13 +10,18 @@
     "preview": "vite preview",
     "check:routes": "vite build --ssr scripts/ssr-check.jsx --outDir .ssr-check --logLevel error && node .ssr-check/ssr-check.js",
     "check:copy": "node scripts/check-copy.mjs",
-    "verify": "npm run build && npm run check:routes && npm run check:copy && npm run build:sitemap",
+    "check:content": "node scripts/check-content.mjs",
+    "verify": "npm run build && npm run check:routes && npm run check:copy && npm run check:content && npm run build:sitemap",
     "lint": "echo \"no linter configured yet\"",
     "build:sitemap": "node scripts/build-sitemap.mjs",
     "audit:dom": "node tools/audit-dom.mjs",
     "audit:dom:mobile": "node tools/audit-dom.mjs --width 390 --height 844",
     "capture": "node tools/capture-pages.mjs",
-    "serve": "npm run build && vite preview --port 4176 --strictPort"
+    "serve": "npm run build && vite preview --port 4176 --strictPort",
+    "cms:migrate": "node tools/cms/migrate-content.mjs",
+    "cms:seed": "node tools/cms/seed-sheet.mjs",
+    "cms:sync": "node tools/cms/sync-cases.mjs",
+    "cms:preview": "node tools/cms/preview-form.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",

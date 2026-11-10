@@ -8,21 +8,34 @@ import MockUpTag from './MockUpTag';
  * The same cinematic treatment as the homepage hero — photograph, scrim,
  * one claim — at a shorter height. It keeps every page opening the same
  * way while leaving the homepage the fullest expression of the idea.
+ *
+ * `mockup` decides whether the banner is labelled as generated artwork.
+ * It defaults to true, because every page banner is generated artwork; the
+ * case page passes the case's own flag, so a case whose picture is real
+ * client photography is not tagged.
  */
-export default function PageBanner({ image, eyebrow, title, lede, className, children }) {
+export default function PageBanner({
+  image,
+  eyebrow,
+  title,
+  lede,
+  className,
+  children,
+  mockup = true,
+}) {
   const { t } = useLocale();
 
   return (
-    <section className={cn('relative isolate grain overflow-hidden bg-night', className)}>
+    <section className={cn('page-banner relative isolate grain overflow-hidden bg-night', className)}>
       <img
         src={image.src}
         alt={t(image.alt)}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="page-banner__image absolute inset-0 h-full w-full object-cover"
         fetchPriority="high"
         decoding="async"
       />
       <div className="hero-scrim absolute inset-0" aria-hidden="true" />
-      <MockUpTag placement="banner" />
+      {mockup && <MockUpTag placement="banner" />}
 
       <div className="relative z-10 mx-auto flex min-h-[52svh] w-full max-w-7xl flex-col justify-end px-6 pb-12 pt-36 md:min-h-[58svh] md:pb-16">
         {eyebrow && <div className="eyebrow text-white/65">{eyebrow}</div>}

@@ -1,0 +1,66 @@
+{
+  "slug": "h-queens",
+  "order": 11,
+  "client": "H Queen's",
+  "clientLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "lifestyle",
+  "services": [
+    "community",
+    "kol-campaign",
+    "creative-content"
+  ],
+  "partnershipSince": {
+    "en": "2021",
+    "zh-Hant": "2021年",
+    "zh-Hans": "2021年"
+  },
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "Integrated Hong Kong social for a Central art and culture venue — content development, live streaming, closed-group seeding, KOL campaigns, video shooting, artist interviews and an Instagram filter.",
+    "zh-Hant": "為中環藝術文化場地提供的整合香港社群項目——內容開發、直播、專屬群組 seeding、KOL 項目、影片拍攝、藝術家專訪及 Instagram 濾鏡。",
+    "zh-Hans": "为中环艺术文化场地提供的整合香港社群项目——内容开发、直播、专属群组 seeding、KOL 项目、视频拍摄、艺术家专访及 Instagram 滤镜。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "Facebook and Instagram content and management",
+      "zh-Hant": "Facebook 及 Instagram 內容及管理",
+      "zh-Hans": "Facebook 及 Instagram 内容及管理"
+    },
+    {
+      "en": "Live streaming and closed-group seeding",
+      "zh-Hant": "直播及專屬群組 seeding",
+      "zh-Hans": "直播及专属群组 seeding"
+    },
+    {
+      "en": "KOL campaign and restaurant review seeding",
+      "zh-Hant": "KOL 項目及餐廳評價 seeding",
+      "zh-Hans": "KOL 项目及餐厅评价 seeding"
+    },
+    {
+      "en": "Video shooting, artist interviews and Instagram filter",
+      "zh-Hant": "影片拍攝、藝術家專訪及 Instagram 濾鏡",
+      "zh-Hans": "视频拍摄、艺术家专访及 Instagram 滤镜"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/HK digital marketing campaign/Agency Credential by Migather Limited - Ecom.pptx",
+  "image": {
+    "src": "/media/cases/h-queens/case-hqueens.jpg",
+    "alt": {
+      "en": "Mock-up: an art gallery opening in a Central heritage space.",
+      "zh-Hant": "樣機：中環歷史建築內的藝術展覽開幕。",
+      "zh-Hans": "样机：中环历史建筑内的艺术展览开幕。"
+    },
+    "mockup": true
+  }
+}

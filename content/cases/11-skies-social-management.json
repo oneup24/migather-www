@@ -1,0 +1,84 @@
+{
+  "slug": "11-skies-social-management",
+  "order": 9,
+  "client": "11 SKIES",
+  "clientLocal": {
+    "en": "11 天空之城",
+    "zh-Hant": "11 天空之城",
+    "zh-Hans": "11 天空之城"
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "properties",
+  "services": [
+    "community",
+    "paid-media",
+    "analytics"
+  ],
+  "partnershipSince": {
+    "en": "2021",
+    "zh-Hant": "2021年",
+    "zh-Hans": "2021年"
+  },
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "Retained Hong Kong social media management for a cross-border shopping complex — account management, content, analytics and strategy across Facebook and Instagram, with paid social support.",
+    "zh-Hant": "為跨境購物城提供的香港社群媒體管理長期合作——帳戶管理、內容、數據分析及策略，覆蓋 Facebook 及 Instagram，並配合付費社群廣告。",
+    "zh-Hans": "为跨境购物城提供的香港社群媒体管理长期合作——账户管理、内容、数据分析及策略，覆盖 Facebook 及 Instagram，并配合付费社群广告。"
+  },
+  "results": [
+    {
+      "value": "HK$1.31M",
+      "label": {
+        "en": "Annual media budget",
+        "zh-Hant": "年度媒體預算",
+        "zh-Hans": "年度媒体预算"
+      },
+      "note": {
+        "en": "Facebook HK$441,000 · Instagram HK$331,800 · LinkedIn HK$537,500",
+        "zh-Hant": "Facebook HK$441,000 · Instagram HK$331,800 · LinkedIn HK$537,500",
+        "zh-Hans": "Facebook HK$441,000 · Instagram HK$331,800 · LinkedIn HK$537,500"
+      }
+    },
+    {
+      "value": "17 months",
+      "label": {
+        "en": "Strategy term",
+        "zh-Hant": "策略年期",
+        "zh-Hans": "策略年期"
+      },
+      "note": null
+    }
+  ],
+  "scope": [
+    {
+      "en": "Facebook and Instagram content and account management",
+      "zh-Hant": "Facebook 及 Instagram 內容及帳戶管理",
+      "zh-Hans": "Facebook 及 Instagram 内容及账户管理"
+    },
+    {
+      "en": "Paid social advertising",
+      "zh-Hant": "付費社群廣告",
+      "zh-Hans": "付费社群广告"
+    },
+    {
+      "en": "Analytics and strategy planning",
+      "zh-Hant": "數據分析及策略規劃",
+      "zh-Hans": "数据分析及策略规划"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/HK digital marketing campaign/11 SKIES_HK Social Management Presentation_Migather Limited.pptx — slides 124–128",
+  "image": {
+    "src": "/media/cases/11-skies-social-management/case-social.jpg",
+    "alt": {
+      "en": "Mock-up: a social content shoot in progress on a Hong Kong street.",
+      "zh-Hant": "樣機：香港街頭進行中的社群內容拍攝。",
+      "zh-Hans": "样机：香港街头进行中的社交内容拍摄。"
+    },
+    "mockup": true
+  }
+}

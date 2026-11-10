@@ -18,6 +18,11 @@
  * The one exception is `clientLogos` below — the logo wall, which carries
  * the clients' own marks rather than generated artwork.
  *
+ * The case images are not here: they moved into the case records when the
+ * works page became CMS-driven, because a picture is edited in the same
+ * place as the copy it sits beside, and it carries its own mock-up flag.
+ * See `src/data/cases.js`.
+ *
  * The site is NOT publishable until this artwork is replaced with real
  * client photography or the pages that use it are removed. This is listed
  * as a launch blocker in `docs/LAUNCH_CHECKLIST.md`.
@@ -247,145 +252,10 @@ export const features = {
 };
 
 /**
- * One image per case.
+ * The case images live with the cases.
  *
- * The subject is chosen to match what the case on file actually was — a
- * forum for the GBA case, a trading floor for the brokerage case, a mall
- * atrium for the shopping-centre cases — so the mock-up reads as the right
- * kind of work. It is still atmosphere, and it is still labelled as such.
+ * They moved out of this manifest when the works page became CMS-driven: a
+ * case's picture is part of the case, it carries its own alt text and its
+ * own mock-up flag, and it is edited in the same place as the copy. They
+ * are read from the compiled case files — see `src/data/cases.js`.
  */
-export const caseImages = {
-  'huatai-finance-hk': {
-    src: asset('/media/case-huatai.jpg'),
-    alt: {
-      en: 'Mock-up: dawn over a Hong Kong financial district, glass towers catching the light.',
-      'zh-Hant': '樣機：香港金融區破曉，玻璃幕牆映着晨光。',
-      'zh-Hans': '样机：香港金融区破晓，玻璃幕墙映着晨光。',
-    },
-  },
-  '11-skies-gba-forum': {
-    src: asset('/media/case-forum.jpg'),
-    alt: {
-      en: 'Mock-up: a large business forum auditorium, stage lit, audience in silhouette.',
-      'zh-Hant': '樣機：大型商業論壇會場，台上燈光明亮，觀眾成剪影。',
-      'zh-Hans': '样机：大型商业论坛会场，台上灯光明亮，观众成剪影。',
-    },
-  },
-  'bank-of-china-hk': {
-    src: asset('/media/case-boc.jpg'),
-    alt: {
-      en: 'Mock-up: hands holding a phone with an abstract banking interface.',
-      'zh-Hant': '樣機：雙手拿着顯示抽象銀行介面的手機。',
-      'zh-Hans': '样机：双手拿着显示抽象银行界面的手机。',
-    },
-  },
-  'atfx-securities-hk': {
-    src: asset('/media/case-atfx.jpg'),
-    alt: {
-      en: 'Mock-up: a Hong Kong commercial district at night, traffic light trails.',
-      'zh-Hant': '樣機：香港商業區夜色，車流光軌。',
-      'zh-Hans': '样机：香港商业区夜色，车流光轨。',
-    },
-  },
-  'wing-fung-financial-hk': {
-    src: asset('/media/case-wingfung.jpg'),
-    alt: {
-      en: 'Mock-up: gold bullion and coins under a single light.',
-      'zh-Hant': '樣機：單一燈光下的金條與金幣。',
-      'zh-Hans': '样机：单一灯光下的金条与金币。',
-    },
-  },
-  'new-world-development': {
-    src: asset('/media/case-newworld.jpg'),
-    alt: {
-      en: 'Mock-up: an Asian megacity skyline at dusk.',
-      'zh-Hant': '樣機：黃昏時分的亞洲城市天際線。',
-      'zh-Hans': '样机：黄昏时分的亚洲城市天际线。',
-    },
-  },
-  'christies-auction': {
-    src: asset('/media/case-christies.jpg'),
-    alt: {
-      en: 'Mock-up: an auction viewing room, one sculpture lit on a pedestal.',
-      'zh-Hant': '樣機：拍賣預展廳，基座上的雕塑被聚光照亮。',
-      'zh-Hans': '样机：拍卖预展厅，基座上的雕塑被聚光照亮。',
-    },
-  },
-  'hang-seng-bank': {
-    src: asset('/media/case-hangseng.jpg'),
-    alt: {
-      en: 'Mock-up: a presenter at a desk in a modern broadcast set.',
-      'zh-Hant': '樣機：現代錄影場景中坐在枱前的講者。',
-      'zh-Hans': '样机：现代录影场景中坐在桌前的讲者。',
-    },
-  },
-  'fubon-bank': {
-    src: asset('/media/case-fubon.jpg'),
-    alt: {
-      en: 'Mock-up: abstract animated geometric forms on a deep blue field.',
-      'zh-Hant': '樣機：深藍底上的抽象動態幾何圖形。',
-      'zh-Hans': '样机：深蓝底上的抽象动态几何图形。',
-    },
-  },
-  '11-skies-social-management': {
-    src: asset('/media/case-social.jpg'),
-    alt: {
-      en: 'Mock-up: a social content shoot in progress on a Hong Kong street.',
-      'zh-Hant': '樣機：香港街頭進行中的社群內容拍攝。',
-      'zh-Hans': '样机：香港街头进行中的社交内容拍摄。',
-    },
-  },
-  'marks-and-spencer': {
-    src: asset('/media/case-mands.jpg'),
-    alt: {
-      en: 'Mock-up: a retail window display of folded garments in warm light.',
-      'zh-Hant': '樣機：暖光下的零售櫥窗服裝陳列。',
-      'zh-Hans': '样机：暖光下的零售橱窗服装陈列。',
-    },
-  },
-  'h-queens': {
-    src: asset('/media/case-hqueens.jpg'),
-    alt: {
-      en: 'Mock-up: an art gallery opening in a Central heritage space.',
-      'zh-Hant': '樣機：中環歷史建築內的藝術展覽開幕。',
-      'zh-Hans': '样机：中环历史建筑内的艺术展览开幕。',
-    },
-  },
-  'v-city-v-walk': {
-    src: asset('/media/case-vcity.jpg'),
-    alt: {
-      en: 'Mock-up: a shopping mall interior under a glass roof.',
-      'zh-Hant': '樣機：玻璃天幕下的購物城內景。',
-      'zh-Hans': '样机：玻璃天幕下的购物城景。',
-    },
-  },
-  'k11-musea': {
-    src: asset('/media/case-k11.jpg'),
-    alt: {
-      en: 'Mock-up: a retail atrium with a large artwork hanging above.',
-      'zh-Hant': '樣機：懸掛大型藝術裝置的零售中庭。',
-      'zh-Hans': '样机：悬挂大型艺术装置的零售中庭。',
-    },
-  },
-  'lee-gardens': {
-    src: asset('/media/case-leegardens.jpg'),
-    alt: {
-      en: 'Mock-up: a tree-lined shopping street in a Chinese city in autumn.',
-      'zh-Hant': '樣機：中國城市秋日的林蔭購物街。',
-      'zh-Hans': '样机：中国城市秋日的林荫购物街。',
-    },
-  },
-  chinachem: {
-    src: asset('/media/case-chinachem.jpg'),
-    alt: {
-      en: 'Mock-up: residential tower facades at dusk, seen from below.',
-      'zh-Hant': '樣機：黃昏時分仰拍的住宅樓立面。',
-      'zh-Hans': '样机：黄昏时分仰拍的住宅楼立面。',
-    },
-  },
-};
-
-/** Case images are optional — a case without one falls back to a flat panel. */
-export function caseImage(slug) {
-  return caseImages[slug] ?? null;
-}

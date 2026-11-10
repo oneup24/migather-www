@@ -1,0 +1,81 @@
+{
+  "slug": "bank-of-china-hk",
+  "order": 2,
+  "client": "Bank of China HK",
+  "clientLocal": {
+    "en": "中銀香港",
+    "zh-Hant": "中銀香港",
+    "zh-Hans": "中銀香港"
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "finance",
+  "services": [
+    "creative-content",
+    "strategic-creative",
+    "seo"
+  ],
+  "partnershipSince": null,
+  "featured": true,
+  "published": true,
+  "summary": {
+    "en": "Creative and UI/UX adaptation of brand video and banner assets for a Hong Kong banking app campaign site, built to be search-friendly and consistent with brand guidelines.",
+    "zh-Hant": "為香港銀行手機應用推廣網站，進行品牌影片及橫幅素材的創意與 UI/UX 適配，兼顧搜尋友好及品牌規範一致性。",
+    "zh-Hans": "为香港银行手机应用推广网站，进行品牌视频及横幅素材的创意与 UI/UX 适配，兼顾搜索友好及品牌规范一致性。"
+  },
+  "results": [
+    {
+      "value": "+18%",
+      "label": {
+        "en": "Website traffic, organically",
+        "zh-Hant": "自然搜尋網站流量",
+        "zh-Hans": "自然搜索网站流量"
+      },
+      "note": null
+    },
+    {
+      "value": "+38%",
+      "label": {
+        "en": "Stay time of unique visitor",
+        "zh-Hant": "獨立訪客停留時間",
+        "zh-Hans": "独立访客停留时间"
+      },
+      "note": null
+    }
+  ],
+  "scope": [
+    {
+      "en": "Branding video and banner adaptation for web",
+      "zh-Hant": "品牌影片及網頁橫幅適配",
+      "zh-Hans": "品牌视频及网页横幅适配"
+    },
+    {
+      "en": "Custom UI/UX approach for the campaign page",
+      "zh-Hant": "推廣頁面的客製化 UI/UX 設計",
+      "zh-Hans": "推广页面的定制化 UI/UX 设计"
+    },
+    {
+      "en": "Branding elements adapted to the campaign web page",
+      "zh-Hant": "品牌元素於推廣網頁上的適配",
+      "zh-Hans": "品牌元素在推广网页上的适配"
+    },
+    {
+      "en": "SEO-friendly build",
+      "zh-Hant": "搜尋引擎友好的網頁建置",
+      "zh-Hans": "搜索引擎友好的网页建置"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 11",
+  "image": {
+    "src": "/media/cases/bank-of-china-hk/case-boc.jpg",
+    "alt": {
+      "en": "Mock-up: hands holding a phone with an abstract banking interface.",
+      "zh-Hant": "樣機：雙手拿着顯示抽象銀行介面的手機。",
+      "zh-Hans": "样机：双手拿着显示抽象银行界面的手机。"
+    },
+    "mockup": true
+  }
+}

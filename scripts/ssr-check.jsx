@@ -23,6 +23,9 @@ const SUB_PATHS = [
   '/work/huatai-finance-hk',
   '/work/11-skies-gba-forum',
   '/work/christies-auction',
+  // A case with no results and a local client name — the shape a newly
+  // published case usually has.
+  '/work/chinachem',
   '/services',
   '/services/community',
   '/services/kol',

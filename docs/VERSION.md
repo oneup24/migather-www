@@ -74,6 +74,57 @@ are removed. See [`docs/LAUNCH_CHECKLIST.md`](docs/LAUNCH_CHECKLIST.md) §0.
 
 ---
 
+## The works page becomes CMS-driven — 10 November 2026
+
+The 16 case studies moved out of `src/data/cases.js` into
+`content/cases/*.json`, one file per case, all three locales merged. The
+editor now works in a Google Sheet, with the pictures in a Google Drive
+folder and the form in a Google Apps Script web app; a GitHub Actions
+workflow pulls, validates, compiles and commits.
+
+**The content did not change.** The migration was lossless — the same copy,
+the same figures, the same sources, byte for byte — and the round trip
+through the sheet was proved lossless too: the cases go into the sheet as
+rows and come back out as identical files.
+
+- **`content/cases/<slug>.json`** — the compiled record. A case's picture,
+  its alt text and its mock-up flag now travel together in one record, so
+  they cannot disagree. `src/data/cases.js` is a loader over the files.
+- **`src/data/sectors.js`** — the sector taxonomy, split out so the CMS
+  tooling can read it outside the bundler.
+- **`tools/cms/`** — the pull (`sync-cases.mjs`), the seed
+  (`seed-sheet.mjs`), the compiler and the validator (`lib/`). No npm
+  dependency: the service account signs its own JWT with `node:crypto`.
+- **`apps-script/`** — the editing form. One locale per session, an
+  editor allow-list in the sheet's `settings` tab, the GitHub token in the
+  script's properties.
+- **`.github/workflows/sync-cases.yml`** — triggered by the CMS, commits the
+  compiled content to `main`.
+
+**The mock-up label became a per-case switch.** `image.mockup` decides
+whether a card, a case banner and an alt text carry the mock-up label. The
+footer's standing disclosure and the work-grid note render only while at
+least one published case still carries generated artwork — so replacing the
+last mock-up retires them on its own. That is the per-case exit from the
+launch blocker in [`LAUNCH_CHECKLIST.md`](LAUNCH_CHECKLIST.md) §0.
+
+**Two holes closed.** The publish workflow now runs `npm run verify` before
+it deploys — it did not, and that gap was independent of the CMS. And the
+copy screen now walks `content/cases/*.json`, so a banned term typed into
+the form fails the build before the case is published. A new
+`npm run check:content` asserts that every published case has an image, a
+source, and alt text in all three languages.
+
+Verified: `npm run verify` — 49/49 route renders across 3 locales, copy
+screen clean across 9 data modules and 16 compiled case files, content check
+clean, 150-URL sitemap. `npm run audit:dom` 49/49, `audit:dom:mobile` 53/53,
+including the new checks for the image, the source and the mock-up tag. The
+mock-up switch was exercised end to end: a case flipped to real photography
+loses its tag, its alt prefix and its banner note, and the footer disclosure
+disappears once the last mock-up is gone.
+
+---
+
 ## The reference about-copy rewritten — 10 November 2026
 
 The user supplied a screenshot of another agency's (PRIZM Group's) about

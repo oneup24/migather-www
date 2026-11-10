@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { hasMockUpCases } from '../../data/cases';
 import { content } from '../../data/content';
 import { footerNav, legalNav, offices, site } from '../../data/site';
 import { mockUpNotice } from '../../data/media';
@@ -7,6 +8,11 @@ import Logo from '../ui/Logo';
 
 export default function SiteFooter() {
   const { path, t } = useLocale();
+
+  // The standing disclosure stays only while at least one published case
+  // still carries generated artwork. When the last mock-up is replaced with
+  // real client photography, the disclosure retires by itself.
+  const showMockUpNotice = hasMockUpCases();
 
   return (
     <footer className="bg-night px-6 pt-20 pb-10 text-white">
@@ -52,10 +58,12 @@ export default function SiteFooter() {
 
         {/* The mock-up disclosure. Every photograph in this build is generated
             placeholder artwork, and the site must not be published without
-            saying so. */}
-        <p className="mt-16 border-t border-white/10 pt-7 text-[12px] leading-relaxed text-white/45">
-          {t(mockUpNotice)}
-        </p>
+            saying so — for as long as that is true of the work pages. */}
+        {showMockUpNotice && (
+          <p className="mt-16 border-t border-white/10 pt-7 text-[12px] leading-relaxed text-white/45">
+            {t(mockUpNotice)}
+          </p>
+        )}
 
         <div className="mt-6 flex flex-col items-start justify-between gap-4 text-xs text-white/45 md:flex-row md:items-center">
           <p>

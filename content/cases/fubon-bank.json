@@ -1,0 +1,50 @@
+{
+  "slug": "fubon-bank",
+  "order": 8,
+  "client": "Fubon Bank",
+  "clientLocal": {
+    "en": "永明金融",
+    "zh-Hant": "永明金融",
+    "zh-Hans": "永明金融"
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "finance",
+  "services": [
+    "creative-content"
+  ],
+  "partnershipSince": null,
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "Online video production for a Hong Kong bank’s digital product — an info-graphic explainer and animation for its Fubon Go starter kit.",
+    "zh-Hant": "為香港銀行電子產品製作的線上影片——Fubon Go 新手入門包的資訊圖表解說及動畫。",
+    "zh-Hans": "为香港银行电子产品制作的线上视频——Fubon Go 新手入门包的资讯图表解说及动画。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "Info-graphic explainer video",
+      "zh-Hant": "資訊圖表解說影片",
+      "zh-Hans": "资讯图表解说视频"
+    },
+    {
+      "en": "Animation",
+      "zh-Hant": "動畫",
+      "zh-Hans": "动画"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 12",
+  "image": {
+    "src": "/media/cases/fubon-bank/case-fubon.jpg",
+    "alt": {
+      "en": "Mock-up: abstract animated geometric forms on a deep blue field.",
+      "zh-Hant": "樣機：深藍底上的抽象動態幾何圖形。",
+      "zh-Hans": "样机：深蓝底上的抽象动态几何图形。"
+    },
+    "mockup": true
+  }
+}

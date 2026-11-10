@@ -34,3 +34,8 @@ tools/media/_masters/
 # A build output. It is published to the gh-pages branch by
 # .github/workflows/publish-preview.yml, not committed to main.
 docs/pages-site/
+
+# ── The CMS's download scratch space ───────────────────────────────────────
+# The images the sync pulls from Drive land here before they are resized and
+# moved into public/media/cases/. Working files, never committed.
+.cms-tmp/

@@ -1,0 +1,71 @@
+{
+  "slug": "christies-auction",
+  "order": 6,
+  "client": "Christie's Auction",
+  "clientLocal": {
+    "en": "佳士得",
+    "zh-Hant": "佳士得",
+    "zh-Hans": "佳士得"
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "luxury",
+  "services": [
+    "strategic-creative",
+    "creative-content",
+    "community"
+  ],
+  "partnershipSince": {
+    "en": "2021",
+    "zh-Hant": "2021年",
+    "zh-Hans": "2021年"
+  },
+  "featured": true,
+  "published": true,
+  "summary": {
+    "en": "China social creative produced end to end for an international auction house — creative planning, strategy and production, WeChat Red Packet covers, animation, articles and sticker production from sketch.",
+    "zh-Hant": "為國際拍賣行統籌的中國社群創意項目——由創意規劃、策略至製作，涵蓋微信紅包封面、動畫、文章，以及由草圖起稿的貼圖製作。",
+    "zh-Hans": "为国际拍卖行统筹的中国社群创意项目——由创意规划、策略至制作，涵盖微信红包封面、动画、文章，以及由草图起稿的贴图制作。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "Creative planning, strategy and production",
+      "zh-Hant": "創意規劃、策略及製作",
+      "zh-Hans": "创意规划、策略及制作"
+    },
+    {
+      "en": "WeChat Red Packet cover design — 2022 CNY theme",
+      "zh-Hant": "微信紅包封面設計——2022 年新春主題",
+      "zh-Hans": "微信红包封面设计——2022 年新春主题"
+    },
+    {
+      "en": "Animation production",
+      "zh-Hant": "動畫製作",
+      "zh-Hans": "动画制作"
+    },
+    {
+      "en": "WeChat campaign article",
+      "zh-Hant": "微信推廣文章",
+      "zh-Hans": "微信推广文章"
+    },
+    {
+      "en": "WeChat sticker production, from sketch",
+      "zh-Hant": "微信貼圖製作，由草圖起稿",
+      "zh-Hans": "微信贴图制作，由草图起稿"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 14",
+  "image": {
+    "src": "/media/cases/christies-auction/case-christies.jpg",
+    "alt": {
+      "en": "Mock-up: an auction viewing room, one sculpture lit on a pedestal.",
+      "zh-Hant": "樣機：拍賣預展廳，基座上的雕塑被聚光照亮。",
+      "zh-Hans": "样机：拍卖预展厅，基座上的雕塑被聚光照亮。"
+    },
+    "mockup": true
+  }
+}

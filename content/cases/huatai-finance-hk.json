@@ -1,0 +1,98 @@
+{
+  "slug": "huatai-finance-hk",
+  "order": 0,
+  "client": "Huatai Finance HK",
+  "clientLocal": {
+    "en": "華泰證券",
+    "zh-Hant": "華泰證券",
+    "zh-Hans": "華泰證券"
+  },
+  "projectLocal": {
+    "en": "漲樂全球通",
+    "zh-Hant": "漲樂全球通",
+    "zh-Hans": "漲樂全球通"
+  },
+  "sector": "finance",
+  "services": [
+    "strategic-creative",
+    "offline-activation",
+    "kol"
+  ],
+  "partnershipSince": {
+    "en": "July 2021",
+    "zh-Hant": "2021年7月",
+    "zh-Hans": "2021年7月"
+  },
+  "featured": true,
+  "published": true,
+  "summary": {
+    "en": "A one-stop Hong Kong branding and social programme for a China-headquartered broker’s retail investment brand — branding video, localised social strategy, and online campaigns tied to offline OOH events.",
+    "zh-Hant": "為一家中國總部券商的零售投資品牌，於香港執行一站式品牌及社群項目——品牌影片、本地化社群策略，並結合線下戶外廣告的線上推廣。",
+    "zh-Hans": "为一家中国总部券商的零售投资品牌，在香港执行一站式品牌及社群项目——品牌视频、本地化社群策略，并结合线下户外广告的线上推广。"
+  },
+  "results": [
+    {
+      "value": "+38%",
+      "label": {
+        "en": "Facebook fans base",
+        "zh-Hant": "Facebook 粉絲數",
+        "zh-Hans": "Facebook 粉丝数"
+      },
+      "note": {
+        "en": "Organic, without paid social budget",
+        "zh-Hant": "自然增長，未動用付費社群預算",
+        "zh-Hans": "自然增长，未动用付费社群预算"
+      }
+    },
+    {
+      "value": "+48%",
+      "label": {
+        "en": "Social engagement",
+        "zh-Hant": "社群互動率",
+        "zh-Hans": "社群互动率"
+      },
+      "note": {
+        "en": "Organic, without paid social budget",
+        "zh-Hant": "自然增長，未動用付費社群預算",
+        "zh-Hans": "自然增长，未动用付费社群预算"
+      }
+    }
+  ],
+  "scope": [
+    {
+      "en": "Branding video — full length, 15s and 30s cuts",
+      "zh-Hant": "品牌影片——完整版、15秒及30秒版本",
+      "zh-Hans": "品牌视频——完整版、15秒及30秒版本"
+    },
+    {
+      "en": "Localised Hong Kong branding strategy",
+      "zh-Hant": "香港本地化品牌策略",
+      "zh-Hans": "香港本地化品牌策略"
+    },
+    {
+      "en": "Creative and social strategy for Facebook and Instagram pages",
+      "zh-Hant": "Facebook 及 Instagram 專頁的創意及社群策略",
+      "zh-Hans": "Facebook 及 Instagram 专页的创意及社群策略"
+    },
+    {
+      "en": "O2O campaigns linked to OOH bus and tram advertising, promotional car and roadshow",
+      "zh-Hant": "結合巴士及電車戶外廣告、宣傳車及路演的線上線下整合推廣",
+      "zh-Hans": "结合巴士及电车户外广告、宣传车及路演的线上线下整合推广"
+    },
+    {
+      "en": "KOL and third-party Facebook page collaborations",
+      "zh-Hant": "KOL 及第三方 Facebook 專頁合作",
+      "zh-Hans": "KOL 及第三方 Facebook 专页合作"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 7",
+  "image": {
+    "src": "/media/cases/huatai-finance-hk/case-huatai.jpg",
+    "alt": {
+      "en": "Mock-up: dawn over a Hong Kong financial district, glass towers catching the light.",
+      "zh-Hant": "樣機：香港金融區破曉，玻璃幕牆映着晨光。",
+      "zh-Hans": "样机：香港金融区破晓，玻璃幕墙映着晨光。"
+    },
+    "mockup": true
+  }
+}

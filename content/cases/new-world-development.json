@@ -1,0 +1,71 @@
+{
+  "slug": "new-world-development",
+  "order": 5,
+  "client": "New World Development",
+  "clientLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "properties",
+  "services": [
+    "pr",
+    "paid-media",
+    "kol"
+  ],
+  "partnershipSince": {
+    "en": "2016",
+    "zh-Hant": "2016年",
+    "zh-Hans": "2016年"
+  },
+  "featured": true,
+  "published": true,
+  "summary": {
+    "en": "A long-running multi-market awareness programme across China, Singapore, Australia, Thailand, Malaysia and Indonesia — press, KOL, online publishers, social content management, paid social and programmatic.",
+    "zh-Hant": "橫跨中國、新加坡、澳洲、泰國、馬來西亞及印尼的長期品牌知名度項目——新聞稿、KOL、線上媒體、社群內容管理、付費社群及程序化投放。",
+    "zh-Hans": "横跨中国、新加坡、澳洲、泰国、马来西亚及印尼的长期品牌认知项目——新闻稿、KOL、线上媒体、社群内容管理、付费社群及程序化投放。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "Online press releases",
+      "zh-Hant": "線上新聞稿",
+      "zh-Hans": "线上新闻稿"
+    },
+    {
+      "en": "KOL and online publisher partnerships",
+      "zh-Hant": "KOL 及線上媒體合作",
+      "zh-Hans": "KOL 及线上媒体合作"
+    },
+    {
+      "en": "Social content management",
+      "zh-Hant": "社群內容管理",
+      "zh-Hans": "社群内容管理"
+    },
+    {
+      "en": "Paid social advertising",
+      "zh-Hant": "付費社群廣告",
+      "zh-Hans": "付费社群广告"
+    },
+    {
+      "en": "Programmatic advertising",
+      "zh-Hant": "程序化廣告投放",
+      "zh-Hans": "程序化广告投放"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 15",
+  "image": {
+    "src": "/media/cases/new-world-development/case-newworld.jpg",
+    "alt": {
+      "en": "Mock-up: an Asian megacity skyline at dusk.",
+      "zh-Hant": "樣機：黃昏時分的亞洲城市天際線。",
+      "zh-Hans": "样机：黄昏时分的亚洲城市天际线。"
+    },
+    "mockup": true
+  }
+}

@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { cases, getCase, sectors } from '../data/cases';
 import { content } from '../data/content';
 import { contentV3 } from '../data/content.v3';
-import { asset, caseImage } from '../data/media';
+import { asset } from '../data/media';
 import { useLocale } from '../hooks/useLocale';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import Editorial from '../components/v3/Editorial';
@@ -32,7 +32,7 @@ export default function WorkDetailPage() {
 
   const currentIndex = cases.findIndex((c) => c.slug === item.slug);
   const next = cases[(currentIndex + 1) % cases.length];
-  const image = caseImage(item.slug);
+  const image = item.image ?? null;
 
   return (
     <>
@@ -40,13 +40,14 @@ export default function WorkDetailPage() {
         image={
           image ?? { src: asset('/media/work-hero.jpg'), alt: { en: '', 'zh-Hant': '', 'zh-Hans': '' } }
         }
+        mockup={image ? Boolean(image.mockup) : true}
         eyebrow={t(sectors[item.sector].label)}
         title={
           <span className="flex flex-col gap-3">
             <span>{item.client}</span>
             {item.clientLocal && (
               <span className="font-display text-[0.42em] leading-tight text-white/60">
-                {item.clientLocal}
+                {t(item.clientLocal)}
               </span>
             )}
           </span>
@@ -63,7 +64,7 @@ export default function WorkDetailPage() {
             </div>
           )}
 
-          {image && (
+          {image?.mockup && (
             <span className="eyebrow border border-white/30 px-2.5 py-1 text-white/65">
               {t(contentV3.disclosure.bannerNote)}
             </span>
@@ -114,7 +115,9 @@ export default function WorkDetailPage() {
                   <dd className="mt-2 font-display text-[17px] font-medium text-ink">
                     {item.client}
                     {item.clientLocal && (
-                      <span className="ml-2 text-[14px] font-normal text-muted">{item.clientLocal}</span>
+                      <span className="ml-2 text-[14px] font-normal text-muted">
+                        {t(item.clientLocal)}
+                      </span>
                     )}
                   </dd>
                 </div>
@@ -141,7 +144,7 @@ export default function WorkDetailPage() {
                 ))}
               </ul>
 
-              <p className="mt-8 border-l-2 border-brandBlue/30 pl-4 text-[12px] leading-relaxed text-muted">
+              <p className="case-source mt-8 border-l-2 border-brandBlue/30 pl-4 text-[12px] leading-relaxed text-muted">
                 {t(content.common.sourceNote)}
                 <br />
                 <span className="text-muted/80">{item.source}</span>

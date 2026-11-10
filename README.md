@@ -26,18 +26,40 @@ npm run serve        # build + preview → http://localhost:4176
 | `npm run dev` | Dev server with hot reload. |
 | `npm run build` | Production build into `dist/`. |
 | `npm run serve` | Build, then preview on port 4176. |
-| `npm run check:routes` | Renders all 37 routes in all 3 locales, asserts each produces its own heading, and screens the **rendered text** of every route for banned terms. |
-| `npm run check:copy` | Screens every translatable string in `src/data/` against the 中国广告法 restricted terms and Migather's own banned claim words. |
-| `npm run build:sitemap` | Regenerates `public/sitemap.xml` — 75 URLs. |
+| `npm run check:routes` | Renders all 49 routes in all 3 locales, asserts each produces its own heading, and screens the **rendered text** of every route for banned terms. |
+| `npm run check:copy` | Screens every translatable string in `src/data/` **and in the compiled case files** against the 中国广告法 restricted terms and Migather's own banned claim words. |
+| `npm run check:content` | Checks the compiled case content: every published case has an image, a source, and alt text in all three languages. |
+| `npm run build:sitemap` | Regenerates `public/sitemap.xml` — 150 URLs. |
 | `npm run verify` | All of the above, in order. |
 | `npm run audit:dom` | Drives the real page in headless Chrome: no horizontal overflow, no broken images, the header turns solid on scroll, the mobile drawer opens and closes, the sector filter works, every route renders its own heading. |
 | `npm run audit:dom:mobile` | The same audit at 390 × 844. |
 | `npm run capture` | Full-page mock-up screens → `docs/mockups/`. Fails loudly if any image did not load. |
+| `npm run cms:migrate` | The one-off migration: the pre-CMS data modules into `content/cases/*.json`. |
+| `npm run cms:seed` | The one-off migration into the Google Sheet and Drive. |
+| `npm run cms:sync` | The ongoing pull: Sheet + Drive → the compiled content. |
 
 ```bash
 node tools/capture-pages.mjs     # full-page mock-up screens → docs/mockups/
 python3 tools/contact-sheet.py   # one contact sheet per locale
 python3 tools/build-review-set.py  # the handover-sized review set
+```
+
+---
+
+## The works CMS
+
+The 16 case studies are the only part of the site an editor changes
+themselves. They live in a Google Sheet, their pictures in a Google Drive
+folder, and the editing surface is a Google Apps Script web app. A change is
+pulled by GitHub Actions, validated, compiled into `content/cases/*.json`,
+and committed — so the build never depends on Google, and every published
+change is a reviewable commit.
+
+The operating manual is [`docs/CMS.md`](docs/CMS.md).
+
+```bash
+npm run cms:seed -- --fixtures ./fixtures   # the tabs, written locally
+npm run cms:sync -- --fixtures ./fixtures   # the tabs, read back — must be lossless
 ```
 
 ---
@@ -64,6 +86,10 @@ domain root. `404.html` is a copy of the app shell, so a deep link such as
 `/en/work` resolves: Pages serves the 404 file, the router reads the path, and
 the right page renders.
 
+The publish workflow runs `npm run verify` before it deploys, so a commit
+carrying a banned word, a broken route or an incomplete case cannot reach the
+published site.
+
 > The repository is **public**. The client roster, the attributed testimonials
 > and the case figures are world-readable. Make the repo private before
 > sharing the link outside the team.
@@ -83,7 +109,10 @@ Three locales, URL-prefixed: `/en/*`, `/zh-Hant/*`, `/zh-Hans/*`.
 
 | Path | What it is |
 | --- | --- |
-| `src/data/` | Everything factual. `content.js` (copy), `cases.js` (16 sourced cases), `services.js` (25 published service lines, derived from the CRM's 23 agreed scope rows — one row is presented as three add-on lines), `clients.js` (roster + testimonials), `site.js` (constants, offices, platforms), `media.js` (mock-up imagery), `content.v3.js` (v3.0 structural copy), `i18n.js` (locale registry). |
+| `src/data/` | Everything factual. `content.js` (copy), `cases.js` (the loader over the compiled case files), `sectors.js` (the sector taxonomy), `services.js` (25 published service lines, derived from the CRM's 23 agreed scope rows — one row is presented as three add-on lines), `clients.js` (roster + testimonials), `site.js` (constants, offices, platforms), `media.js` (page-banner imagery), `content.v3.js` (v3.0 structural copy), `i18n.js` (locale registry). |
+| `content/cases/` | The 16 sourced cases, one file per case, all three locales merged. Written by the CMS sync, read by the site. |
+| `apps-script/` | The Google Apps Script web app an editor works in. |
+| `tools/cms/` | The CMS tooling: the pull, the seed, the compiler and the validator. |
 | `src/components/v3/` | The v3.0 component library. |
 | `src/components/layout/` | `SiteHeader`, `SiteFooter`, `CaptureMode`. |
 | `src/components/ui/` | `Button`, `Icon`, `Logo`. |
@@ -111,7 +140,12 @@ Three locales, URL-prefixed: `/en/*`, `/zh-Hant/*`, `/zh-Hans/*`.
 5. **State the as-of date** on every report, with the record count next to
    the total.
 6. **The mock-up imagery is labelled everywhere it appears**, because it sits
-   beside real client results.
+   beside real client results. The label is per case: a case whose picture is
+   real client photography carries no tag, and the footer's standing
+   disclosure disappears on its own when the last mock-up is replaced.
+7. **The build never depends on Google.** The works content is compiled into
+   the repository and committed. A broken sheet leaves the last good content
+   serving.
 
 ---
 

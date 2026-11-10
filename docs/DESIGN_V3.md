@@ -9,6 +9,14 @@ same data modules, the same copy, the same routes, the same 16 sourced cases,
 the same 27-client roster, the same three locales, the same legal pages. What
 changed is the grammar the content is set in.
 
+**Where the works content lives.** The 16 case studies are the one part of
+the site an editor changes themselves: they live in `content/cases/*.json`,
+written by the CMS sync from a Google Sheet, and the site reads them through
+`src/data/cases.js`. The copy in them is unchanged — the migration was
+lossless. The mechanism is in [`CMS.md`](CMS.md); the design consequence is
+that a case's picture, its alt text and its mock-up label now travel together
+in one record, so the three cannot disagree.
+
 v1.0 and v2.0 are untouched and still run, so the three can be compared side
 by side.
 
@@ -228,9 +236,17 @@ The labelling is what keeps the page honest.
 > real client photography, or the pages that use it are removed.** This is
 > item 0 in [`LAUNCH_CHECKLIST.md`](LAUNCH_CHECKLIST.md).
 >
-> The images live in `public/media/` and are registered in
-> `src/data/media.js`. Replacing one is a matter of dropping the file in and
-> pointing the manifest entry at it — the alt text and the disclosure stay.
+> The page banners live in `public/media/` and are registered in
+> `src/data/media.js`. The case images live with their cases, in
+> `content/cases/<slug>.json`, and are edited in the CMS form.
+>
+> **The case images now have a per-case exit.** Every case record carries
+> `image.mockup`. When it is true the `MOCK-UP` tag and the `Mock-up: ` alt
+> prefix are shown; when it is false they are not. The footer's standing
+> disclosure and the work-grid note render only while at least one published
+> case still carries a mock-up, so replacing the last one retires them on
+> their own — the blocker clears case by case rather than all at once.
+> See [`CMS.md`](CMS.md).
 
 ### How the imagery was made
 

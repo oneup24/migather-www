@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { sectors } from '../../data/cases';
-import { caseImage } from '../../data/media';
 import { useLocale } from '../../hooks/useLocale';
 import { cn } from '../../lib/utils';
 import MockUpTag from './MockUpTag';
@@ -13,11 +12,13 @@ import MockUpTag from './MockUpTag';
  * client, the sector and the first sourced figure, because a grid of
  * photographs with no substance would be wallpaper.
  *
- * The image is generated placeholder artwork and carries a `MockUpTag`.
+ * The image carries a `MockUpTag` only while it is generated artwork: a
+ * case whose picture is real client photography is not tagged, and the tag
+ * leaves that case on its own — one replaced picture at a time.
  */
 export function CaseCard({ entry, className }) {
   const { t, path } = useLocale();
-  const image = caseImage(entry.slug);
+  const image = entry.image ?? null;
   const headline = entry.results?.[0];
 
   return (
@@ -33,7 +34,7 @@ export function CaseCard({ entry, className }) {
                 decoding="async"
                 className="h-full w-full object-cover"
               />
-              <MockUpTag />
+              {image.mockup && <MockUpTag />}
             </>
           ) : (
             <div className="absolute inset-0 bg-surface" aria-hidden="true" />

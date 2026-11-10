@@ -1,0 +1,99 @@
+{
+  "slug": "atfx-securities-hk",
+  "order": 3,
+  "client": "ATFX Securities HK",
+  "clientLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "finance",
+  "services": [
+    "paid-media",
+    "performance-media",
+    "reporting"
+  ],
+  "partnershipSince": null,
+  "featured": true,
+  "published": true,
+  "summary": {
+    "en": "A Hong Kong and Southeast Asia acquisition programme for an online trading platform — SEM and display, A/B testing, remarketing, whitelisting and weekly optimisation against conversion cost.",
+    "zh-Hant": "為線上交易平台於香港及東南亞市場执行的獲客項目——搜尋及展示廣告、A/B 測試、再營銷、白名單投放，並按週針對轉化成本優化。",
+    "zh-Hans": "为线上交易平台在香港及东南亚市场执行的获客项目——搜索及展示广告、A/B 测试、再营销、白名单投放，并按周针对转化成本优化。"
+  },
+  "results": [
+    {
+      "value": "58%",
+      "label": {
+        "en": "Click-through rate",
+        "zh-Hant": "點擊率",
+        "zh-Hans": "点击率"
+      },
+      "note": null
+    },
+    {
+      "value": "43%",
+      "label": {
+        "en": "Cost per click",
+        "zh-Hant": "每次點擊成本",
+        "zh-Hans": "每次点击成本"
+      },
+      "note": null
+    },
+    {
+      "value": "—",
+      "label": {
+        "en": "Cost per conversion",
+        "zh-Hant": "每次轉化成本",
+        "zh-Hans": "每次转化成本"
+      },
+      "note": {
+        "en": "Metric tracked in the deck; the figure is not legible in the source file",
+        "zh-Hant": "此指標於簡報中有記錄，但原始檔案中的數值無法辨識",
+        "zh-Hans": "此指标于简报中有记录，但原始文件中的数值无法辨识"
+      }
+    }
+  ],
+  "scope": [
+    {
+      "en": "One-stop online acquisition strategy",
+      "zh-Hant": "一站式線上獲客策略",
+      "zh-Hans": "一站式线上获客策略"
+    },
+    {
+      "en": "Campaign development, A/B testing and result monitoring",
+      "zh-Hant": "推廣開發、A/B 測試及成效監控",
+      "zh-Hans": "推广开发、A/B 测试及成效监控"
+    },
+    {
+      "en": "Google Ad products — ad extension and best practice for HK and SEA",
+      "zh-Hant": "Google Ads 產品——廣告延伸功能，結合香港及東南亞最佳做法",
+      "zh-Hans": "Google Ads 产品——广告延伸功能，结合香港及东南亚最佳做法"
+    },
+    {
+      "en": "Remarketing and whitelisting of sensitive cryptocurrency portals",
+      "zh-Hant": "再營銷及加密貨幣相關敏感門戶的白名單投放",
+      "zh-Hans": "再营销及加密货币相关敏感门户的白名单投放"
+    },
+    {
+      "en": "Weekly and monthly reporting against conversion cost",
+      "zh-Hant": "按週及按月提交轉化成本報告",
+      "zh-Hans": "按周及按月提交转化成本报告"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 9",
+  "image": {
+    "src": "/media/cases/atfx-securities-hk/case-atfx.jpg",
+    "alt": {
+      "en": "Mock-up: a Hong Kong commercial district at night, traffic light trails.",
+      "zh-Hant": "樣機：香港商業區夜色，車流光軌。",
+      "zh-Hans": "样机：香港商业区夜色，车流光轨。"
+    },
+    "mockup": true
+  }
+}

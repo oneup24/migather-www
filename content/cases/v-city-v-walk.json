@@ -1,0 +1,61 @@
+{
+  "slug": "v-city-v-walk",
+  "order": 12,
+  "client": "V City & V Walk",
+  "clientLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "travel",
+  "services": [
+    "community",
+    "kol",
+    "creative-content"
+  ],
+  "partnershipSince": {
+    "en": "2021",
+    "zh-Hant": "2021年",
+    "zh-Hans": "2021年"
+  },
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "Hong Kong social management for a New Territories shopping and lifestyle destination — content, live streaming, KOL campaigns and video production.",
+    "zh-Hant": "為新界購物及生活目的地提供的香港社群管理——內容、直播、KOL 項目及影片製作。",
+    "zh-Hans": "为新界购物及生活目的地提供的香港社群管理——内容、直播、KOL 项目及视频制作。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "Facebook and Instagram content and management",
+      "zh-Hant": "Facebook 及 Instagram 內容及管理",
+      "zh-Hans": "Facebook 及 Instagram 内容及管理"
+    },
+    {
+      "en": "Live streaming and closed-group seeding",
+      "zh-Hant": "直播及專屬群組 seeding",
+      "zh-Hans": "直播及专属群组 seeding"
+    },
+    {
+      "en": "KOL campaign and video shooting",
+      "zh-Hant": "KOL 項目及影片拍攝",
+      "zh-Hans": "KOL 项目及视频拍摄"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/HK digital marketing campaign/Agency Credential by Migather Limited - Ecom.pptx",
+  "image": {
+    "src": "/media/cases/v-city-v-walk/case-vcity.jpg",
+    "alt": {
+      "en": "Mock-up: a shopping mall interior under a glass roof.",
+      "zh-Hant": "樣機：玻璃天幕下的購物城內景。",
+      "zh-Hans": "样机：玻璃天幕下的购物城景。"
+    },
+    "mockup": true
+  }
+}

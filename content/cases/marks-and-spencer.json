@@ -1,0 +1,61 @@
+{
+  "slug": "marks-and-spencer",
+  "order": 10,
+  "client": "Marks & Spencer",
+  "clientLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "lifestyle",
+  "services": [
+    "community",
+    "analytics",
+    "creative-content"
+  ],
+  "partnershipSince": {
+    "en": "2019",
+    "zh-Hant": "2019年",
+    "zh-Hans": "2019年"
+  },
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "Hong Kong social media maintenance for an international retailer — account management, content, analytics, strategy planning, plus WhatsApp stickers and viral formats.",
+    "zh-Hant": "為國際零售商提供的香港社群媒體維護——帳戶管理、內容、數據分析、策略規劃，以及 WhatsApp 貼圖及爆款格式。",
+    "zh-Hans": "为国际零售商提供的香港社群媒体维护——账户管理、内容、数据分析、策略规划，以及 WhatsApp 贴图及爆款格式。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "Facebook and Instagram account management and content",
+      "zh-Hant": "Facebook 及 Instagram 帳戶管理及內容",
+      "zh-Hans": "Facebook 及 Instagram 账户管理及内容"
+    },
+    {
+      "en": "Analytics and strategy planning",
+      "zh-Hant": "數據分析及策略規劃",
+      "zh-Hans": "数据分析及策略规划"
+    },
+    {
+      "en": "WhatsApp stickers and viral content formats",
+      "zh-Hant": "WhatsApp 貼圖及爆款內容格式",
+      "zh-Hans": "WhatsApp 贴图及爆款内容格式"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/HK digital marketing campaign/Agency Credential by Migather Limited - Ecom.pptx",
+  "image": {
+    "src": "/media/cases/marks-and-spencer/case-mands.jpg",
+    "alt": {
+      "en": "Mock-up: a retail window display of folded garments in warm light.",
+      "zh-Hant": "樣機：暖光下的零售櫥窗服裝陳列。",
+      "zh-Hans": "样机：暖光下的零售橱窗服装陈列。"
+    },
+    "mockup": true
+  }
+}

@@ -9,6 +9,13 @@ name: Publish the preview site
 on:
   push:
     branches: [main]
+  # The CMS's publish path. The sync workflow commits with the repository's
+  # own token, and GitHub does not raise a `push` event for a push made
+  # with that token — so the sync's completion is what starts this
+  # workflow, and the commit it made is already on `main` by then.
+  workflow_run:
+    workflows: ["Sync the works content"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +23,12 @@ permissions:
 
 jobs:
   publish:
+    # A failed sync must not publish. The sync itself writes nothing when
+    # the sheet is broken, so the site would be republished unchanged — but
+    # the run should say so rather than look like a successful publish.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,6 +39,17 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      - name: Verify the build
+        # The screens: the app compiles, every route renders in every
+        # language, the copy clears the banned-word lists, the compiled case
+        # content is complete, and the sitemap is written.
+        #
+        # This step was missing until the CMS work — a commit carrying a
+        # banned word or a broken route used to reach the published site
+        # without a check. It closes that, for every commit and not only for
+        # the ones the CMS makes.
+        run: npm run verify
 
       - name: Build the preview site
         # Assembles the app at the Pages root, the mock-up screen gallery

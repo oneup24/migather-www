@@ -12,12 +12,30 @@
  */
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
+import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(HERE, '..');
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const BASE = 'http://localhost:4176';
+
+/**
+ * The published cases, read from the compiled content.
+ *
+ * The audit checks the page against the data it is built from: a case that
+ * carries a mock-up flag has to be labelled, and a case that does not has to
+ * be left alone. The flags live in `content/cases/`, so they are read here
+ * rather than hard-coded.
+ */
+function loadCases() {
+  const dir = join(ROOT, 'content', 'cases');
+  return readdirSync(dir)
+    .filter((file) => file.endsWith('.json'))
+    .map((file) => JSON.parse(readFileSync(join(dir, file), 'utf8')))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+}
 
 /**
  * Ask the OS for a free port.
@@ -407,23 +425,41 @@ async function main() {
     }
 
     /* ── 5. The mock-up disclosure is present on every page ─────────── */
+    const cases = loadCases();
+    const mockUpCases = cases.filter((c) => c.image?.mockup);
+
     await goto(`${BASE}/en?capture=1`);
     const footerDisclosure = await evaluate(`
       document.querySelector('footer').textContent.includes('Mock-up imagery')
     `);
-    check('the footer carries the mock-up disclosure', footerDisclosure === true);
+    check(
+      'the footer carries the mock-up disclosure while a mock-up remains',
+      footerDisclosure === (mockUpCases.length > 0),
+      `the footer says ${footerDisclosure}, ${mockUpCases.length} case(s) carry a mock-up`,
+    );
 
     /* The homepage no longer carries case cards — the selected work moved to
        its own page in November 2026 — so the case images are checked there,
        and the banner check below covers the one image left on the homepage. */
     await goto(`${BASE}/en/work?capture=1`);
-    const workTagged = await evaluate(`
-      Array.from(document.querySelectorAll('.frame')).filter((f) => f.querySelector('.mock-up-tag')).length
+    const workTags = await evaluate(`
+      JSON.stringify(
+        Array.from(document.querySelectorAll('a[href*="/work/"]')).map((a) => ({
+          slug: (a.getAttribute('href').split('/work/')[1] || '').split('?')[0],
+          tagged: !!a.querySelector('.mock-up-tag'),
+        }))
+      )
     `);
+    const taggedBySlug = new Map(
+      JSON.parse(workTags).map((entry) => [entry.slug, entry.tagged]),
+    );
+    const wrongTags = cases.filter(
+      (c) => taggedBySlug.get(c.slug) !== Boolean(c.image?.mockup),
+    );
     check(
-      'every work-grid image is tagged as a mock-up',
-      workTagged === 16,
-      `${workTagged} of 16 tagged`,
+      'every work-grid card is tagged exactly when its case is a mock-up',
+      wrongTags.length === 0,
+      wrongTags.map((c) => c.slug).join(', '),
     );
 
     /* Every full-bleed banner — the homepage hero and every inner-page
@@ -507,8 +543,7 @@ async function main() {
         heroIndexCheck.targetsExist === true &&
         // The index follows the order of the sections on the page: how we
         // work sits above the closing call to action, and the selected work
-        // points at its own page since November 2026. (The delivery spine
-        // sits on the page but is not indexed from the hero.)
+        // points at its own page since November 2026.
         JSON.stringify(heroIndexCheck.anchors) === JSON.stringify(['#approach', '#contact']) &&
         heroIndexCheck.routes.length === 1 &&
         heroIndexCheck.routes[0].endsWith('/work'),
@@ -527,6 +562,59 @@ async function main() {
         heroIndexCheck.scrolls.length === 2 &&
         heroIndexCheck.scrolls.every((s) => s.clearOfHeader),
       JSON.stringify(heroIndexCheck.scrolls),
+    );
+
+    /* ── 5e. Every published case ─────────────────────────────────────
+       The launch blocker lives on the case pages: a picture of Hong Kong
+       beside a sourced figure. Each published case therefore has to show
+       its image, name its source, and be labelled as a mock-up exactly when
+       its record says it is one. */
+    const missingImage = [];
+    const missingSource = [];
+    const wrongCaseTag = [];
+
+    for (const record of cases) {
+      await goto(`${BASE}/en/work/${record.slug}?capture=1`);
+      const page = await evaluate(`
+        (() => {
+          const banner = document.querySelector('.page-banner');
+          const image = document.querySelector('.page-banner__image');
+          const source = document.querySelector('.case-source');
+          return {
+            notFound: document.body.textContent.includes('This page is not here'),
+            imageSrc: image ? image.getAttribute('src') : null,
+            imageLoaded: image ? image.naturalWidth > 0 : false,
+            source: source ? source.textContent.replace(/\\s+/g, ' ').trim() : '',
+            tagged: !!(banner && banner.querySelector('.mock-up-tag')),
+          };
+        })()
+      `);
+
+      if (page.notFound || !page.imageSrc || !page.imageLoaded) {
+        missingImage.push(`${record.slug}${page.notFound ? ' (404)' : ''}`);
+      }
+      if (!page.source.includes(record.source.slice(0, 24))) {
+        missingSource.push(record.slug);
+      }
+      if (page.tagged !== Boolean(record.image?.mockup)) {
+        wrongCaseTag.push(record.slug);
+      }
+    }
+
+    check(
+      'every published case shows its image',
+      missingImage.length === 0,
+      missingImage.join(', '),
+    );
+    check(
+      'every published case names its source',
+      missingSource.length === 0,
+      missingSource.join(', '),
+    );
+    check(
+      'a case page is labelled as a mock-up exactly when its record says so',
+      wrongCaseTag.length === 0,
+      wrongCaseTag.join(', '),
     );
 
     /* ── 6. The sector filter ────────────────────────────────────────── */
@@ -556,7 +644,7 @@ async function main() {
     );
     check(
       'the sector filter narrows the grid',
-      filterResult.cards > 0 && filterResult.cards < 16,
+      filterResult.cards > 0 && filterResult.cards < cases.length,
       `${filterResult.cards} cards`,
     );
 
@@ -579,7 +667,7 @@ async function main() {
     `);
     check(
       'every work-grid image loads when scrolled into view',
-      gridImages.total === 16 && gridImages.loaded === 16,
+      gridImages.total === cases.length && gridImages.loaded === cases.length,
       `${gridImages.loaded} of ${gridImages.total} loaded`,
     );
     check(
@@ -599,8 +687,8 @@ async function main() {
     `);
     check(
       'every work-grid image is loaded after scrolling the whole grid',
-      allLoaded === 16,
-      `${allLoaded} of 16 loaded`,
+      allLoaded === cases.length,
+      `${allLoaded} of ${cases.length} loaded`,
     );
   } finally {
     // Reap the whole browser tree, not just the launcher, and wait for the

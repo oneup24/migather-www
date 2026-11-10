@@ -1,0 +1,56 @@
+{
+  "slug": "hang-seng-bank",
+  "order": 7,
+  "client": "Hang Seng Bank",
+  "clientLocal": {
+    "en": "恒生銀行",
+    "zh-Hant": "恒生銀行",
+    "zh-Hans": "恒生銀行"
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "finance",
+  "services": [
+    "creative-content",
+    "kol"
+  ],
+  "partnershipSince": null,
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "A YouTube short-video content series for a Hong Kong bank — market commentary, ESG explainers and cross-border wealth-connectivity updates.",
+    "zh-Hant": "為香港銀行製作的 YouTube 短片系列——市場前瞻、ESG 解讀及跨境理財通資訊。",
+    "zh-Hans": "为香港银行制作的 YouTube 短视频系列——市场前瞻、ESG 解读及跨境理财通资讯。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "債匯前瞻 — market commentary series",
+      "zh-Hant": "債匯前瞻——市場評論系列",
+      "zh-Hans": "债汇前瞻——市场评论系列"
+    },
+    {
+      "en": "ESG 趨勢知多啲 — ESG explainer series",
+      "zh-Hant": "ESG 趨勢知多啲——ESG 解讀系列",
+      "zh-Hans": "ESG 趋势知多啲——ESG 解读系列"
+    },
+    {
+      "en": "跨境理財通市場快訊 — market updates",
+      "zh-Hant": "跨境理財通市場快訊——市場資訊",
+      "zh-Hans": "跨境理财通市场快讯——市场资讯"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 13",
+  "image": {
+    "src": "/media/cases/hang-seng-bank/case-hangseng.jpg",
+    "alt": {
+      "en": "Mock-up: a presenter at a desk in a modern broadcast set.",
+      "zh-Hant": "樣機：現代錄影場景中坐在枱前的講者。",
+      "zh-Hans": "样机：现代录影场景中坐在桌前的讲者。"
+    },
+    "mockup": true
+  }
+}

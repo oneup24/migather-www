@@ -15,7 +15,7 @@ live, in priority order.
 
 ## 0. Blocker — every photograph on the site is placeholder artwork
 
-**No image in v3.0 is client photography.** The 24 photographs in
+**No image in v3.0 is client photography.** The photographs in
 `public/media/` are generated mock-ups: a Hong Kong harbour at night, a forum
 hall, a gallery, a mall atrium, a residential tower at dusk. They are there
 so the layout can be judged at full size.
@@ -34,11 +34,38 @@ directly beside **real, sourced client results**. An unmarked photograph of
 Hong Kong next to a `+38%` figure reads as a photograph of the work that
 produced it.
 
+### The per-case exit
+
+Since the works page became CMS-driven, the mock-up label is a **per-case
+switch**, not a site-wide constant. Every case record carries
+`image.mockup`, and:
+
+| | |
+| --- | --- |
+| `mockup: true` | The `MOCK-UP` tag appears on the card and on the case page, and the alt text starts with `Mock-up: ` / `樣機：` / `样机：`. |
+| `mockup: false` | No tag, no alt prefix, no banner note. The picture is treated as real client photography. |
+
+The footer's standing disclosure and the work-grid note render only while
+**at least one** published case still carries a mock-up. When the last one is
+replaced, both disappear on their own — that is the exit from this blocker,
+and it does not need a code change.
+
+The check is enforced, not left to memory: `npm run check:content` fails the
+build if a mock-up's alt text does not say so (or if a real photograph's alt
+text does), and `npm run audit:dom` fails if a card or a case page carries a
+tag its record does not justify.
+
+The case images and their flag are edited in the CMS form — see
+[`CMS.md`](CMS.md). To replace one by hand: put the file in
+`public/media/cases/<slug>/`, set `image.mockup` to `false` in
+`content/cases/<slug>.json`, and remove the `Mock-up: ` prefix from the alt
+text.
+
 **Action — pick one:**
 
 | Option | What it involves |
 | --- | --- |
-| **A. Replace with real photography** *(recommended)* | Commission or source real client photography, drop the files into `public/media/`, and point the manifest entries at them (`src/data/media.js`). The alt text and the disclosures stay — they are still correct. |
+| **A. Replace with real photography** *(recommended)* | Commission or source real client photography, upload it through the CMS form, and flip the case's mock-up flag. The tag and the alt prefix disappear for that case; the footer disclosure shrinks as the last one goes. |
 | **B. Remove the imagery** | Drop the images and let the type carry the pages. The site still works; the hero becomes a typographic field and the work grid becomes a list. |
 | **C. Ship as-is with a visible banner** | Acceptable only if the site is clearly marked as a design preview in every channel it appears. **Not acceptable for a live client-facing site.** |
 
@@ -192,8 +219,8 @@ The build output is a static site in `dist/`. It needs:
   check the first paint on a slow connection and consider `font-display:
   swap` behaviour before launch.
 
-`sitemap.xml` is generated with 75 URLs (9 routes × 3 locales, plus 16 case
-pages × 3 locales). Regenerate it if cases are added:
+`sitemap.xml` is generated with 150 URLs (9 routes + 16 case pages + 25
+service pages, in 3 locales). Regenerate it if cases are added:
 
 ```bash
 node scripts/build-sitemap.mjs
@@ -210,9 +237,16 @@ npm run verify
 Must pass clean:
 
 - `npm run build` — compiles
-- `npm run check:routes` — 37 route renders pass across 3 locales, and the
+- `npm run check:routes` — 49 route renders pass across 3 locales, and the
   rendered text of every route clears the banned-term screen
-- `npm run check:copy` — no banned words in any translatable string
+- `npm run check:copy` — no banned words in any translatable string, in the
+  data modules or in the compiled case files
+- `npm run check:content` — every published case has an image, a source, and
+  alt text in all three languages
+- `npm run build:sitemap` — the sitemap is written from the published cases
+
+The publish workflow runs `npm run verify` before it deploys, so a commit
+carrying a banned word or a broken route cannot reach the published site.
 
 Then, in the browser:
 
@@ -225,3 +259,5 @@ Then, in the browser:
 - [ ] A wrong URL — the 404 page, in the right language
 - [ ] Mobile viewport — drawer menu opens, language switcher works, no horizontal scroll
 - [ ] **Every `MOCK-UP` tag still carries a real image behind it** — no empty frames
+- [ ] `/en/work` — the footer's mock-up disclosure appears only while a
+      published case still carries generated artwork

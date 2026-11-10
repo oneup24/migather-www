@@ -1,0 +1,61 @@
+{
+  "slug": "chinachem",
+  "order": 15,
+  "client": "Chinachem",
+  "clientLocal": {
+    "en": "信和集團",
+    "zh-Hant": "信和集團",
+    "zh-Hans": "信和集團"
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "properties",
+  "services": [
+    "community",
+    "analytics",
+    "paid-media"
+  ],
+  "partnershipSince": {
+    "en": "2023",
+    "zh-Hant": "2023年",
+    "zh-Hans": "2023年"
+  },
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "Mainland China social media maintenance for a Hong Kong property group — WeChat account management, content, analytics and strategy planning.",
+    "zh-Hant": "為香港地產集團提供的中國內地社群媒體維護——微信帳戶管理、內容、數據分析及策略規劃。",
+    "zh-Hans": "为香港地产集团提供的中国内地社群媒体维护——微信账户管理、内容、数据分析及策略规划。"
+  },
+  "results": [],
+  "scope": [
+    {
+      "en": "WeChat content and management",
+      "zh-Hant": "微信內容及管理",
+      "zh-Hans": "微信内容及管理"
+    },
+    {
+      "en": "Analytics and strategy planning",
+      "zh-Hant": "數據分析及策略規劃",
+      "zh-Hans": "数据分析及策略规划"
+    },
+    {
+      "en": "Paid social advertising",
+      "zh-Hant": "付費社群廣告",
+      "zh-Hans": "付费社群广告"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/HK digital marketing campaign/Social Retainer Showcase.pptx — slide 4",
+  "image": {
+    "src": "/media/cases/chinachem/case-chinachem.jpg",
+    "alt": {
+      "en": "Mock-up: residential tower facades at dusk, seen from below.",
+      "zh-Hant": "樣機：黃昏時分仰拍的住宅樓立面。",
+      "zh-Hans": "样机：黄昏时分仰拍的住宅楼立面。"
+    },
+    "mockup": true
+  }
+}

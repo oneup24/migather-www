@@ -1,0 +1,103 @@
+{
+  "slug": "11-skies-gba-forum",
+  "order": 1,
+  "client": "11 SKIES",
+  "clientLocal": {
+    "en": "11 天空之城",
+    "zh-Hant": "11 天空之城",
+    "zh-Hans": "11 天空之城"
+  },
+  "projectLocal": {
+    "en": "",
+    "zh-Hant": "",
+    "zh-Hans": ""
+  },
+  "sector": "properties",
+  "services": [
+    "paid-media",
+    "performance-media",
+    "seo"
+  ],
+  "partnershipSince": {
+    "en": "2021",
+    "zh-Hant": "2021年",
+    "zh-Hans": "2021年"
+  },
+  "featured": true,
+  "published": true,
+  "summary": {
+    "en": "A Greater Bay Area business forum campaign built to drive reach, site traffic and live-stream registrations for a cross-border shopping complex.",
+    "zh-Hant": "大灣區商務論壇項目，為跨境購物城帶來曝光、網站流量及直播報名人數。",
+    "zh-Hans": "大湾区商务论坛项目，为跨境购物城带来曝光、网站流量及直播报名人数。"
+  },
+  "results": [
+    {
+      "value": "+79%",
+      "label": {
+        "en": "Impressions vs plan",
+        "zh-Hant": "曝光量對比計劃",
+        "zh-Hans": "曝光量对比计划"
+      },
+      "note": null
+    },
+    {
+      "value": "+45%",
+      "label": {
+        "en": "Clicks vs plan",
+        "zh-Hant": "點擊量對比計劃",
+        "zh-Hans": "点击量对比计划"
+      },
+      "note": null
+    },
+    {
+      "value": "+55%",
+      "label": {
+        "en": "Average page views",
+        "zh-Hant": "平均頁面瀏覽量",
+        "zh-Hans": "平均页面浏览量"
+      },
+      "note": null
+    },
+    {
+      "value": "3,000+",
+      "label": {
+        "en": "Live-stream registrations",
+        "zh-Hant": "直播活動報名人數",
+        "zh-Hans": "直播活动报名人数"
+      },
+      "note": null
+    }
+  ],
+  "scope": [
+    {
+      "en": "Maimai display advertising with anti-fraud traffic filtering",
+      "zh-Hant": "脈脈展示廣告，結合反欺詐流量過濾",
+      "zh-Hans": "脉脉展示广告，结合反欺诈流量过滤"
+    },
+    {
+      "en": "China DSP programmatic display for repeat quality traffic",
+      "zh-Hant": "中國 DSP 程序化展示，累積優質流量",
+      "zh-Hans": "中国 DSP 程序化展示，累积优质流量"
+    },
+    {
+      "en": "Baidu and Google SEM, plus LinkedIn advertising",
+      "zh-Hant": "百度及 Google 搜尋廣告，以及 LinkedIn 廣告",
+      "zh-Hans": "百度及 Google 搜索广告，以及 LinkedIn 广告"
+    },
+    {
+      "en": "Campaign site production and tracking",
+      "zh-Hant": "推廣網站製作及追蹤設定",
+      "zh-Hans": "推广网站制作及追踪设置"
+    }
+  ],
+  "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 16",
+  "image": {
+    "src": "/media/cases/11-skies-gba-forum/case-forum.jpg",
+    "alt": {
+      "en": "Mock-up: a large business forum auditorium, stage lit, audience in silhouette.",
+      "zh-Hant": "樣機：大型商業論壇會場，台上燈光明亮，觀眾成剪影。",
+      "zh-Hans": "样机：大型商业论坛会场，台上灯光明亮，观众成剪影。"
+    },
+    "mockup": true
+  }
+}

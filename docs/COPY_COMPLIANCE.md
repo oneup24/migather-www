@@ -11,20 +11,26 @@ There are **two** screens, and they share one word list.
 
 ```bash
 npm run check:copy     # the source: every translatable string in src/data/
+                       #         and in the compiled case files
 npm run check:routes   # the rendered text: every route, in every locale
 ```
 
 `check:copy` scans the data modules, which is where the translatable copy
-lives. `check:routes` renders all 37 routes (9 pages + 16 cases + the 404,
-across EN / 繁 / 简) and scans the **text the reader actually sees**. The
-second screen is what catches a banned term written straight into a component
+lives, **and the compiled case files** in `content/cases/*.json` — the case
+copy is published from there, so it is screened there. A banned term typed
+into the CMS form fails the build before the case is published, not after.
+
+`check:routes` renders all 49 routes (9 pages + 16 cases + the 404, across
+EN / 繁 / 简) and scans the **text the reader actually sees**. The second
+screen is what catches a banned term written straight into a component
 instead of a data module — the case the first screen structurally cannot see.
 
 Both are part of `npm run verify`, so a banned word cannot reach production
-without failing the check first.
+without failing the check first. The publish workflow runs `npm run verify`
+before it deploys.
 
-The current state of the site: **clean** — 8 data modules and 37 rendered
-routes, no hits.
+The current state of the site: **clean** — 9 data modules, 16 compiled case
+files and 49 rendered routes, no hits.
 
 ### How the screens decide
 
@@ -50,6 +56,27 @@ A screen that always passes is worth nothing, so it is checked against a
 deliberate violation: injecting `We are the leading agency in Asia.` into a
 rendered component makes all three homepages fail. It was confirmed to do so,
 and the probe was removed.
+
+---
+
+## 1b. The source field is enforced by the build
+
+Every case carries the deck and slide it came from. That was always the rule
+— see `docs/CMS.md` and the `source` field on every case — and it is now
+**enforced by the build** rather than held by convention:
+
+- `npm run check:content` fails if a published case has no source.
+- The CMS sync refuses to compile a published case with no source, and names
+  the case and the column.
+- The Apps Script form will not publish a case whose source is empty.
+
+The same three checks cover the image and the alt text: a published case must
+have an image, the file must be in the repository, and the alt text must be
+filled in for all three languages. A mock-up says so in its alt text; a real
+photograph's alt text must not carry the prefix.
+
+So the rule "every figure carries its source" is no longer something a
+reviewer has to remember to check. It is a build failure.
 
 ---
 
@@ -203,13 +230,20 @@ That is a design decision, not a copy decision, and it is documented in
 
 ## 6. Nothing was inherited by accident
 
-The Chinese copy in `services.js`, `cases.js` and `clients.js` is
+The Chinese copy in `services.js`, the compiled case files and `clients.js` is
 unchanged from v1.0 and v2.0. `content.js` has been touched — the hero
 eyebrow, headline and lede were rewritten in November 2026, the third
 principle now counts three markets rather than two, and the service pages
 and the mega menu brought their own labels — but each change was made
 deliberately, in both scripts, and the zh-Hant and zh-Hans strings remain
 separately authored, never machine-converted between them.
+
+**The cases moved, they did not change.** `src/data/cases.js` used to hold
+the sixteen cases; they now live in `content/cases/*.json`, one file per
+case, written by the CMS sync. The migration was lossless — the same cases,
+the same copy, the same figures, the same sources, byte for byte — and the
+round trip through the sheet was proved to be lossless too. The Chinese copy
+in the case files is the Chinese copy that was there before.
 
 The new service copy makes no claim either: it is the name of each service
 line, the goal it sits under, and the labels around it — "Work in this
