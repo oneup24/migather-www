@@ -138,6 +138,17 @@ opens to "the editor allow-list is: (empty)" and refuses everyone.
    row, separated by commas. The seed also writes the `sectors` and
    `services` rows there — the site's own taxonomy, so the form cannot offer
    a service or a sector the site does not have.
+
+   The list can be managed from the command line instead of by hand:
+
+   ```bash
+   npm run cms:editors -- --list
+   npm run cms:editors -- --add someone@example.com
+   npm run cms:editors -- --remove someone@example.com
+   ```
+
+   The script reads the row on every request, so a change takes effect
+   immediately — nothing needs redeploying.
 5. Deploy as a web app: execute as you, access "Anyone with a Google
    account". The allow-list in the sheet is what actually decides who may
    edit — the deploy setting is only there so the script can read
@@ -304,6 +315,8 @@ so.
 | `npm run cms:seed` | The one-off migration into the Sheet and Drive. `--fixtures <dir>` writes the tabs locally instead. |
 | `npm run cms:sync` | The ongoing pull: Sheet + Drive → the compiled content. `--fixtures <dir>` reads a local copy; `--dry-run` writes nothing. |
 | `npm run check:content` | Checks the compiled content: every published case has an image, a source, and alt text in all three languages. |
+| `npm run cms:preview` | Renders the editor form locally with mock data, so it can be reviewed without a Google project. |
+| `npm run cms:editors` | Shows, adds to or removes from the editor allow-list in the sheet's `settings` tab. |
 
 The library the three share is in `tools/cms/lib/`: `schema.mjs` (the
 contract), `records.mjs` (records ↔ rows), `compile.mjs` (the validator and
