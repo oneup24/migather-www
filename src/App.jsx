@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import AboutPage from './pages/AboutPage';
+import AdminPage from './pages/AdminPage';
 import ServiceDetailPage from './pages/ServiceDetailPage';
 import ServicesPage from './pages/ServicesPage';
 import CareersPage from './pages/CareersPage';
@@ -36,6 +37,10 @@ export const pageRoutes = [
   { path: 'careers', element: <CareersPage /> },
   { path: 'contact', element: <ContactPage /> },
   { path: 'legal/:doc', element: <LegalPage /> },
+  // The works editor. Not linked from the navigation, marked noindex, and
+  // useless to a stranger: the sheet itself only opens for the agency
+  // account and the service account.
+  { path: 'admin', element: <AdminPage /> },
 ];
 
 /** The page table as route elements, ready to be dropped into a <Routes>. */

@@ -1,186 +1,217 @@
-# The works CMS — Google Sheet + Drive, behind an Apps Script form
+# The works CMS — a form on the website, a sheet behind it
 
 > The works page is the only part of the site an editor changes themselves.
 > Everything else — the client wall, the services menu, the offices, the
 > hero, the credentials — stays hand-edited in the repository.
 
-This is the operating manual: how the pieces fit, how to set it up, what the
-editor sees, and what happens when something is wrong.
+This is the operating manual: how it works, how to set it up, and what to do
+when something goes wrong.
 
 ---
 
-## 1. The shape of it
+## 1. What the editor sees
+
+One address. One button.
 
 ```
-  Google Sheet (9 tabs × 3 locales)   Google Drive (a folder per case)
-            │                                   │
-            └──────────────┬────────────────────┘
-                           ▼
-             Apps Script web app  ── Save ──► writes Sheet + Drive
-                             └─ Save & publish ──► repository_dispatch
-                           ▼
-   GitHub Actions: sync-cases ── pull ── validate ── compile ── commit to main
-                           ▼
-   publish-preview workflow ── builds from the committed files ──► gh-pages
+https://migather.com/en/admin
 ```
 
-Two properties fall out of this shape, and both matter:
+- **Sign in with Google.** Their own Migather account. Nothing is stored —
+  closing the tab forgets the token.
+- **Pick a case, pick a language, fill in the form.** The form is pre-filled
+  from the sheet, so it shows the copy as it stands today.
+- **Save.** The sheet is written as them. That is it — the copy is saved.
+- **Publish to the site.** The site rebuilds. The page says whether it
+  worked, and says so honestly: it watches the build and reports what
+  happened, rather than saying "publishing" and leaving you to guess.
 
-- **The build never depends on Google.** `content/cases/*.json` and
-  `public/media/cases/**` are committed. If Google is down or the sheet is
-  malformed, the sync fails, nothing is committed, and the site keeps serving
-  the last good content.
-- **The content stays in git.** Every published change is a commit:
-  reviewable, revertible, and screened by the copy screen like any other
-  copy.
-
-**How the publish actually reaches the site.** The sync workflow commits with
-the repository's own token, and GitHub does not raise a `push` event for a
-push made with that token. So the publish workflow listens for the *sync's
-completion* (`workflow_run`) as well as for pushes to `main`. By the time the
-sync workflow finishes, its commit is already on `main`, and the publish
-workflow builds from it — after running `npm run verify`, which it now does
-before every deploy.
-
-If the agency would rather a change be reviewed before it goes live, the
-sync workflow is where that changes: push a branch and open a pull request
-instead of pushing to `main`.
+No git. No commit. No workflow. No Actions tab. The editor never has to know
+any of that exists.
 
 ---
 
-## 2. Setting it up
+## 2. How it works
 
-**Two actors, two different permissions.** It is worth being clear about this
-before you start, because it is the part that usually goes wrong.
+```
+  /admin on the website
+    │
+    ├─ sign in ───────────► Google Identity Services
+    │                        (an access token, in memory, for the tab)
+    │
+    ├─ read the copy ─────► Google Sheets API, as the editor
+    ├─ write the copy ────► Google Sheets API, as the editor
+    └─ the picture ───────► a form post to the Apps Script
+                             (it runs as the editor, and has storage quota)
+                                │
+                                └─ the Drive folder
 
-| | Who it is | What it needs |
-| --- | --- | --- |
-| **The form** (the Apps Script) | The person who deployed it — the script runs *as them* | **Editor** on the Sheet and the Drive folder, because it writes to both on the editor's behalf |
-| **The sync** (GitHub Actions) | A service account | **Reader** on the Sheet, **reader** on the Drive folder, because it only pulls |
+  Publish to the site
+    └─ a form post to the Apps Script
+         └─ GitHub: repository_dispatch
+              └─ the sync workflow: pull → validate → compile → commit
+                   └─ the publish workflow: verify → build → deploy
+```
 
-So the deploying person needs edit rights on the sheet, and the service
-account needs read rights. Give the service account Editor too if you would
-rather not think about it — it changes nothing the sync does.
+### Why there is a script at all
 
-### 2.1 The Sheet
+Only two things, and neither can happen in the browser:
 
-Create a Google Sheet with **nine content tabs** plus a `settings` tab:
+1. **The picture.** A service account has no Drive storage quota, and a
+   browser cannot write to Drive without a Drive scope on the editor's
+   account — which would mean asking the editor for access to their entire
+   Drive. So the picture is posted to the Apps Script, which runs as the
+   editor and has quota. The editor grants one scope: `spreadsheets`.
+
+2. **The publish.** It needs a GitHub token, and a token must not live in a
+   browser. The script holds it in its properties and fires the workflow.
+
+The browser cannot read a reply from the Apps Script — Google sends no CORS
+headers — so the script reports back by writing into the sheet's `settings`
+tab, where the editor's page can read it. That is how "Published" is a
+fact rather than a hope.
+
+### Why the public pages are still a static build
+
+The site is served from GitHub Pages, which serves files. A page cannot ask
+the Sheets API for content when a reader opens it. So the sheet is pulled at
+build time, committed, and built — and the committed copy is what the
+public sees.
+
+That means:
+
+- The public pages are fast and are up even if Google is down.
+- A published change is a commit: reviewable, revertible, and screened by
+  the copy screen like any other copy.
+- The site takes a minute or two to catch up after a publish. That is the
+  price of a static site, and it is the right price for a marketing site.
+
+---
+
+## 3. Setting it up
+
+### 3.1 The sheet
+
+One sheet, **nine content tabs** plus a `settings` tab:
 
 | Tab | Holds |
 | --- | --- |
 | `cases_EN` `cases_ZH-HANT` `cases_ZH-HANS` | one row per case, one locale per tab |
 | `results_EN` `results_ZH-HANT` `results_ZH-HANS` | one row per result |
 | `scope_EN` `scope_ZH-HANT` `scope_ZH-HANS` | one row per scope line |
-| `settings` | the editor allow-list, the repository coordinates, and the vocabulary the form offers |
+| `settings` | the editor allow-list, the repository coordinates, and the last publish |
 
-The exact columns are in `tools/cms/lib/schema.mjs`, and the seed writes the
-header rows for you — run the seed before editing anything by hand.
+The columns are in `tools/cms/lib/schema.mjs`, and the seed writes the
+header rows for you.
 
 **Keep the sheet private.** It holds unpublished drafts and client names.
+Only the agency account and the service account should be able to open it —
+that sharing is the real gate, and the allow-list is a friendly layer on
+top.
 
-### 2.2 The Drive folder
+### 3.2 The Drive folder
 
 One folder, with one sub-folder per case, named after the case's slug. The
-image file sits inside it. The slug is the folder name, so the sync finds
-the folder without a lookup table.
+picture sits inside it. The slug is the folder name, so the sync finds the
+picture without a lookup table.
 
-**The service account must be able to see it.** A folder that is private to
-one person's Drive is invisible to the service account — the Drive API
-answers `404 File not found`, and `files.list` returns an empty list rather
-than an error, so the symptom is easy to misread as "the folder is empty".
-Share the folder with the service account's address, and with the Google
-account that deploys the Apps Script, as editors.
+### 3.3 The service account
 
-**Turn off "anyone with the link" on the Sheet.** A Google Sheet created
-through the console sometimes carries a link-sharing permission with the
-role *writer*. On the works sheet that is not acceptable: anyone with the
-link could change the copy that gets published. Replace it with explicit
-shares — the service account and the deploying account as editors.
-
-### 2.3 The service account
-
-1. In the Google Cloud console, create a service account and download a JSON
-   key.
-2. **Enable the two APIs** on the project — *APIs & Services → Library* →
-   **Google Sheets API** and **Google Drive API** → Enable. A fresh project
-   has neither, and the failure is a `403` that says so only obliquely:
-   *"Google Sheets API has not been used in project … before or it is
-   disabled."*
+1. Create a service account and download a JSON key.
+2. **Enable the Google Sheets API and the Google Drive API** on the project.
+   A fresh project has neither, and the failure is a `403` that says so only
+   obliquely.
 3. Share the Sheet and the Drive folder with the service account's address
-   (`…@….iam.gserviceaccount.com`) — as an editor on the Sheet, and as a
-   file/folder viewer on Drive.
+   — as an editor on the sheet (the sync writes to it) and a viewer on the
+   Drive folder.
 4. Add the key as a repository secret named `GCP_SERVICE_ACCOUNT_JSON`, and
    the sheet and folder ids as `CMS_SPREADSHEET_ID` and
    `CMS_DRIVE_FOLDER_ID`.
 
 The key never enters the repository and never reaches a browser.
 
-### 2.4 The Apps Script
+### 3.4 The OAuth client
 
-**Run the seed first** (§2.6). The form's allow-list lives in the sheet's
-`settings` tab, so a form deployed against a sheet with no `settings` tab
-opens to "the editor allow-list is: (empty)" and refuses everyone.
+The editor signs in with their own Google account, so the sheet is written
+as *them*. That needs an OAuth client id.
 
-1. Create a standalone Apps Script project, or a bound one on the Sheet.
-2. Paste `apps-script/Code.gs` into `Code.gs` and `apps-script/Index.html`
-   into `Index.html`.
-3. Set the script properties (Project Settings → Script properties):
+**Google Cloud console → your project → APIs & Services → Credentials →
+Create credentials → OAuth client ID → Web application:**
 
-   | Property | Value |
-   | --- | --- |
-   | `SPREADSHEET_ID` | the sheet id |
-   | `DRIVE_FOLDER_ID` | the Drive folder id |
-   | `GITHUB_TOKEN` | a token with write access to the repository |
-   | `GITHUB_OWNER` | the repository owner |
-   | `GITHUB_REPO` | the repository name |
+- **Name**: `Migather works editor`
+- **Authorised JavaScript origins**: the site's origin —
+  `https://oneup24.github.io` now, and `https://migather.com` when the
+  domain is live.
+- **Authorised redirect URIs**: leave empty.
 
-4. Put the editor email addresses in the `settings` tab, on the `editors`
-   row, separated by commas. The seed also writes the `sectors` and
-   `services` rows there — the site's own taxonomy, so the form cannot offer
-   a service or a sector the site does not have.
+Copy the client id. It is public — it ends up in the page, like every
+OAuth app's — and it is set as a repository **variable**, not a secret:
 
-   The list can be managed from the command line instead of by hand:
+| Name | Value |
+| --- | --- |
+| `VITE_CMS_CLIENT_ID` | the client id |
+| `VITE_CMS_SHEET_ID` | the sheet id |
+| `VITE_CMS_SCRIPT_URL` | the Apps Script web-app address |
 
-   ```bash
-   npm run cms:editors -- --list
-   npm run cms:editors -- --add someone@example.com
-   npm run cms:editors -- --remove someone@example.com
-   ```
+Repository **Settings → Secrets and variables → Actions → Variables**.
 
-   The script reads the row on every request, so a change takes effect
-   immediately — nothing needs redeploying.
-5. Deploy as a web app: execute as you, access "Anyone with a Google
-   account". The allow-list in the sheet is what actually decides who may
-   edit — the deploy setting is only there so the script can read
-   `Session.getActiveUser()`.
+### 3.5 The Apps Script
 
-### 2.5 Seeding the sheet
+One script, two jobs. Create a standalone Apps Script project, paste
+`apps-script/Code.gs`, and set the script properties:
+
+| Property | Value |
+| --- | --- |
+| `SPREADSHEET_ID` | the sheet id |
+| `DRIVE_FOLDER_ID` | the Drive folder id |
+| `GITHUB_TOKEN` | a token with write access to the repository |
+| `GITHUB_OWNER` | the repository owner |
+| `GITHUB_REPO` | the repository name |
+
+The repository coordinates may also sit on the sheet's `settings` tab, on
+the `github_owner` and `github_repo` rows, which take precedence.
+
+Deploy as a web app: **execute as you**, access **"Anyone with a Google
+account"**. The browser posts here from a hidden frame, which makes it a
+first-party request for script.google.com and therefore carries the
+editor's Google session.
+
+### 3.6 Seeding the sheet
 
 ```bash
 node tools/cms/seed-sheet.mjs \
   --spreadsheet <sheet-id> \
   --drive-folder <folder-id> \
-  --credentials ./service-account.json
+  --credentials ./service-account.json \
+  --editors "you@migather.com" \
+  --github-owner oneup24 --github-repo migather-www
 ```
 
-This writes the 16 existing cases into the sheet and their images into
-Drive. It is re-runnable and it never clobbers: a case whose slug is already
-in a tab is left alone.
+This writes the nine tabs with their headers, pushes the cases in all three
+languages, and writes the settings tab. It is re-runnable and never
+clobbers: a case whose slug is already in a tab is left alone.
 
-Check it worked without writing to Google first:
+> The service account cannot upload to Drive — it has no storage quota. The
+> 16 pictures were uploaded by hand; the editor's browser now hands new ones
+> to the Apps Script, which runs as the editor and has quota.
+
+### 3.7 The editor allow-list
+
+The `editors` row of the `settings` tab, comma-separated. It can be
+managed from the command line:
 
 ```bash
-node tools/cms/seed-sheet.mjs --fixtures ./fixtures
-node tools/cms/sync-cases.mjs --fixtures ./fixtures --dry-run
+npm run cms:editors -- --list
+npm run cms:editors -- --add someone@migather.com
+npm run cms:editors -- --remove someone@migather.com
 ```
 
-The second command must report every case compiled cleanly. If it does, the
-migration is lossless — the same cases went into the sheet as rows and come
-back out as byte-identical case files.
+The script reads the row on every request, so a change takes effect
+immediately. Nothing needs redeploying.
 
 ---
 
-## 3. The content contract
+## 4. The content contract
 
 ### `cases_<locale>` — one row per case
 
@@ -190,7 +221,7 @@ back out as byte-identical case files.
 | `client` | text | e.g. `Huatai Finance HK`. The same in every language. |
 | `clientLocal` | text | e.g. `華泰證券`. Shown under the client name. |
 | `projectLocal` | text | Optional. |
-| `sector` | dropdown | `finance` `properties` `travel` `luxury` `lifestyle` — the keys in `src/data/sectors.js`. |
+| `sector` | dropdown | The keys in `src/data/sectors.js`. |
 | `services` | multi-select | The service keys from `src/data/services.js`, comma separated. This is the "category" field. |
 | `partnershipSince` | text | e.g. `July 2021` / `2021年7月`. |
 | `summary` | long text | The case summary. |
@@ -204,7 +235,8 @@ back out as byte-identical case files.
 The locale-independent columns (`slug`, `client`, `sector`, `services`,
 `source`, `image`, `mockup`, `featured`, `published`) are repeated in all
 three tabs. **The sync fails the build if they disagree** — that is the
-check that catches a client name edited in one language only.
+check that catches a client name edited in one language only. The editor's
+page writes them to all three, so they cannot drift by accident.
 
 ### `results_<locale>` — one row per result
 
@@ -219,36 +251,12 @@ check that catches a client name edited in one language only.
 
 ```
 content/cases/<slug>.json        one file per case, all three locales merged
-public/media/cases/<slug>/<file> the image, downloaded from Drive
+public/media/cases/<slug>/<file> the picture, downloaded from Drive
 ```
 
 `src/data/cases.js` is a loader over those files and keeps exporting
-`sectors` and `getCase`. The image travels with the case: the record
+`sectors` and `getCase`. The picture travels with the case: the record
 carries `image: { src, alt: { en, zh-Hant, zh-Hans }, mockup }`.
-
----
-
-## 4. What the editor sees
-
-The form is one case, one language at a time.
-
-- **The case picker** lists every case with how many of its three languages
-  are ready (`2 of 3 languages`) and whether it is published or a draft.
-- **The fields** are the columns above, for the selected language only. The
-  locale-independent fields are written to all three tabs by the script, so
-  they cannot drift by accident.
-- **The categories** are a set of checkboxes — the 25 service lines of the
-  site's own menu, read from the sheet's `settings` tab.
-- **The image** is uploaded from the browser as base64 and saved into the
-  case's Drive folder.
-- **Save** stores the case as a draft.
-- **Save & publish** stores the case, sets `published: true` on every tab
-  and fires the `repository_dispatch` that starts the rebuild. It only
-  publishes when all three languages are ready — otherwise the case stays a
-  draft and the form says how many languages are ready.
-
-The GitHub token lives in the script's properties. It is never in the
-repository and never in the browser.
 
 ---
 
@@ -260,7 +268,7 @@ The sync fails the build, with the case and the column named, on:
 - an unknown `sector` or service key;
 - a duplicate slug, or a slug that is not a valid route id;
 - a published case with no `source`;
-- a published case with no image;
+- a published case with no picture;
 - a case whose locale-independent fields disagree across the tabs;
 - a published case missing from one of the locale tabs;
 - a published case whose copy is only partly filled in one language;
@@ -275,19 +283,19 @@ A draft case is allowed to be unfinished. That is what a draft is for.
 
 | What breaks | What happens |
 | --- | --- |
-| Google is down, or the sheet is malformed | The sync fails, nothing is committed, the site keeps the last good content. The editor sees the error in the sync output. |
-| A case is saved with a banned word | The copy screen fails the build, the site does not publish. The editor sees it in the sync output. |
-| A published case has no source, or no image | The sync refuses to compile it and names the case and the column. |
-| One language is filled and the others are not | The case is not published; it stays a draft. The form shows "1 of 3 languages ready". |
-| The editor and the Chinese scripts | The form edits one locale per session, and the sync rejects a case whose locale-independent fields disagree between tabs. |
-| A real photograph replaces a mock-up | The flag flips, the `MOCK-UP` tag and the `Mock-up: ` alt prefix disappear for that case, and the footer's standing disclosure shrinks. |
-| The workflow cannot push to `main` | The commit fails. Either the repository has branch protection on `main` — in which case switch the sync workflow to a branch and a pull request — or the workflow needs `contents: write`, which it has. |
+| The editor signs in but sees "not on the editor list" | The `editors` row in the sheet. Add the address. |
+| The editor signs in and the case list is empty | The sheet could not be read. Check that the account has access — the sheet's sharing is the gate. |
+| "The sheet could not be written" | The token's scope was not granted, or the account has no edit access to the sheet. |
+| The picture did not appear | The Apps Script could not save it. The sync will fail and name the case. Re-upload. |
+| "The build did not succeed" | The page is reporting a failed build. Open the Actions tab on GitHub to see why — usually a banned word or a missing source. |
+| "The build did not start — the GitHub token may have expired" | The token in the Apps Script's properties has expired. Make a new one. |
+| Nothing happens after "Published" | The build ran but the deploy is still going. The publish workflow runs after the sync workflow; give it a minute or two. |
 
 ---
 
 ## 7. Reviewing a published change
 
-Every published change is a commit. To review one:
+Every published change is a commit:
 
 ```bash
 git log --oneline -- content/cases
@@ -295,15 +303,13 @@ git show <commit> -- content/cases
 ```
 
 The diff shows the copy that changed, in the three languages, and nothing
-else. To undo it, revert the commit and the site publishes the previous
-content.
+else. To undo it, revert the commit and publish again.
 
-The screens that a change has to pass are `npm run verify` — the route
-renders, the copy screen over the data modules *and* the compiled case
-files, the content check, and the sitemap — plus `npm run audit:dom`, which
-drives the real page and checks that every published case shows its image,
-names its source, and is labelled as a mock-up exactly when its record says
-so.
+The screens a change has to pass are `npm run verify` — the route renders,
+the copy screen over the data modules *and* the compiled case files, the
+content check, and the sitemap — plus `npm run audit:dom`, which drives the
+real page and checks that every published case shows its picture, names its
+source, and is labelled as a mock-up exactly when its record says so.
 
 ---
 
@@ -314,10 +320,11 @@ so.
 | `npm run cms:migrate` | The one-off migration: the pre-CMS data modules into `content/cases/*.json` and `public/media/cases/`. |
 | `npm run cms:seed` | The one-off migration into the Sheet and Drive. `--fixtures <dir>` writes the tabs locally instead. |
 | `npm run cms:sync` | The ongoing pull: Sheet + Drive → the compiled content. `--fixtures <dir>` reads a local copy; `--dry-run` writes nothing. |
-| `npm run check:content` | Checks the compiled content: every published case has an image, a source, and alt text in all three languages. |
-| `npm run cms:preview` | Renders the editor form locally with mock data, so it can be reviewed without a Google project. |
-| `npm run cms:editors` | Shows, adds to or removes from the editor allow-list in the sheet's `settings` tab. |
-| `npm run cms:test` | Runs the Apps Script against a mocked sheet — a new case, an edited case, the publish rule and the allow-list. |
+| `npm run cms:preview` | Renders the editor page locally with mock data, so it can be reviewed without a Google project. |
+| `npm run cms:editors` | Shows, adds to or removes from the editor allow-list. |
+| `npm run cms:test` | Runs the Apps Script against a mocked Drive and a mocked GitHub. |
+| `npm run cms:test:page` | Runs the editor page against mocked Google APIs. |
+| `npm run check:content` | Checks the compiled content: every published case has a picture, a source, and alt text in all three languages. |
 
 The library the three share is in `tools/cms/lib/`: `schema.mjs` (the
 contract), `records.mjs` (records ↔ rows), `compile.mjs` (the validator and
@@ -325,5 +332,4 @@ the compiler), `google.mjs` (the APIs), `vocab.mjs` (the sectors and the
 service keys).
 
 There are no npm dependencies: the service account signs its own JWT with
-`node:crypto`. The only external tool is Pillow, which resizes the images
-the editor uploads.
+`node:crypto`. The only external tool is Pillow, which resizes the pictures.

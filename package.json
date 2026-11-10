@@ -21,9 +21,10 @@
     "cms:migrate": "node tools/cms/migrate-content.mjs",
     "cms:seed": "node tools/cms/seed-sheet.mjs",
     "cms:sync": "node tools/cms/sync-cases.mjs",
-    "cms:preview": "node tools/cms/preview-form.mjs",
+    "cms:preview": "node tools/cms/preview-admin.mjs",
     "cms:editors": "node tools/cms/editors.mjs",
-    "cms:test": "node tools/cms/test-apps-script.mjs"
+    "cms:test": "node tools/cms/test-apps-script.mjs",
+    "cms:test:page": "node tools/cms/test-admin-page.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",

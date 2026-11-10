@@ -37,6 +37,9 @@ npm run serve        # build + preview → http://localhost:4176
 | `npm run cms:migrate` | The one-off migration: the pre-CMS data modules into `content/cases/*.json`. |
 | `npm run cms:seed` | The one-off migration into the Google Sheet and Drive. |
 | `npm run cms:sync` | The ongoing pull: Sheet + Drive → the compiled content. |
+| `npm run cms:preview` | The works editor, served locally with the sheet mocked — no Google needed. |
+| `npm run cms:editors` | Shows, adds to or removes from the editor allow-list. |
+| `npm run cms:test` | The Apps Script, against a mocked Drive and a mocked GitHub. |
 
 ```bash
 node tools/capture-pages.mjs     # full-page mock-up screens → docs/mockups/
@@ -57,9 +60,15 @@ change is a reviewable commit.
 
 The operating manual is [`docs/CMS.md`](docs/CMS.md).
 
+**The editor is a page of the website**, at `/admin`. An editor signs in with
+their own Google account, fills in the form, and presses Save. The sheet is
+written as them; the site rebuilds itself. There is no git, no commit and no
+workflow in the editor's path.
+
 ```bash
-npm run cms:seed -- --fixtures ./fixtures   # the tabs, written locally
-npm run cms:sync -- --fixtures ./fixtures   # the tabs, read back — must be lossless
+npm run cms:preview   # the editor, with the sheet mocked — open /en/admin
+npm run cms:test      # the Apps Script, against a mocked Drive and GitHub
+npm run cms:test:page # the editor page, against mocked Google APIs
 ```
 
 ---

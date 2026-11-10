@@ -102,6 +102,42 @@ locales; the review set regenerated.
 
 ---
 
+## The editor becomes a page of the website — 10 November 2026
+
+The CMS had grown into something nobody could follow: a form on a Google
+URL, two buttons, a commit, a workflow and an Actions tab. The editor's
+path through it was five steps and four places.
+
+It is now one page and one button.
+
+- **`/admin` is a page of the website**, in the site's own design. The
+  editor signs in with their own Google account and the sheet is written as
+  *them*. The token lives in the tab and is forgotten when it closes.
+- **The Apps Script is down to two jobs**: saving the picture, which needs
+  storage quota a service account does not have, and firing the publish,
+  which needs a GitHub token that must not live in a browser.
+- **One button — Save.** The picture and the publish are posted to the
+  script through a hidden frame, because Google sends no CORS headers and
+  the browser cannot read a reply. The script reports back by writing into
+  the sheet's `settings` tab, so "Published" means published rather than
+  hoped for.
+- **The public pages are still a static build.** The sheet is pulled at
+  build time and committed, so the site is fast and is up even if Google is
+  down — and a published change is still a reviewable, revertible commit.
+
+Two things could not be done the obvious way, and both were checked rather
+than assumed: an Apps Script web app cannot be embedded in a page on another
+origin (`X-Frame-Options: SAMEORIGIN`), and it cannot be called from one
+either (no CORS headers). Hence the sheet being written directly from the
+browser, and the script being reduced to the two jobs it is uniquely suited
+to.
+
+The old Apps Script form and its `Index.html` are gone. `npm run cms:test`
+runs the script against a mocked Drive and a mocked GitHub, and
+`npm run cms:test:page` runs the editor page against mocked Google APIs.
+
+---
+
 ## The works page becomes CMS-driven — 10 November 2026
 
 The 16 case studies moved out of `src/data/cases.js` into

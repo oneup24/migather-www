@@ -1,14 +1,15 @@
 /**
- * A test harness for the Apps Script.
+ * A test of the Apps Script.
  *
- * The form's server side cannot be run in Node — it reaches for
- * `SpreadsheetApp`, `DriveApp` and the rest. This mocks them, so the parts
- * that matter can be tested: a new case, an edited case, and the rule that
- * the locale-independent fields are written into all three tabs.
+ * The script reaches for `DriveApp`, `UrlFetchApp` and `SpreadsheetApp`, so
+ * this mocks them and runs the real code against a fake Drive and a fake
+ * GitHub.
+ *
+ * What is tested: the picture is filed in the case's folder, the old
+ * picture is cleared out, the publish is dispatched, and the outcome is
+ * written into the settings tab where the editor's page can read it.
  *
  * Run with:  node tools/cms/test-apps-script.mjs
- *
- * It prints one line per check and exits non-zero if any of them fail.
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -17,86 +18,105 @@ import vm from 'node:vm';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 
-/* ── The fake sheet ───────────────────────────────────────────────────── */
+let failed = 0;
+function check(label, condition, detail = '') {
+  if (condition) console.log(`  ok    ${label}`);
+  else {
+    failed += 1;
+    console.log(`  FAIL  ${label}${detail ? ` — ${detail}` : ''}`);
+  }
+}
 
-/** A tab: an array of rows, each an array of strings. */
-function makeTab(rows = []) {
-  return {
-    rows: rows.map((row) => row.map((cell) => String(cell ?? ''))),
-    getDataRange() {
+/* ── The fake world ───────────────────────────────────────────────────── */
+
+/** A Drive folder that remembers what is in it. */
+function makeFolder(name) {
+  const folder = {
+    name,
+    children: [],
+    getFoldersByName: (wanted) => {
+      const found = folder.children.filter((child) => child.isFolder && child.name === wanted);
       return {
-        getValues: () => this.rows.map((row) => row.slice()),
+        hasNext: () => found.length > 0,
+        next: () => found[0],
       };
     },
-    getRange(row, column, numRows = 1, numColumns = 1) {
+    createFolder: (childName) => {
+      const child = makeFolder(childName);
+      child.isFolder = true;
+      folder.children.push(child);
+      return child;
+    },
+    getFiles: () => {
+      const files = folder.children.filter((child) => !child.isFolder);
+      let index = 0;
       return {
-        setValues: (values) => {
-          for (let r = 0; r < numRows; r += 1) {
-            const target = row - 1 + r;
-            while (this.rows.length <= target) this.rows.push([]);
-            const line = this.rows[target];
-            while (line.length < column - 1 + numColumns) line.push('');
-            for (let c = 0; c < numColumns; c += 1) {
-              line[column - 1 + c] = String(values[r][c] ?? '');
-            }
-          }
+        hasNext: () => index < files.length,
+        next: () => files[index++],
+      };
+    },
+    getFilesByName: (wanted) => {
+      const found = folder.children.filter((child) => !child.isFolder && child.name === wanted);
+      return {
+        hasNext: () => found.length > 0,
+        next: () => found[0],
+      };
+    },
+    createFile: (blob) => {
+      const file = {
+        name: blob.getName(),
+        bytes: blob.getBytes(),
+        trashed: false,
+        setTrashed: (value) => {
+          file.trashed = value;
+        },
+        setContent: (bytes) => {
+          file.bytes = bytes;
         },
       };
-    },
-    getLastRow() {
-      return this.rows.length;
-    },
-    clearContents() {
-      this.rows = [];
+      folder.children.push(file);
+      return file;
     },
   };
+  return folder;
 }
 
-/** The whole spreadsheet: tabs by name. */
-function makeSheet(tabs) {
-  const sheet = {
-    tabs,
-    getSheetByName(name) {
-      return tabs[name] ?? null;
-    },
-    createSheet(name) {
-      tabs[name] = makeTab();
-      return tabs[name];
-    },
+/** A sheet with one tab, writable. */
+function makeSheet(rows) {
+  const values = rows.map((row) => [...row]);
+  const tab = {
+    getDataRange: () => ({ getValues: () => values.map((row) => [...row]) }),
+    getRange: (row, column, numRows = 1, numColumns = 1) => ({
+      setValue: (value) => {
+        values[row - 1][column - 1] = String(value);
+      },
+      setValues: (block) => {
+        block.forEach((line, r) => {
+          line.forEach((cell, c) => {
+            values[row - 1 + r][column - 1 + c] = String(cell);
+          });
+        });
+      },
+    }),
   };
-  return sheet;
+  return { getSheetByName: (name) => (name === 'settings' ? tab : null), values };
 }
 
-/* ── The mocks ────────────────────────────────────────────────────────── */
+/** The fake Drive, the fake sheet and the fake GitHub. */
+function makeContext(options = {}) {
+  const root = makeFolder('Migather case images');
+  const calls = { dispatched: [], fetched: [], settings: [] };
 
-const CASE_COLUMNS = [
-  'slug', 'client', 'clientLocal', 'projectLocal', 'sector', 'services',
-  'partnershipSince', 'summary', 'imageAlt', 'image', 'mockup', 'source',
-  'featured', 'published',
-];
+  const settingsRows = [
+    ['key', 'value'],
+    ['editors', 'editor@example.com'],
+    ['github_owner', 'oneup24'],
+    ['github_repo', 'migather-www'],
+    ['lastPublish', ''],
+    ['lastPublishStatus', ''],
+  ];
 
-function buildSheet(cases) {
-  const tabs = {};
-  for (const tab of ['cases_EN', 'cases_ZH-HANT', 'cases_ZH-HANS']) {
-    tabs[tab] = makeTab([CASE_COLUMNS]);
-  }
-  for (const tab of ['results_EN', 'results_ZH-HANT', 'results_ZH-HANS']) {
-    tabs[tab] = makeTab([['slug', 'order', 'value', 'label', 'note']]);
-  }
-  for (const tab of ['scope_EN', 'scope_ZH-HANT', 'scope_ZH-HANS']) {
-    tabs[tab] = makeTab([['slug', 'order', 'text']]);
-  }
-  for (const [slug, values] of Object.entries(cases)) {
-    for (const tab of ['cases_EN', 'cases_ZH-HANT', 'cases_ZH-HANS']) {
-      tabs[tab].rows.push(CASE_COLUMNS.map((column) => values[column] ?? ''));
-    }
-  }
-  return makeSheet(tabs);
-}
-
-/** The globals the script expects. */
-function makeContext({ sheet, email, properties }) {
-  const calls = { publish: [], files: [], folders: [] };
+  const sheet = makeSheet(settingsRows);
 
   const context = {
     console,
@@ -108,63 +128,63 @@ function makeContext({ sheet, email, properties }) {
     Error,
     Date,
     RegExp,
-
-    SpreadsheetApp: {
-      openById: () => sheet,
-    },
-
-    DriveApp: {
-      getFolderById: () => ({
-        getFoldersByName: () => ({
-          hasNext: () => false,
-        }),
-        createFolder: (name) => {
-          calls.folders.push(name);
-          return {
-            getFilesByName: () => ({ hasNext: () => false }),
-            createFile: (blob) => {
-              calls.files.push({ name: blob.getName(), bytes: blob.getBytes() });
-            },
-          };
-        },
-      }),
-    },
-
     Utilities: {
       base64Decode: (value) => value,
-      newBlob: (bytes, type, name) => ({
-        getBytes: () => bytes,
-        getName: () => name,
-      }),
+      newBlob: (bytes, type, name) => ({ getBytes: () => bytes, getName: () => name }),
+      sleep: () => {},
     },
-
-    PropertiesService: {
-      getScriptProperties: () => ({
-        getProperty: (name) => properties[name] ?? null,
-      }),
-    },
-
-    Session: {
-      getActiveUser: () => ({
-        getEmail: () => email,
-      }),
-    },
-
     ContentService: {
-      MimeType: { JSON: 'application/json' },
+      MimeType: { TEXT: 'text/plain', JSON: 'application/json' },
       createTextOutput: (body) => ({
+        body,
         setMimeType: () => ({ body }),
       }),
     },
-
+    HtmlService: {
+      createHtmlOutput: (html) => ({
+        html,
+        setTitle: () => ({ html }),
+      }),
+    },
+    SpreadsheetApp: { openById: () => sheet },
+    DriveApp: { getFolderById: () => root },
+    PropertiesService: {
+      getScriptProperties: () => ({
+        getProperty: (name) =>
+          ({
+            SPREADSHEET_ID: 'sheet',
+            DRIVE_FOLDER_ID: 'folder',
+            GITHUB_TOKEN: 'token',
+            GITHUB_OWNER: 'oneup24',
+            GITHUB_REPO: 'migather-www',
+          })[name] ?? null,
+      }),
+    },
     UrlFetchApp: {
-      fetch: (url, options) => {
-        calls.publish.push({ url, body: options.payload });
-        return { getResponseCode: () => 204, getContentText: () => '' };
+      fetch: (url, opts) => {
+        calls.fetched.push({ url, opts });
+        if (url.includes('/dispatches')) {
+          calls.dispatched.push(JSON.parse(opts.payload));
+          return { getResponseCode: () => 204, getContentText: () => '' };
+        }
+        if (url.includes('/actions/workflows/')) {
+          const body = options.runs ?? {
+            workflow_runs: [
+              {
+                created_at: new Date(Date.now() + 1000).toISOString(),
+                status: 'completed',
+                conclusion: 'success',
+              },
+            ],
+          };
+          return { getResponseCode: () => 200, getContentText: () => JSON.stringify(body) };
+        }
+        return { getResponseCode: () => 200, getContentText: () => '{}' };
       },
     },
-
     __calls: calls,
+    __sheet: sheet,
+    __root: root,
   };
 
   return context;
@@ -180,225 +200,101 @@ function load(context) {
   return context;
 }
 
+/** The value of a settings row, read from the sheet itself. */
+function setting(context, key) {
+  const row = context.__sheet.values.find((entry) => entry[0] === key);
+  return row ? row[1] : undefined;
+}
+
 /* ── The checks ───────────────────────────────────────────────────────── */
 
-let failed = 0;
-function check(label, condition, detail = '') {
-  if (condition) {
-    console.log(`  ok    ${label}`);
-  } else {
-    failed += 1;
-    console.log(`  FAIL  ${label}${detail ? ` — ${detail}` : ''}`);
-  }
-}
+console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
 
-/** The rows of a tab, as objects. */
-function rowsOf(sheet, tab) {
-  const rows = sheet.tabs[tab].rows;
-  const header = rows[0];
-  return rows.slice(1).map((row) => {
-    const object = {};
-    header.forEach((column, index) => {
-      object[column] = row[index] ?? '';
-    });
-    return object;
-  });
-}
-
-console.log('The Apps Script, against a mocked sheet.\n');
-
-/* ── 1. A new case creates a row in all three tabs ───────────────────── */
+/* ── 1. A picture is filed in the case's folder ───────────────────────── */
 {
-  console.log('A new case');
-  const sheet = buildSheet({});
-  const context = load(makeContext({
-    sheet,
-    email: 'editor@example.com',
-    properties: {
-      SPREADSHEET_ID: 'sheet',
-      DRIVE_FOLDER_ID: 'folder',
-      GITHUB_TOKEN: 'token',
-      GITHUB_OWNER: 'oneup24',
-      GITHUB_REPO: 'migather-www',
-    },
-  }));
-
-  // The allow-list, in the settings tab.
-  sheet.tabs.settings = makeTab([
-    ['key', 'value'],
-    ['editors', 'editor@example.com'],
-  ]);
-
-  const result = context.save_(
-    {
-      slug: 'acme-hk-2026',
-      locale: 'en',
-      client: 'Acme HK',
-      sector: 'finance',
-      summary: 'The first sentence.',
-      source: 'Deck p.4',
-    },
-    false,
-  );
-
-  check('the save succeeded', result.slug === 'acme-hk-2026', JSON.stringify(result));
-  for (const tab of ['cases_EN', 'cases_ZH-HANT', 'cases_ZH-HANS']) {
-    const rows = rowsOf(sheet, tab);
-    const row = rows.find((r) => r.slug === 'acme-hk-2026');
-    check(`${tab} has a row for it`, !!row);
-    if (!row) continue;
-    check(`${tab} row carries the slug`, row.slug === 'acme-hk-2026');
-    check(`${tab} row carries the client`, row.client === 'Acme HK');
-    check(`${tab} row carries the source`, row.source === 'Deck p.4');
-    check(`${tab} row is a draft`, row.published === 'false');
-  }
-  check(
-    'the English summary is filled in',
-    rowsOf(sheet, 'cases_EN').find((r) => r.slug === 'acme-hk-2026').summary === 'The first sentence.',
-  );
-  check(
-    'the Chinese summaries are still empty',
-    rowsOf(sheet, 'cases_ZH-HANT').find((r) => r.slug === 'acme-hk-2026').summary === '',
-  );
-}
-
-/* ── 2. An edit keeps the other languages, and the shared fields ──────── */
-{
-  console.log('\nAn existing case, edited');
-  const sheet = buildSheet({
-    'huatai-finance-hk': {
-      slug: 'huatai-finance-hk',
-      client: 'Huatai Finance HK',
-      clientLocal: '華泰證券',
-      sector: 'finance',
-      services: 'strategic-creative, kol',
-      summary: 'Old English',
-      source: 'Deck p.1',
-      image: 'case-huatai.jpg',
-      mockup: 'true',
-      published: 'true',
-    },
+  console.log('Saving a picture');
+  const context = load(makeContext());
+  const reply = context.doPost({
+    parameter: (name) =>
+      ({
+        action: 'image',
+        slug: 'acme-hk-2026',
+        fileName: 'acme-hk-2026.jpg',
+        dataUrl: 'data:image/jpeg;base64,AAAA',
+      })[name],
   });
-  sheet.tabs.settings = makeTab([
-    ['key', 'value'],
-    ['editors', 'editor@example.com'],
-  ]);
 
-  // Give the Chinese tabs their own copy, so the test can prove it survives.
-  const zh = sheet.tabs['cases_ZH-HANT'].rows[1];
-  zh[7] = '舊的繁體中文';
-  const zs = sheet.tabs['cases_ZH-HANS'].rows[1];
-  zs[7] = '旧的中文';
+  check('the reply says it saved', /saved/i.test(String(reply.body ?? reply)), String(reply.body ?? reply));
 
-  const context = load(makeContext({
-    sheet,
-    email: 'editor@example.com',
-    properties: {
-      SPREADSHEET_ID: 'sheet',
-      DRIVE_FOLDER_ID: 'folder',
-      GITHUB_TOKEN: 'token',
-      GITHUB_OWNER: 'oneup24',
-      GITHUB_REPO: 'migather-www',
-    },
-  }));
-
-  context.save_(
-    {
-      slug: 'huatai-finance-hk',
-      locale: 'en',
-      client: 'Huatai Finance HK',
-      summary: 'New English',
-      source: 'Deck p.1',
-    },
-    false,
-  );
-
-  const en = rowsOf(sheet, 'cases_EN').find((r) => r.slug === 'huatai-finance-hk');
-  const hant = rowsOf(sheet, 'cases_ZH-HANT').find((r) => r.slug === 'huatai-finance-hk');
-  const hans = rowsOf(sheet, 'cases_ZH-HANS').find((r) => r.slug === 'huatai-finance-hk');
-
-  check('the English summary changed', en.summary === 'New English', en.summary);
-  check('the Traditional Chinese summary survived', hant.summary === '舊的繁體中文', hant.summary);
-  check('the Simplified Chinese summary survived', hans.summary === '旧的中文', hans.summary);
-  check('the image name is in every tab', [en, hant, hans].every((r) => r.image === 'case-huatai.jpg'));
-  check(
-    'the categories are in every tab',
-    [en, hant, hans].every((r) => r.services === 'strategic-creative, kol'),
-  );
+  const caseFolder = context.__root.children.find((child) => child.name === 'acme-hk-2026');
+  check('a folder was created for the case', !!caseFolder);
+  const picture = caseFolder?.children?.[0];
+  check('the picture is in it', picture?.name === 'acme-hk-2026.jpg', JSON.stringify(picture?.name));
+  check('the bytes were kept', picture?.bytes === 'AAAA', String(picture?.bytes));
 }
 
-/* ── 3. Publishing needs all three languages ─────────────────────────── */
+/* ── 2. A bad slug or file name is refused ───────────────────────────── */
+{
+  console.log('\nRefusing nonsense');
+  const context = load(makeContext());
+  context.doPost({
+    parameter: (name) =>
+      ({ action: 'image', slug: 'Not A Slug', fileName: 'x.jpg', dataUrl: 'data:image/jpeg;base64,AA' })[name],
+  });
+  check('no folder was made for a bad slug', context.__root.children.length === 0);
+}
+
+/* ── 3. Publishing dispatches, and reports the outcome ────────────────── */
 {
   console.log('\nPublishing');
-  const sheet = buildSheet({
-    'draft-case': { slug: 'draft-case', client: 'Draft Co', sector: 'finance' },
-  });
-  sheet.tabs.settings = makeTab([
-    ['key', 'value'],
-    ['editors', 'editor@example.com'],
-  ]);
+  const context = load(makeContext());
+  const reply = context.doPost({ parameter: (name) => ({ action: 'publish' })[name] });
 
-  const context = load(makeContext({
-    sheet,
-    email: 'editor@example.com',
-    properties: {
-      SPREADSHEET_ID: 'sheet',
-      DRIVE_FOLDER_ID: 'folder',
-      GITHUB_TOKEN: 'token',
-      GITHUB_OWNER: 'oneup24',
-      GITHUB_REPO: 'migather-www',
-    },
-  }));
-
-  const result = context.save_(
-    { slug: 'draft-case', locale: 'en', client: 'Draft Co', sector: 'finance', summary: 'Something.' },
-    true,
-  );
-
-  const row = rowsOf(sheet, 'cases_EN').find((r) => r.slug === 'draft-case');
-  check('a case with one language stays a draft', row.published === 'false', row.published);
-  check('the form says so', result.published === false);
-  // Readiness needs a summary, a client name and alt text in a language, so a
-  // case with only a summary is not ready in any of them.
-  check(
-    'the readiness is reported',
-    result.readiness.ready === 0 && result.readiness.total === 3,
-    JSON.stringify(result.readiness),
-  );
-  check('GitHub was not asked to publish', context.__calls.publish.length === 0);
+  check('the reply says it is rebuilding', /rebuild/i.test(String(reply.body ?? reply)));
+  check('GitHub was asked to dispatch', context.__calls.dispatched.length === 1);
+  check('the event type is right', context.__calls.dispatched[0]?.event_type === 'sync-cases');
+  check('the publish was stamped', String(setting(context, 'lastPublish')).length > 10);
+  check('the outcome was written', setting(context, 'lastPublishStatus') === 'ok', setting(context, 'lastPublishStatus'));
 }
 
-/* ── 4. Somebody who is not on the list is refused ────────────────────── */
+/* ── 4. A failed build is reported as a failure ───────────────────────── */
 {
-  console.log('\nThe allow-list');
-  const sheet = buildSheet({});
-  sheet.tabs.settings = makeTab([
-    ['key', 'value'],
-    ['editors', 'editor@example.com'],
-  ]);
-
-  const context = load(makeContext({
-    sheet,
-    email: 'stranger@example.com',
-    properties: {
-      SPREADSHEET_ID: 'sheet',
-      DRIVE_FOLDER_ID: 'folder',
-      GITHUB_TOKEN: 'token',
-      GITHUB_OWNER: 'oneup24',
-      GITHUB_REPO: 'migather-www',
-    },
-  }));
-
-  const reply = JSON.parse(
-    context.api('save', JSON.stringify({ slug: 'x', locale: 'en' })).body,
+  console.log('\nA build that failed');
+  const context = load(
+    makeContext({
+      runs: {
+        workflow_runs: [
+          {
+            created_at: new Date(Date.now() + 1000).toISOString(),
+            status: 'completed',
+            conclusion: 'failure',
+          },
+        ],
+      },
+    }),
   );
-  check('a stranger is refused', reply.ok === false && /allow-list/.test(reply.error), JSON.stringify(reply));
-  check('nothing was written', sheet.tabs.cases_EN.rows.length === 1);
+  context.doPost({ parameter: (name) => ({ action: 'publish' })[name] });
 
-  const allowed = JSON.parse(
-    context.api('load', JSON.stringify({ slug: 'nope', locale: 'en' })).body,
-  );
-  check('a stranger cannot read a case either', allowed.ok === false);
+  check('the outcome says it failed', setting(context, 'lastPublishStatus') === 'failed', setting(context, 'lastPublishStatus'));
+  check('there is a message to show', String(setting(context, 'lastPublishMessage')).length > 0);
+}
+
+/* ── 5. A stale token is reported, not hidden ─────────────────────────── */
+{
+  console.log('\nA token that has expired');
+  const context = load(makeContext());
+  context.__calls.fetched = [];
+  const original = context.UrlFetchApp.fetch;
+  context.UrlFetchApp.fetch = (url, opts) => {
+    if (url.includes('/dispatches')) {
+      return { getResponseCode: () => 401, getContentText: () => 'Bad credentials' };
+    }
+    return original(url, opts);
+  };
+
+  const reply = context.doPost({ parameter: (name) => ({ action: 'publish' })[name] });
+  check('the refusal is reported', String(reply.body ?? reply).includes('401'), String(reply.body ?? reply));
+  check('nothing was stamped as published', !String(setting(context, 'lastPublishStatus')));
 }
 
 console.log(`\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`);

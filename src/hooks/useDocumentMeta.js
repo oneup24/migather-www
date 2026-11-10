@@ -7,8 +7,11 @@ import { site } from '../data/site';
  *
  * `path` should be the locale-prefixed path, so canonical and og:url point
  * at the language the reader is actually on.
+ *
+ * `noindex` keeps a page out of the search engines — the editor's page
+ * should never be indexed, and should say so rather than merely hoping.
  */
-export function useDocumentMeta({ title, description, path } = {}) {
+export function useDocumentMeta({ title, description, path, noindex = false } = {}) {
   useEffect(() => {
     const fullTitle = title ? `${title} — ${site.name}` : `${site.name} — Performance Digital Creative & Media Agency`;
     document.title = fullTitle;
@@ -27,6 +30,18 @@ export function useDocumentMeta({ title, description, path } = {}) {
 
     setMeta('meta[name="description"]', 'content', description);
 
+    let robots = document.querySelector('meta[name="robots"]');
+    if (noindex) {
+      if (!robots) {
+        robots = document.createElement('meta');
+        robots.setAttribute('name', 'robots');
+        document.head.appendChild(robots);
+      }
+      robots.setAttribute('content', 'noindex, nofollow');
+    } else if (robots) {
+      robots.setAttribute('content', 'index, follow');
+    }
+
     let ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute('content', fullTitle);
 
@@ -44,5 +59,5 @@ export function useDocumentMeta({ title, description, path } = {}) {
       document.head.appendChild(canonical);
     }
     canonical.setAttribute('href', href);
-  }, [title, description, path]);
+  }, [title, description, path, noindex]);
 }

@@ -56,6 +56,15 @@ jobs:
         # under review/, and the preview note under preview/. The app is built
         # with the base path baked in, because a GitHub Pages project site is
         # served from /<repo>/ rather than the domain root.
+        #
+        # The VITE_CMS_* variables configure the works editor at /admin. They
+        # are repository variables rather than secrets — the sheet's own
+        # permissions are what protect the content, and the editor page is
+        # useless without a Google sign-in.
+        env:
+          VITE_CMS_CLIENT_ID: ${{ vars.VITE_CMS_CLIENT_ID }}
+          VITE_CMS_SHEET_ID: ${{ vars.VITE_CMS_SHEET_ID }}
+          VITE_CMS_SCRIPT_URL: ${{ vars.VITE_CMS_SCRIPT_URL }}
         run: python3 tools/build-pages-site.py
 
       - name: Publish to the gh-pages branch
