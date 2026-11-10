@@ -248,6 +248,7 @@ export const goals = [
  */
 export const addOns = [
   {
+    key: 'shopper-marketing',
     name: { en: 'Shopper marketing & in-store activation', 'zh-Hant': '購物者營銷及店內體驗', 'zh-Hans': '购物者营销及店内体验' },
     description: {
       en: 'POSM ideas, sampling mechanics and simple roadshow concepts; partnership and sponsorship strategy; and post-event lead nurturing.',
@@ -256,6 +257,7 @@ export const addOns = [
     },
   },
   {
+    key: 'review-management',
     name: { en: 'Review management', 'zh-Hant': '評價管理', 'zh-Hans': '评价管理' },
     description: {
       en: 'Review management across OpenRice, Google and social platforms.',
@@ -264,6 +266,7 @@ export const addOns = [
     },
   },
   {
+    key: 'short-form-video',
     name: { en: 'Short-form video production', 'zh-Hant': '短片製作', 'zh-Hans': '短视频制作' },
     description: {
       en: 'One to three reels produced as an add-on to a campaign.',
@@ -272,6 +275,7 @@ export const addOns = [
     },
   },
   {
+    key: 'integrated-media-plan',
     name: { en: 'Integrated media plan', 'zh-Hant': '整合媒體計劃', 'zh-Hans': '整合媒体计划' },
     description: {
       en: 'An integrated media plan with channel recommendations, and a post-campaign tracking and analytics report.',
@@ -280,3 +284,36 @@ export const addOns = [
     },
   },
 ];
+
+/**
+ * The service menu and the service pages.
+ *
+ * `serviceGroups` is the mega menu: one column per goal, plus the add-ons.
+ * `allServices` is the same set flattened, in menu order — the service pages
+ * walk it to find the next one, and the case pages walk it to find the work
+ * in a category.
+ *
+ * The key of a service is the value a case carries in its `services` field.
+ * That is the field the CMS will expose as "category": pick a service, and
+ * the work lands on that service's page.
+ */
+export const serviceGroups = [
+  { key: 'build', label: goals[0].name, items: goals[0].items },
+  { key: 'grow', label: goals[1].name, items: goals[1].items },
+  { key: 'convert', label: goals[2].name, items: goals[2].items },
+  {
+    key: 'add-ons',
+    label: { en: 'Add-ons', 'zh-Hant': '加購項目', 'zh-Hans': '加购项目' },
+    items: addOns,
+  },
+];
+
+/** Every service, flat, in menu order. */
+export const allServices = serviceGroups.flatMap((group) =>
+  group.items.map((item) => ({ ...item, group: group.key })),
+);
+
+/** One service, by key — null when the address does not name one. */
+export function getService(key) {
+  return allServices.find((service) => service.key === key) ?? null;
+}

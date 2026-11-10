@@ -341,8 +341,51 @@ async function main() {
       check('the desktop header carries the primary nav', navLinks >= 4, `${navLinks} links`);
     }
 
+    /* ── 3e. The Services mega menu ─────────────────────────────────────
+       The menu is the way into every service page, so it has to open, and
+       every line in it has to point at a page that exists. */
+    await goto(`${BASE}/en`);
+    const megaMenu = await evaluate(`
+      (async () => {
+        const trigger = Array.from(document.querySelectorAll('header nav a'))
+          .find((a) => a.textContent.trim().toLowerCase().startsWith('services'));
+        if (!trigger) return { found: false };
+        trigger.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+        trigger.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 600));
+        const panel = document.querySelector('header a[href^="/en/services/"]');
+        const links = panel
+          ? Array.from(new Set(Array.from(document.querySelectorAll('header a[href^="/en/services/"]')).map((a) => a.getAttribute('href'))))
+          : [];
+        return { found: true, opened: links.length > 0, links };
+      })()
+    `);
+    check(
+      'the Services mega menu opens and lists the services',
+      megaMenu?.found === true && megaMenu?.opened === true && megaMenu?.links.length >= 20,
+      `${megaMenu?.links?.length ?? 0} service links`,
+    );
+
+    for (const href of (megaMenu?.links ?? []).slice(0, 4)) {
+      await goto(`${BASE}${href}?capture=1`);
+      const servicePage = await evaluate(`
+        (() => {
+          const h1 = document.querySelector('main h1');
+          return {
+            h1: h1 ? h1.textContent.trim() : null,
+            notFound: !!document.body.textContent.includes('This page is not here'),
+          };
+        })()
+      `);
+      check(
+        `${href} renders its own heading`,
+        !!servicePage.h1 && !servicePage.notFound,
+        `h1: ${servicePage.h1}`,
+      );
+    }
+
     /* ── 4. Every internal link resolves to a real page ─────────────── */
-    const routes = ['/en', '/en/work', '/en/services', '/en/about', '/en/careers', '/en/contact'];
+    const routes = ['/en', '/en/work', '/en/services', '/en/services/community', '/en/about', '/en/careers', '/en/contact'];
     for (const route of routes) {
       await goto(`${BASE}${route}?capture=1`);
       const result = await evaluate(`

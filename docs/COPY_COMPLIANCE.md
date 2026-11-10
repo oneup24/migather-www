@@ -205,10 +205,16 @@ That is a design decision, not a copy decision, and it is documented in
 
 The Chinese copy in `services.js`, `cases.js` and `clients.js` is
 unchanged from v1.0 and v2.0. `content.js` has been touched — the hero
-eyebrow, headline and lede were rewritten in November 2026, and the third
-principle now counts three markets rather than two — but each change was
-made deliberately, in both scripts, and the zh-Hant and zh-Hans strings
-remain separately authored, never machine-converted between them.
+eyebrow, headline and lede were rewritten in November 2026, the third
+principle now counts three markets rather than two, and the service pages
+and the mega menu brought their own labels — but each change was made
+deliberately, in both scripts, and the zh-Hant and zh-Hans strings remain
+separately authored, never machine-converted between them.
+
+The new service copy makes no claim either: it is the name of each service
+line, the goal it sits under, and the labels around it — "Work in this
+category", "Where this sits", "Next service". The wording of each service
+is the wording of the agreed scope of work in the CRM, unchanged.
 
 The KOL Disclosure page still states the 报备 / 非报备 position: that 非报备
 cooperation risks 限流 and client-account sanction, and that it must be

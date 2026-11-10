@@ -49,6 +49,7 @@ export const content = {
       'zh-Hans': '所有数字及表述均取自各案例所引用的客户简报。',
     },
     preLaunchBadge: { en: 'Pre-launch build', 'zh-Hant': '上線前版本', 'zh-Hans': '上线前版本' },
+    backToServices: { en: 'Back to all services', 'zh-Hant': '返回服務列表', 'zh-Hans': '返回服务列表' },
   },
 
   /* ───────────────────────────────────────────────────────────────────────
@@ -324,6 +325,43 @@ export const content = {
      ─────────────────────────────────────────────────────────────────────── */
   services: {
     eyebrow: { en: 'Services', 'zh-Hant': '服務範疇', 'zh-Hans': '服务范围' },
+
+    /* The mega menu, and the pages that hang off it. */
+    menu: {
+      allServices: { en: 'All services', 'zh-Hant': '所有服務', 'zh-Hans': '所有服务' },
+      serviceCount: { en: 'services', 'zh-Hant': '項服務', 'zh-Hans': '项服务' },
+      groupCount: { en: 'goals', 'zh-Hant': '個目標', 'zh-Hans': '个目标' },
+      label: { en: 'Services', 'zh-Hant': '服務', 'zh-Hans': '服务' },
+    },
+    page: {
+      workTitle: {
+        en: 'Work in this category',
+        'zh-Hant': '這一類別的案例',
+        'zh-Hans': '这一类别的案例',
+      },
+      workLede: {
+        en: 'Every case below was delivered under this service line.',
+        'zh-Hant': '以下每個案例均在此服務範疇下交付。',
+        'zh-Hans': '以下每个案例均在此服务范围内交付。',
+      },
+      empty: {
+        en: 'No published work in this category yet.',
+        'zh-Hant': '此類別暫未有公開案例。',
+        'zh-Hans': '此类别暂未有公开案例。',
+      },
+      coversTitle: {
+        en: 'Where this sits',
+        'zh-Hant': '這一類服務的位置',
+        'zh-Hans': '这一类服务的位置',
+      },
+      nextTitle: { en: 'Next service', 'zh-Hant': '下一項服務', 'zh-Hans': '下一项服务' },
+      ctaScopeNote: {
+        en: 'The wording is taken from the agreed scope of work held in the CRM.',
+        'zh-Hant': '相關表述取自客戶確認並存於 CRM 內的工作範疇。',
+        'zh-Hans': '相关表述取自客户确认并存于 CRM 内的服务范围。',
+      },
+    },
+
     title: {
       en: 'Three goals. Everything we do serves one of them.',
       'zh-Hant': '三個目標。我們做的每一件事，都服務於其中之一。',

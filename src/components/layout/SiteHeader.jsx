@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { LOCALES } from '../../data/i18n';
 import { primaryNav, site } from '../../data/site';
 import { content } from '../../data/content';
+import { serviceGroups } from '../../data/services';
 import { useLocale } from '../../hooks/useLocale';
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 import { cn } from '../../lib/utils';
 import Icon from '../ui/Icon';
 import Logo from '../ui/Logo';
+import ServicesMegaMenu from '../v3/ServicesMegaMenu';
 
 /**
  * The site header.
@@ -23,13 +25,41 @@ import Logo from '../ui/Logo';
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [drawerServices, setDrawerServices] = useState(false);
   const { pathname } = useLocation();
   const { locale, path, t } = useLocale();
+  const closeTimer = useRef(null);
   useLockBodyScroll(open);
 
   useEffect(() => {
     setOpen(false);
+    setMenuOpen(false);
+    setDrawerServices(false);
   }, [pathname]);
+
+  /* ── The Services mega menu ──────────────────────────────────────────────
+     It opens on hover and on focus, closes when the pointer leaves it, on
+     Escape, and when the reader moves on to another page. The delay before
+     it closes stops the panel from disappearing when the pointer crosses
+     the gap between the trigger and the panel. */
+  const openMenu = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setMenuOpen(true);
+  };
+
+  const closeMenu = (delay = 120) => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setMenuOpen(false), delay);
+  };
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -99,29 +129,45 @@ export default function SiteHeader() {
               overlay ? 'text-white/80' : 'text-charcoal',
             )}
           >
-            {primaryNav.map((item) => (
-              <NavLink
-                key={item.key}
-                to={path(item.to)}
-                className={cn(
-                  'relative py-2 transition-colors hover:text-ink',
-                  overlay ? 'hover:text-white' : 'hover:text-ink',
-                  isActive(item.to) && (overlay ? 'text-white' : 'text-ink'),
-                )}
-                aria-current={isActive(item.to) ? 'page' : undefined}
-              >
-                {t(item.label)}
-                {isActive(item.to) && (
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      'absolute -bottom-[1px] left-0 right-0 h-[2px]',
-                      overlay ? 'bg-white' : 'bg-brandCrimson',
-                    )}
-                  />
-                )}
-              </NavLink>
-            ))}
+            {primaryNav.map((item) => {
+              const isServices = item.key === 'services';
+              return (
+                <NavLink
+                  key={item.key}
+                  to={path(item.to)}
+                  onMouseEnter={isServices ? openMenu : undefined}
+                  onFocus={isServices ? openMenu : undefined}
+                  aria-expanded={isServices ? menuOpen : undefined}
+                  aria-haspopup={isServices ? 'true' : undefined}
+                  className={cn(
+                    'relative flex items-center gap-1.5 py-2 transition-colors hover:text-ink',
+                    overlay ? 'hover:text-white' : 'hover:text-ink',
+                    isActive(item.to) && (overlay ? 'text-white' : 'text-ink'),
+                  )}
+                  aria-current={isActive(item.to) ? 'page' : undefined}
+                >
+                  {t(item.label)}
+                  {isServices && (
+                    <Icon
+                      name="chevron-down"
+                      className={cn(
+                        'h-3 w-3 transition-transform',
+                        menuOpen ? 'rotate-180' : '',
+                      )}
+                    />
+                  )}
+                  {isActive(item.to) && (
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'absolute -bottom-[1px] left-0 right-0 h-[2px]',
+                        overlay ? 'bg-white' : 'bg-brandCrimson',
+                      )}
+                    />
+                  )}
+                </NavLink>
+              );
+            })}
           </nav>
         </div>
 
@@ -160,6 +206,17 @@ export default function SiteHeader() {
         </button>
       </div>
 
+      {/* The Services mega menu, under the bar */}
+      {menuOpen && (
+        <div
+          onMouseEnter={openMenu}
+          onMouseLeave={() => closeMenu(0)}
+          className="absolute inset-x-0 top-full hidden lg:block"
+        >
+          <ServicesMegaMenu onNavigate={() => setMenuOpen(false)} />
+        </div>
+      )}
+
       {/* Mobile drawer */}
       <div
         className={cn(
@@ -195,19 +252,71 @@ export default function SiteHeader() {
 
           <nav className="flex-1 overflow-y-auto px-6 py-8">
             <ul>
-              {primaryNav.map((item) => (
-                <li key={item.key}>
-                  <NavLink
-                    to={path(item.to)}
-                    className={cn(
-                      'block border-b border-rule py-5 font-editorial text-[26px] leading-tight transition-colors',
-                      isActive(item.to) ? 'text-brandBlue' : 'text-ink',
-                    )}
-                  >
-                    {t(item.label)}
-                  </NavLink>
-                </li>
-              ))}
+              {primaryNav.map((item) => {
+                /* The Services entry opens the service list instead of
+                   navigating — a phone has no hover, and 25 links will not
+                   fit in a menu row. */
+                if (item.key === 'services') {
+                  return (
+                    <li key={item.key} className="border-b border-rule">
+                      <button
+                        type="button"
+                        onClick={() => setDrawerServices((v) => !v)}
+                        aria-expanded={drawerServices}
+                        className="flex w-full items-center justify-between py-5 text-left font-editorial text-[26px] leading-tight text-ink"
+                      >
+                        {t(item.label)}
+                        <Icon
+                          name="chevron-down"
+                          className={cn(
+                            'h-5 w-5 shrink-0 transition-transform',
+                            drawerServices ? 'rotate-180' : '',
+                          )}
+                        />
+                      </button>
+
+                      {drawerServices && (
+                        <div className="pb-7 pt-1">
+                          {serviceGroups.map((group) => (
+                            <div key={group.key} className="mt-5 first:mt-2">
+                              <div className="eyebrow text-brandCrimson">{t(group.label)}</div>
+                              <ul className="mt-2.5 space-y-1.5">
+                                {group.items.map((service) => (
+                                  <li key={service.key}>
+                                    <Link
+                                      to={path(`/services/${service.key}`)}
+                                      className="block py-0.5 text-[15px] leading-snug text-charcoal"
+                                    >
+                                      {t(service.name)}
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                          <Link to={path('/services')} className="link-line mt-6 inline-flex">
+                            {t(content.services.menu.allServices)}
+                          </Link>
+                        </div>
+                      )}
+                    </li>
+                  );
+                }
+
+                return (
+                  <li key={item.key}>
+                    <NavLink
+                      to={path(item.to)}
+                      className={cn(
+                        'block border-b border-rule py-5 font-editorial text-[26px] leading-tight transition-colors',
+                        isActive(item.to) ? 'text-brandBlue' : 'text-ink',
+                      )}
+                    >
+                      {t(item.label)}
+                    </NavLink>
+                  </li>
+                );
+              })}
             </ul>
 
             <div className="mt-10 border-t border-rule pt-8">

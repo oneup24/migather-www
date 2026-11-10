@@ -162,6 +162,28 @@ hidden from assistive technology; hovering stops the movement, and a reader
 who asks for reduced motion gets a row they can drag sideways instead. The
 marks are the clients' own — see §6.
 
+### The Services mega menu
+
+The Services entry in the header opens a full-width panel with one column
+per goal and a fourth for the add-ons — the structure the reference site
+the client named uses. It opens on hover and on focus, closes when the
+pointer leaves it, on Escape and on navigation, and the trigger carries a
+chevron that turns when the panel is open. On a phone, where there is no
+hover and 25 links will not fit in a menu row, the same entry expands in
+place instead.
+
+Every line in the menu is a link to that service's own page, and every
+service page is built on the case-study template: a banner with the goal
+above the title, the work underneath, the detail beside it, and the next
+service at the foot.
+
+The link between a service and the work is the `services` field on each
+case — the keys of the service menu, taken from that case's own scope
+lines. **That field is the one the CMS will expose as "category": pick a
+service and the case appears on that service's page.** The page works the
+same whether the roster is edited by hand or through a CMS, because the
+filter is the data, not the template.
+
 ### Inner pages
 
 All nine templates were rebuilt in the same grammar. Each opens on the same
@@ -170,6 +192,10 @@ editorial row pattern.
 
 The work index keeps Capsule48's structure exactly: filter row above the grid,
 with the filter held in the URL so a filtered view can be linked.
+
+The service pages sit beside it: `/services` is the index of the 25 service
+lines, `/services/:key` is one of them, and every one of them carries the
+work filed under it.
 
 ---
 

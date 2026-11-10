@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import AboutPage from './pages/AboutPage';
+import ServiceDetailPage from './pages/ServiceDetailPage';
 import ServicesPage from './pages/ServicesPage';
 import CareersPage from './pages/CareersPage';
 import ContactPage from './pages/ContactPage';
@@ -30,6 +31,7 @@ export const pageRoutes = [
   { path: 'work', element: <WorkIndexPage /> },
   { path: 'work/:slug', element: <WorkDetailPage /> },
   { path: 'services', element: <ServicesPage /> },
+  { path: 'services/:key', element: <ServiceDetailPage /> },
   { path: 'about', element: <AboutPage /> },
   { path: 'careers', element: <CareersPage /> },
   { path: 'contact', element: <ContactPage /> },

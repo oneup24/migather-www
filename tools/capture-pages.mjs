@@ -42,6 +42,7 @@ const ROUTES = [
   { slug: 'work-huatai', path: '/work/huatai-finance-hk' },
   { slug: 'work-christies', path: '/work/christies-auction' },
   { slug: 'services', path: '/services' },
+  { slug: 'service-community', path: '/services/community' },
   { slug: 'about', path: '/about' },
   { slug: 'careers', path: '/careers' },
   { slug: 'contact', path: '/contact' },

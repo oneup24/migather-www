@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { addOns, goals } from '../data/services';
 import { content } from '../data/content';
 import { banners } from '../data/media';
@@ -54,7 +55,12 @@ export default function ServicesPage() {
                 <ul className="border-t border-rule">
                   {goal.items.map((item) => (
                     <li key={item.key} className="border-b border-rule py-7">
-                      <div className="service-list__item">{t(item.name)}</div>
+                      <Link
+                        to={path(`/services/${item.key}`)}
+                        className="service-list__item transition-colors hover:text-brandBlue"
+                      >
+                        {t(item.name)}
+                      </Link>
                       <p className="mt-3 max-w-2xl text-[15.5px] leading-relaxed text-charcoal">
                         {t(item.description)}
                       </p>
@@ -78,8 +84,13 @@ export default function ServicesPage() {
 
           <ul className="service-list mt-14">
             {addOns.map((addon) => (
-              <li key={addon.name.en}>
-                <div className="service-list__item">{t(addon.name)}</div>
+              <li key={addon.key}>
+                <Link
+                  to={path(`/services/${addon.key}`)}
+                  className="service-list__item transition-colors hover:text-brandBlue"
+                >
+                  {t(addon.name)}
+                </Link>
                 <p className="mt-2.5 max-w-md text-[14.5px] leading-relaxed text-charcoal">
                   {t(addon.description)}
                 </p>

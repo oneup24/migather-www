@@ -34,7 +34,12 @@ function readCaseSlugs() {
   return [...source.matchAll(/^\s{4}slug: '([^']+)',/gm)].map((m) => m[1]);
 }
 
+/** Pull the service keys out of the service menu. The module is plain
+ *  JavaScript with no dependencies, so it can simply be imported. */
+const { allServices } = await import(join(DATA_DIR, 'services.js'));
+
 const slugs = readCaseSlugs();
+const serviceKeys = allServices.map((service) => service.key);
 
 const urls = [];
 for (const locale of LOCALES) {
@@ -43,6 +48,9 @@ for (const locale of LOCALES) {
   }
   for (const slug of slugs) {
     urls.push(`/${locale}/work/${slug}`);
+  }
+  for (const key of serviceKeys) {
+    urls.push(`/${locale}/services/${key}`);
   }
 }
 
@@ -56,4 +64,6 @@ const xml = [
 
 writeFileSync(join(ROOT, 'public', 'sitemap.xml'), xml, 'utf8');
 
-console.log(`sitemap.xml written — ${urls.length} URLs (${LOCALES.length} locales, ${slugs.length} cases).`);
+console.log(
+  `sitemap.xml written — ${urls.length} URLs (${LOCALES.length} locales, ${slugs.length} cases, ${serviceKeys.length} services).`,
+);

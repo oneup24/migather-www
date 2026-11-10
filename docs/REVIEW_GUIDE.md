@@ -78,6 +78,19 @@ Open `docs/mockups/en/home.png` and scroll to the top.
   standing disclosure, and they stay until the artwork is replaced with real
   client photography.
 
+### 3.1b The Services mega menu
+
+Hover **SERVICES** in the header.
+
+- A full-width panel opens under the bar: one column per goal — Build the
+  brand, Grow the audience, Convert and compound — and a fourth for the
+  add-ons.
+- Every line is a link to that service's own page, in the same shape as a
+  case study. Follow one: the page carries the goal above the title, the
+  work filed under that service, and the next service at the foot.
+- The trigger's chevron turns while the panel is open. Escape closes it.
+- On a phone, the same entry expands in place in the drawer.
+
 ### 3.2 The body — Capsule48's contribution
 
 Scroll down the same file.

@@ -1,6 +1,12 @@
 /**
  * Client work — every entry traces to a file in `Migather/LIBRARY 2026 Q4/`.
  *
+ * The `services` field on each case is its category: the keys of the service
+ * menu (`src/data/services.js`), taken from that case's own scope lines —
+ * a case that delivered WeChat content and paid social is tagged with those
+ * two services, and nothing else. It is the field the CMS will expose as
+ * "category": pick a service and the case appears on that service's page.
+ *
  * The `source` field on each case names the deck and slide the entry came
  * from. Nothing here is written from memory, and no figure appears that is
  * not printed in the cited deck.
@@ -37,6 +43,7 @@ export const sectors = {
 export const cases = [
   {
     slug: 'huatai-finance-hk',
+    services: ['strategic-creative', 'offline-activation', 'kol'],
     client: 'Huatai Finance HK',
     clientLocal: '華泰證券',
     projectLocal: '漲樂全球通',
@@ -80,6 +87,7 @@ export const cases = [
 
   {
     slug: '11-skies-gba-forum',
+    services: ['paid-media', 'performance-media', 'seo'],
     client: '11 SKIES',
     clientLocal: '11 天空之城',
     sector: 'properties',
@@ -119,6 +127,7 @@ export const cases = [
 
   {
     slug: 'bank-of-china-hk',
+    services: ['creative-content', 'strategic-creative', 'seo'],
     client: 'Bank of China HK',
     clientLocal: '中銀香港',
     sector: 'finance',
@@ -150,6 +159,7 @@ export const cases = [
 
   {
     slug: 'atfx-securities-hk',
+    services: ['paid-media', 'performance-media', 'reporting'],
     client: 'ATFX Securities HK',
     sector: 'finance',
     partnershipSince: null,
@@ -190,6 +200,7 @@ export const cases = [
 
   {
     slug: 'wing-fung-financial-hk',
+    services: ['creative-content', 'localization', 'strategic-creative'],
     client: 'Wing Fung Financial Group HK',
     sector: 'finance',
     partnershipSince: null,
@@ -229,6 +240,7 @@ export const cases = [
 
   {
     slug: 'new-world-development',
+    services: ['pr', 'paid-media', 'kol'],
     client: 'New World Development',
     sector: 'properties',
     partnershipSince: { en: '2016', 'zh-Hant': '2016年', 'zh-Hans': '2016年' },
@@ -251,6 +263,7 @@ export const cases = [
 
   {
     slug: 'christies-auction',
+    services: ['strategic-creative', 'creative-content', 'community'],
     client: "Christie's Auction",
     clientLocal: '佳士得',
     sector: 'luxury',
@@ -274,6 +287,7 @@ export const cases = [
 
   {
     slug: 'hang-seng-bank',
+    services: ['creative-content', 'kol'],
     client: 'Hang Seng Bank',
     clientLocal: '恒生銀行',
     sector: 'finance',
@@ -295,6 +309,7 @@ export const cases = [
 
   {
     slug: 'fubon-bank',
+    services: ['creative-content'],
     client: 'Fubon Bank',
     clientLocal: '永明金融',
     sector: 'finance',
@@ -315,6 +330,7 @@ export const cases = [
 
   {
     slug: '11-skies-social-management',
+    services: ['community', 'paid-media', 'analytics'],
     client: '11 SKIES',
     clientLocal: '11 天空之城',
     sector: 'properties',
@@ -350,6 +366,7 @@ export const cases = [
 
   {
     slug: 'marks-and-spencer',
+    services: ['community', 'analytics', 'creative-content'],
     client: 'Marks & Spencer',
     sector: 'lifestyle',
     partnershipSince: { en: '2019', 'zh-Hant': '2019年', 'zh-Hans': '2019年' },
@@ -370,6 +387,7 @@ export const cases = [
 
   {
     slug: 'h-queens',
+    services: ['community', 'kol-campaign', 'creative-content'],
     client: "H Queen's",
     sector: 'lifestyle',
     partnershipSince: { en: '2021', 'zh-Hant': '2021年', 'zh-Hans': '2021年' },
@@ -391,6 +409,7 @@ export const cases = [
 
   {
     slug: 'v-city-v-walk',
+    services: ['community', 'kol', 'creative-content'],
     client: 'V City & V Walk',
     sector: 'travel',
     partnershipSince: { en: '2021', 'zh-Hant': '2021年', 'zh-Hans': '2021年' },
@@ -411,6 +430,7 @@ export const cases = [
 
   {
     slug: 'k11-musea',
+    services: ['paid-media', 'kol', 'community'],
     client: 'K11 Musea',
     sector: 'travel',
     partnershipSince: { en: '2021', 'zh-Hant': '2021年', 'zh-Hans': '2021年' },
@@ -431,6 +451,7 @@ export const cases = [
 
   {
     slug: 'lee-gardens',
+    services: ['community', 'paid-media', 'kol'],
     client: 'Lee Gardens',
     clientLocal: '利園',
     sector: 'travel',
@@ -453,6 +474,7 @@ export const cases = [
 
   {
     slug: 'chinachem',
+    services: ['community', 'analytics', 'paid-media'],
     client: 'Chinachem',
     clientLocal: '信和集團',
     sector: 'properties',
