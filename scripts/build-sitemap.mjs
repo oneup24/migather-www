@@ -19,7 +19,7 @@ const LOCALES = ['en', 'zh-Hant', 'zh-Hans'];
 const STATIC_PATHS = [
   '',
   '/work',
-  '/capabilities',
+  '/services',
   '/about',
   '/careers',
   '/contact',

@@ -132,7 +132,7 @@ build, all confirmed and closed.
    describes the picture, the badge discloses it, and one string doing both
    jobs reads oddly the moment either is reworded.
 4. **`README.md` miscounted the capability lines.** It called
-   `capabilities.js` "23 agreed scope lines". The CRM holds 23 scope rows; the
+   `services.js` "23 agreed scope lines". The CRM holds 23 scope rows; the
    site publishes 25 lines derived from them, because one CRM row is
    presented as three add-on lines. Every line traces to a CRM row, so this
    was a derivation rather than an invention — but the README said so

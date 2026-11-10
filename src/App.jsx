@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, useParams } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import AboutPage from './pages/AboutPage';
-import CapabilitiesPage from './pages/CapabilitiesPage';
+import ServicesPage from './pages/ServicesPage';
 import CareersPage from './pages/CareersPage';
 import ContactPage from './pages/ContactPage';
 import HomePage from './pages/HomePage';
@@ -10,7 +10,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import WorkDetailPage from './pages/WorkDetailPage';
 import WorkIndexPage from './pages/WorkIndexPage';
 import { DEFAULT_LOCALE, isLocale } from './data/i18n';
-import { LocaleProvider } from './hooks/useLocale';
+import { LocaleProvider, useLocale } from './hooks/useLocale';
 
 /**
  * The full route table — 9 page templates, served under a locale prefix.
@@ -29,7 +29,7 @@ export const pageRoutes = [
   { path: '/', index: true, element: <HomePage /> },
   { path: 'work', element: <WorkIndexPage /> },
   { path: 'work/:slug', element: <WorkDetailPage /> },
-  { path: 'capabilities', element: <CapabilitiesPage /> },
+  { path: 'services', element: <ServicesPage /> },
   { path: 'about', element: <AboutPage /> },
   { path: 'careers', element: <CareersPage /> },
   { path: 'contact', element: <ContactPage /> },
@@ -62,6 +62,19 @@ export function LocaleShell() {
   );
 }
 
+/**
+ * The old /capabilities address, kept alive.
+ *
+ * The page was renamed to Services in November 2026 and the URL with it.
+ * Anything already pointing at the old address — the published preview, a
+ * bookmark, a search result — is sent to the new one rather than to the
+ * 404 page.
+ */
+export function LegacyServicesRedirect() {
+  const { locale } = useLocale();
+  return <Navigate to={`/${locale}/services`} replace />;
+}
+
 export default function App() {
   // When the site is published under a sub-path (GitHub Pages project sites
   // live at /<repo>/...), the router has to be told where the app starts, or
@@ -76,6 +89,7 @@ export default function App() {
 
         <Route path="/:locale" element={<LocaleShell />}>
           {pageRouteElements}
+          <Route path="capabilities" element={<LegacyServicesRedirect />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

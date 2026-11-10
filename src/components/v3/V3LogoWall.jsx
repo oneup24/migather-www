@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { clients } from '../../data/clients';
 import { content } from '../../data/content';
 import { contentV3 } from '../../data/content.v3';
@@ -30,9 +31,12 @@ export default function V3LogoWall() {
   const proof = content.home.proof;
 
   // The two rows are interleaved, so a sector never lines up with itself.
+  // A client marked `wall: false` is on the roster and in the case list,
+  // but is not shown here.
+  const wall = clients.filter((client) => client.wall !== false);
   const rows = [
-    clients.filter((_, index) => index % 2 === 0),
-    clients.filter((_, index) => index % 2 === 1),
+    wall.filter((_, index) => index % 2 === 0),
+    wall.filter((_, index) => index % 2 === 1),
   ];
 
   const cell = (client, hidden) => {
@@ -67,17 +71,25 @@ export default function V3LogoWall() {
       className="scroll-mt-24 border-y border-rule bg-paper py-16 md:py-20"
     >
       <div className="mx-auto max-w-7xl px-6">
-        <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="h-px w-8 bg-brandCrimson/60" />
-          <span className="eyebrow text-ink">{t(contentV3.labels.clients)}</span>
+        <div className="flex items-center gap-4">
+          <span aria-hidden="true" className="h-px w-10 bg-brandCrimson/60" />
+          <span className="font-display text-[clamp(1.05rem,1.7vw,1.45rem)] font-medium uppercase tracking-[0.16em] text-ink">
+            {t(contentV3.labels.clients)}
+          </span>
         </div>
 
-        <p className="font-editorial mt-6 max-w-[24ch] text-[clamp(1.75rem,3.4vw,2.9rem)] leading-[1.15] font-normal text-ink">
-          {t(proof.title)}
-        </p>
-
-        <p className="mt-5 max-w-2xl text-[14.5px] leading-relaxed text-charcoal">
-          {t(proof.lede)}
+        <p className="mt-6 max-w-3xl text-[16px] leading-relaxed text-charcoal md:text-[17px]">
+          {proof.figures.map((figure, index) => (
+            <Fragment key={figure.value}>
+              {index > 0 && (
+                <span aria-hidden="true" className="px-2 text-rule">
+                  ·
+                </span>
+              )}
+              <span className="font-display text-brandBlue">{figure.value}</span>{' '}
+              {t(figure.label)}
+            </Fragment>
+          ))}
         </p>
       </div>
 

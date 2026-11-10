@@ -100,8 +100,7 @@ module.
 Nothing in it is a claim. The new strings are:
 
 - Section labels — `Our philosophy`, `Selected work`, `How we work`,
-  `Who we work with`, `By the numbers`, `In their words`, `Next step`,
-  `Where we work`.
+  `Who we work with`, `In their words`, `Next step`, `Where we work`.
 - The hero index — `How we work`, `Selected work`, `Start a conversation`.
 - The closing call to action — `What we need from you`, and the three
   lines beneath it: `The objective`, `The market`, `The deadline`.
@@ -142,9 +141,46 @@ before launch.
 The second half of the positioning line — expanding into overseas markets —
 is carried by the hero lede, which names it, and by the case list behind it.
 
-### The belief card is a citation, not a claim
+### The four figures above the client wall
 
-The card opposite the hero lede quotes Jef I. Richards: *Creativity without
+> 500+ named clients · 1,000+ campaigns delivered · 20 countries served ·
+> 15+ years of expertise
+
+Agency figures, supplied in November 2026. They are lifetime numbers, and
+they are the only figures the homepage carries: the band that used to count
+what the site can evidence was removed in the same pass, so nothing on the
+page now sits beside them claiming otherwise.
+
+| Claim | Source | Status |
+|---|---|---|
+| 500+ named clients | the agency | **file name needed** |
+| 1,000+ campaigns delivered | the agency | **file name needed** |
+| 20 countries served | the agency | **file name needed** |
+| 15+ years of expertise | the agency | **file name needed** |
+
+Two things have to be settled before launch:
+
+- **"15+ years" implies a founding year.** `site.js` deliberately carries
+  `foundedYear: null` — the domain was registered in 2016, which is not a
+  founding date. Either the founding year is evidenced and stated, or the
+  figure comes down.
+- **"20 countries" sits against "3 markets covered."** Both can be true —
+  markets are where the agency operates, countries are where campaigns ran —
+  but the reader cannot see the difference now that the band is gone. The
+  market count still lives in `site.js`; if it is wanted on the page, it has
+  to be worded so the two do not read as a contradiction.
+- **The office list changed in the same pass** — Shanghai became Hangzhou,
+  and Kuala Lumpur joined — so the delivery-office count is four, not three.
+
+The band that carried the site's own counted figures — 27 confirmed clients,
+3 markets, 4 delivery offices, 4 attributed testimonials — was removed from
+the homepage in the same pass. Nothing was lost: every figure it showed is
+computed from the data modules and still verifiable, and the ones a reader
+is most likely to want are on the Services and Contact pages.
+
+### The belief is a citation, not a claim
+
+The belief under the hero claim quotes Jef I. Richards: *Creativity without
 strategy is called art. Creativity with strategy is called advertising.*
 
 It is printed with his name, so it is a citation of someone else's line
@@ -167,7 +203,7 @@ That is a design decision, not a copy decision, and it is documented in
 
 ## 6. Nothing was inherited by accident
 
-The Chinese copy in `capabilities.js`, `cases.js` and `clients.js` is
+The Chinese copy in `services.js`, `cases.js` and `clients.js` is
 unchanged from v1.0 and v2.0. `content.js` has been touched — the hero
 eyebrow, headline and lede were rewritten in November 2026, and the third
 principle now counts three markets rather than two — but each change was

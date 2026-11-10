@@ -29,7 +29,7 @@ PAGES = [
     ("work", "Work index"),
     ("work-huatai", "Case — Huatai Finance HK"),
     ("work-christies", "Case — Christie's Auction"),
-    ("capabilities", "Capabilities"),
+    ("services", "Services"),
     ("about", "About"),
     ("careers", "Careers"),
     ("contact", "Contact"),

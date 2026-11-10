@@ -83,7 +83,7 @@ Three locales, URL-prefixed: `/en/*`, `/zh-Hant/*`, `/zh-Hans/*`.
 
 | Path | What it is |
 | --- | --- |
-| `src/data/` | Everything factual. `content.js` (copy), `cases.js` (16 sourced cases), `capabilities.js` (25 published capability lines, derived from the CRM's 23 agreed scope rows — one row is presented as three add-on lines), `clients.js` (roster + testimonials), `site.js` (constants, offices, platforms), `media.js` (mock-up imagery), `content.v3.js` (v3.0 structural copy), `i18n.js` (locale registry). |
+| `src/data/` | Everything factual. `content.js` (copy), `cases.js` (16 sourced cases), `services.js` (25 published service lines, derived from the CRM's 23 agreed scope rows — one row is presented as three add-on lines), `clients.js` (roster + testimonials), `site.js` (constants, offices, platforms), `media.js` (mock-up imagery), `content.v3.js` (v3.0 structural copy), `i18n.js` (locale registry). |
 | `src/components/v3/` | The v3.0 component library. |
 | `src/components/layout/` | `SiteHeader`, `SiteFooter`, `CaptureMode`. |
 | `src/components/ui/` | `Button`, `Icon`, `Logo`. |

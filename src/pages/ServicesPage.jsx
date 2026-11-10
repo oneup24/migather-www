@@ -1,4 +1,4 @@
-import { addOns, goals } from '../data/capabilities';
+import { addOns, goals } from '../data/services';
 import { content } from '../data/content';
 import { banners } from '../data/media';
 import { useLocale } from '../hooks/useLocale';
@@ -7,27 +7,27 @@ import Editorial from '../components/v3/Editorial';
 import PageBanner from '../components/v3/PageBanner';
 
 /**
- * Capabilities.
+ * Services.
  *
  * The three goals are set in the editorial grammar — a large numeral in the
  * left gutter, the goal name and statement beside it — and the individual
- * capabilities inside each goal follow Capsule48's small caps service list
+ * services inside each goal follow Capsule48's small caps service list
  * rather than a row of cards.
  */
-export default function CapabilitiesPage() {
+export default function ServicesPage() {
   const { locale, path, t } = useLocale();
-  const c = content.capabilities;
+  const c = content.services;
 
   useDocumentMeta({
     title: t(c.title),
     description: t(c.lede),
-    path: `/${locale}/capabilities`,
+    path: `/${locale}/services`,
   });
 
   return (
     <>
       <PageBanner
-        image={banners.capabilities}
+        image={banners.services}
         eyebrow={t(c.eyebrow)}
         title={t(c.title)}
         lede={t(c.lede)}

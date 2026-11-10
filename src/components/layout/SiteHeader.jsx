@@ -49,8 +49,21 @@ export default function SiteHeader() {
   const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
   const overlay = isHome && !scrolled;
 
-  const isActive = (to) =>
-    to === '/' ? pathname === `/${locale}` || pathname === `/${locale}/` : pathname.startsWith(to);
+  /**
+   * Is this nav entry the page we are on?
+   *
+   * Takes the route as written in the data, not the resolved href. The
+   * homepage entry resolves to the locale root ("/en"), which is also the
+   * prefix of every other address in that language — so a plain prefix
+   * test would light "About us" up on every page. It is compared exactly
+   * instead, and everything else is matched on a path boundary.
+   */
+  const isActive = (rawTo) => {
+    const to = path(rawTo);
+    const home = `/${locale}`;
+    if (to === home || to === `${home}/`) return pathname === home || pathname === `${home}/`;
+    return pathname === to || pathname.startsWith(`${to}/`);
+  };
 
   /** Swap the locale segment of the current path, keeping the page. */
   const localeHref = (code) => {
@@ -93,12 +106,12 @@ export default function SiteHeader() {
                 className={cn(
                   'relative py-2 transition-colors hover:text-ink',
                   overlay ? 'hover:text-white' : 'hover:text-ink',
-                  isActive(path(item.to)) && (overlay ? 'text-white' : 'text-ink'),
+                  isActive(item.to) && (overlay ? 'text-white' : 'text-ink'),
                 )}
-                aria-current={isActive(path(item.to)) ? 'page' : undefined}
+                aria-current={isActive(item.to) ? 'page' : undefined}
               >
                 {t(item.label)}
-                {isActive(path(item.to)) && (
+                {isActive(item.to) && (
                   <span
                     aria-hidden="true"
                     className={cn(
@@ -188,7 +201,7 @@ export default function SiteHeader() {
                     to={path(item.to)}
                     className={cn(
                       'block border-b border-rule py-5 font-editorial text-[26px] leading-tight transition-colors',
-                      isActive(path(item.to)) ? 'text-brandBlue' : 'text-ink',
+                      isActive(item.to) ? 'text-brandBlue' : 'text-ink',
                     )}
                   >
                     {t(item.label)}

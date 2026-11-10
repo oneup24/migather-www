@@ -1,7 +1,7 @@
 /**
- * Capabilities, organised by business goal.
+ * Services, organised by business goal.
  *
- * The capability list is derived from the 23 agreed `SCOPE OF WORK` lines in
+ * The service list is derived from the 23 agreed `SCOPE OF WORK` lines in
  * the CRM (`scope_items`), which are wording already used in signed scopes.
  * Where a line carries a price, the price is deliberately NOT published on
  * the site — indicative pricing stays in the proposal and CRM until it is

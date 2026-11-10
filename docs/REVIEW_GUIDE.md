@@ -73,9 +73,10 @@ Open `docs/mockups/en/home.png` and scroll to the top.
   for the page — `How we work`, `Selected work`, `Start a conversation`. The
   first jumps to `#approach`, the third to `#contact`, and the second goes
   to the work page, because the selected work has its own page.
-- The `V3.0 DESIGN PREVIEW` badge is a marker so a screen-capture is never
-  mistaken for the live site. Remove it before launch —
-  `src/data/content.v3.js` → `hero.versionBadge`.
+- The `V3.0 DESIGN PREVIEW` badge has been removed, along with the string
+  behind it. The `MOCK-UP` tags on the photographs have not: they are the
+  standing disclosure, and they stay until the artwork is replaced with real
+  client photography.
 
 ### 3.2 The body — Capsule48's contribution
 
@@ -101,7 +102,7 @@ Open `docs/mockups/en/work.png`.
 
 ### 3.4 The inner pages
 
-`docs/mockups/en/` also holds `about`, `capabilities`, `careers`, `contact`,
+`docs/mockups/en/` also holds `about`, `services`, `careers`, `contact`,
 `legal-privacy`, `not-found` and two case pages.
 
 All nine templates were rebuilt in the same grammar. Each opens on the same

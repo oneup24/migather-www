@@ -49,19 +49,25 @@ export const CONTACT = {
 /**
  * Primary navigation.
  *
- * Order: About us · Services · Works · Contact — set by management in
- * November 2026. The order is the one thing here that is a design decision
- * rather than a fact about the agency, so it lives in one place.
+ * Order: About us · Services · Works · Contact, as management set it in
+ * November 2026.
+ *
+ * The About us entry points at the homepage for now, while the About page
+ * is still being written: the page itself is live at /about, but the menu
+ * item goes home until there is something there to point at.
+ *
+ * The order is the one thing here that is a design decision rather than a
+ * fact about the agency, so it lives in one place.
  */
 export const primaryNav = [
   {
     key: 'about',
-    to: '/about',
+    to: '/',
     label: { en: 'About us', 'zh-Hant': '關於我們', 'zh-Hans': '关于我们' },
   },
   {
-    key: 'capabilities',
-    to: '/capabilities',
+    key: 'services',
+    to: '/services',
     label: { en: 'Services', 'zh-Hant': '服務範疇', 'zh-Hans': '服务范围' },
   },
   { key: 'work', to: '/work', label: { en: 'Works', 'zh-Hant': '案例', 'zh-Hans': '案例' } },
@@ -80,8 +86,7 @@ export const footerNav = {
     { to: '/work?filter=lifestyle', label: { en: 'Lifestyle & retail', 'zh-Hant': '生活品味及零售', 'zh-Hans': '生活品味及零售' } },
   ],
   Agency: [
-    { to: '/capabilities', label: { en: 'Capabilities', 'zh-Hant': '服務範疇', 'zh-Hans': '服务范围' } },
-    { to: '/about', label: { en: 'About us', 'zh-Hant': '關於我們', 'zh-Hans': '关于我们' } },
+    { to: '/services', label: { en: 'Services', 'zh-Hant': '服務範疇', 'zh-Hans': '服务范围' } },
     { to: '/careers', label: { en: 'Careers', 'zh-Hant': '加入我們', 'zh-Hans': '加入我们' } },
     { to: '/contact', label: { en: 'Contact', 'zh-Hant': '聯絡我們', 'zh-Hans': '联系我们' } },
   ],
@@ -106,16 +111,22 @@ export const offices = [
     role: { en: 'Headquarters', 'zh-Hant': '總部', 'zh-Hans': '总部' },
   },
   {
-    city: { en: 'Shanghai', 'zh-Hant': '上海', 'zh-Hans': '上海' },
-    region: { en: "Mainland China", 'zh-Hant': '中國內地', 'zh-Hans': '中国内地' },
+    city: { en: 'Hangzhou', 'zh-Hant': '杭州', 'zh-Hans': '杭州' },
+    region: { en: 'Mainland China', 'zh-Hant': '中國內地', 'zh-Hans': '中国内地' },
     address: null,
     role: { en: 'Mainland team', 'zh-Hant': '內地團隊', 'zh-Hans': '内地团队' },
   },
   {
-    city: { en: 'Shenzhen', 'zh-Hant': '深圳', 'zh-Hans': '深圳' },
-    region: { en: "Mainland China", 'zh-Hant': '中國內地', 'zh-Hans': '中国内地' },
+    city: { en: 'ShenZhen', 'zh-Hant': '深圳', 'zh-Hans': '深圳' },
+    region: { en: 'Mainland China', 'zh-Hant': '中國內地', 'zh-Hans': '中国内地' },
     address: null,
     role: { en: 'Mainland team', 'zh-Hant': '內地團隊', 'zh-Hans': '内地团队' },
+  },
+  {
+    city: { en: 'Kuala Lumpur', 'zh-Hant': '吉隆坡', 'zh-Hans': '吉隆坡' },
+    region: { en: 'Southeast Asia', 'zh-Hant': '東南亞', 'zh-Hans': '东南亚' },
+    address: null,
+    role: { en: 'Southeast Asia team', 'zh-Hant': '東南亞團隊', 'zh-Hans': '东南亚团队' },
   },
 ];
 
@@ -136,9 +147,9 @@ export const markets = [
   {
     name: { en: 'Mainland China', 'zh-Hant': '中國內地', 'zh-Hans': '中国内地' },
     note: {
-      en: 'WeChat, 小红书 and Weibo content, China SEM and programmatic, plus cross-border campaigns run from our own Shanghai and Shenzhen teams.',
-      'zh-Hant': '微信、小紅書及微博內容，中國內地搜尋及程序化投放，並由上海及深圳團隊直接執行跨境項目。',
-      'zh-Hans': '微信、小红书及微博内容，中国内地搜索及程序化投放，并由上海及深圳团队直接执行跨境项目。',
+      en: 'WeChat, 小红书 and Weibo content, China SEM and programmatic, plus cross-border campaigns run from our own Hangzhou and ShenZhen teams.',
+      'zh-Hant': '微信、小紅書及微博內容，中國內地搜尋及程序化投放，並由杭州及深圳團隊直接執行跨境項目。',
+      'zh-Hans': '微信、小红书及微博内容，中国内地搜索及程序化投放，并由杭州及深圳团队直接执行跨境项目。',
     },
   },
   {

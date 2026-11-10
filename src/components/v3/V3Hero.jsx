@@ -39,9 +39,6 @@ export default function V3Hero({ image, className }) {
 
       <div className="relative z-10 mx-auto flex min-h-[86svh] w-full max-w-7xl flex-col justify-end px-6 pb-9 pt-36 md:min-h-[92svh] md:pb-12">
         <div className="mb-7 flex items-center gap-4">
-          <span className="eyebrow border border-white/30 px-2.5 py-1 text-white/70">
-            {t(contentV3.hero.versionBadge)}
-          </span>
           <span className="eyebrow text-white/55">{t(hero.eyebrow)}</span>
         </div>
 
@@ -53,42 +50,32 @@ export default function V3Hero({ image, className }) {
           />
         </h1>
 
-        <div className="mt-7 grid gap-10 lg:grid-cols-12 lg:gap-16">
-          <div className="lg:col-span-7">
-            <p className="max-w-xl text-base leading-relaxed text-white/80 md:text-lg">
-              {t(hero.lede)}
-            </p>
+        {/* The house belief, quoted. It sits under the claim, in the place
+            the lede used to hold. */}
+        <div className="mt-9 max-w-xl">
+          <div className="eyebrow text-white/55">{t(hero.belief.label)}</div>
+          <p className="font-editorial mt-4 text-[clamp(1.25rem,2vw,1.8rem)] leading-[1.3] font-normal text-white">
+            “{t(hero.belief.quote)}”
+          </p>
+          <p className="mt-4 font-display text-[12.5px] font-medium uppercase tracking-[0.1em] text-crimsonOnDark">
+            — {t(hero.belief.attribution)}
+          </p>
+        </div>
 
-            <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Link
-                to={path('/work')}
-                className="inline-flex items-center gap-2 bg-white px-7 py-3.5 font-display text-[13px] font-medium uppercase tracking-[0.08em] text-ink transition-colors hover:bg-brandBlue hover:text-white"
-              >
-                {t(hero.primaryCta)}
-                <Icon name="arrow-right" className="h-4 w-4" />
-              </Link>
-              <Link
-                to={path('/contact')}
-                className="inline-flex items-center gap-2 border border-white/50 px-7 py-3.5 font-display text-[13px] font-medium uppercase tracking-[0.08em] text-white transition-colors hover:border-white hover:bg-white hover:text-ink"
-              >
-                {t(hero.secondaryCta)}
-              </Link>
-            </div>
-          </div>
-
-          {/* The house belief, quoted. It sits opposite the lede, the way the
-              agency video carries it. */}
-          <aside className="lg:col-span-5 lg:pt-1">
-            <div className="border-l-2 border-brandCrimson bg-paper/95 px-6 py-6 shadow-[0_18px_40px_-24px_rgba(0,0,0,0.55)] backdrop-blur-[2px]">
-              <div className="eyebrow text-brandCrimson">{t(hero.belief.label)}</div>
-              <p className="font-editorial mt-4 text-[clamp(1.15rem,1.7vw,1.5rem)] leading-[1.35] font-normal text-ink">
-                “{t(hero.belief.quote)}”
-              </p>
-              <p className="mt-4 font-display text-[13px] font-medium tracking-[0.06em] text-brandCrimson uppercase">
-                — {t(hero.belief.attribution)}
-              </p>
-            </div>
-          </aside>
+        <div className="mt-9 flex flex-wrap items-center gap-3">
+          <Link
+            to={path('/work')}
+            className="inline-flex items-center gap-2 bg-white px-7 py-3.5 font-display text-[13px] font-medium uppercase tracking-[0.08em] text-ink transition-colors hover:bg-brandBlue hover:text-white"
+          >
+            {t(hero.primaryCta)}
+            <Icon name="arrow-right" className="h-4 w-4" />
+          </Link>
+          <Link
+            to={path('/contact')}
+            className="inline-flex items-center gap-2 border border-white/50 px-7 py-3.5 font-display text-[13px] font-medium uppercase tracking-[0.08em] text-white transition-colors hover:border-white hover:bg-white hover:text-ink"
+          >
+            {t(hero.secondaryCta)}
+          </Link>
         </div>
 
         <nav className="index-nav mt-14 md:mt-20" aria-label={t(contentV3.labels.work)}>

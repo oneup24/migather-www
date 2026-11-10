@@ -23,7 +23,7 @@ const SUB_PATHS = [
   '/work/huatai-finance-hk',
   '/work/11-skies-gba-forum',
   '/work/christies-auction',
-  '/capabilities',
+  '/services',
   '/about',
   '/careers',
   '/contact',

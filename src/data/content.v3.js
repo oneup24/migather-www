@@ -1,7 +1,7 @@
 /**
  * v3.0 copy — the words that are new in this design.
  *
- * Everything factual is reused from `content.js`, `capabilities.js`,
+ * Everything factual is reused from `content.js`, `services.js`,
  * `cases.js` and `clients.js`, so the two builds cannot drift apart: the
  * same facts, the same claims, the same sources, laid out differently.
  *
@@ -70,16 +70,6 @@ export const contentV3 = {
       'zh-Hant': '進入中國內地',
       'zh-Hans': '进入中国内地',
     },
-
-    /**
-     * A quiet marker so a screen-capture is never mistaken for the live
-     * site. Remove this one component when v3.0 replaces v1.0.
-     */
-    versionBadge: {
-      en: 'v3.0 design preview',
-      'zh-Hant': 'v3.0 設計預覽',
-      'zh-Hans': 'v3.0 设计预览',
-    },
   },
 
   /* ───────────────────────────────────────────────────────────────────────
@@ -100,7 +90,6 @@ export const contentV3 = {
     work: { en: 'Selected work', 'zh-Hant': '精選案例', 'zh-Hans': '精选案例' },
     approach: { en: 'How we work', 'zh-Hant': '工作方式', 'zh-Hans': '工作方式' },
     clients: { en: 'Who we work with', 'zh-Hant': '合作客戶', 'zh-Hans': '合作客户' },
-    numbers: { en: 'By the numbers', 'zh-Hant': '以數字說明', 'zh-Hans': '以数字说明' },
     voices: { en: 'In their words', 'zh-Hant': '他們怎麼說', 'zh-Hans': '他们怎么说' },
     markOwner: {
       en: 'Client marks are the property of their owners and appear here to identify the clients they belong to.',

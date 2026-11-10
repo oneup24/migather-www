@@ -106,6 +106,12 @@ export const clientLogos = {
     src: asset('/media/clients/k11-musea.svg'),
     source: 'k11musea.com',
   },
+  '11-skies': {
+    // The agency's own instruction, November 2026: the 11 SKIES line of the
+    // wall carries the K11 mark.
+    src: asset('/media/clients/k11-musea.svg'),
+    source: 'the K11 MUSEA mark, at the request of the agency',
+  },
   'marks-spencer': {
     src: asset('/media/clients/marks-spencer.png'),
     source: 'agency credential deck',
@@ -141,10 +147,6 @@ export const clientLogos = {
   mando: {
     src: asset('/media/clients/mando.png'),
     source: 'agency credential deck',
-  },
-  'central-market': {
-    src: asset('/media/clients/central-market.png'),
-    source: 'centralmarket.hk',
   },
   christies: {
     src: asset('/media/clients/christies.svg'),
@@ -193,8 +195,8 @@ export const banners = {
       'zh-Hans': '样机：黄昏时分的创意工作室，单盏灯照亮桌上的稿件。',
     },
   },
-  capabilities: {
-    src: asset('/media/capabilities-hero.jpg'),
+  services: {
+    src: asset('/media/services-hero.jpg'),
     alt: {
       en: 'Mock-up: layered translucent colour gels over a backlit lightbox.',
       'zh-Hant': '樣機：背光燈箱上層疊的半透明色片。',

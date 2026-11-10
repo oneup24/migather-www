@@ -142,11 +142,10 @@ not as one-off class strings in each component.
 The order was reset by management in November 2026 — the client wall moved
 up, "How we work" moved up, and three sections were removed.
 
-1. **Hero** — photograph, one claim, the picked-out phrase, the lede with the belief card opposite it, the numbered index.
-2. **Who we work with** — the small caps label, the client claim set large, and the 27 clients as marks in two rows travelling right to left.
-3. **How we work** — the first three principles, numbered `01`–`03`.
-4. **By the numbers** — the four countable facts.
-5. **Next step** — the closing statement, two actions, and the three things an enquiry has to carry.
+1. **Hero** — photograph, one claim, the picked-out phrase, the belief under it, the numbered index.
+2. **How we work** — the first three principles, numbered `01`–`03`.
+3. **Who we work with** — the label, the four figures, and the 27 clients as marks in two rows travelling right to left.
+4. **Next step** — the closing statement, two actions, and the three things an enquiry has to carry.
 
 The full "Who we work with" editorial (the vertical image and the market
 list) and the "In their words" testimonials section were removed from the
@@ -241,9 +240,11 @@ never from a logo aggregator — and every one is registered in
 - `tools/media/tighten-client-logos.mjs` asks Chrome for the tight bounding
   box of each vector mark and rewrites its viewBox, so a logo does not
   arrive as a speck inside a large empty canvas.
-- Four clients publish no mark we could fetch honestly — Hang Seng Bank,
-  Wing Fung Financial Group, 11 SKIES and QPET — so their cell in the wall
-  carries the name in the house display face instead of an image.
+- Three clients carry their name in the house display face instead of a
+  mark: Hang Seng Bank, QPET and 中環街市. Wing Fung Financial Group is on
+  the roster and in the case list, but comes off the wall at the agency's
+  request. The 11 SKIES line carries the K11 MUSEA mark, also at the
+  agency's request.
 
 A mark is its owner's property. The wall prints that line underneath it.
 
@@ -292,7 +293,7 @@ opposite of the restraint the references use.
   headline now carries one claim — that global brands trust us to enter and
   scale in China — and it is sourced in
   [`COPY_COMPLIANCE.md`](COPY_COMPLIANCE.md) §4.
-- **The copy.** `capabilities.js`, `cases.js` and `clients.js` are unchanged
+- **The copy.** `services.js`, `cases.js` and `clients.js` are unchanged
   from v1.0. `content.js` changed in November 2026: the hero eyebrow,
   headline and lede were rewritten to the agency's own positioning, the
   third principle now counts three markets, and the belief card was added.

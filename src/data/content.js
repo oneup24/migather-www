@@ -80,18 +80,17 @@ export const content = {
         'zh-Hant': '跨國品牌信任我們，進入中國內地並擴張。',
         'zh-Hans': '跨国品牌信任我们，进入中国内地并扩张。',
       },
-      lede: {
-        en: 'We build the brand, grow the audience and convert the demand — for brands entering China and expanding into overseas markets. Every account is run by the senior people doing the work, from day one.',
-        'zh-Hant': '我們建立品牌、擴展受眾、轉化需求——為進入中國並拓展海外市場的品牌而做。每個項目都由親自落手操作的資深團隊，自第一天起即在你的項目上。',
-        'zh-Hans': '我们建立品牌、扩展受众、转化需求——为进入中国并拓展海外市场的品牌而做。每个项目都由亲自落手操作的资深团队，自第一天起就在你的项目上。',
-      },
-
       /**
-       * The belief card in the hero.
+       * The belief under the hero claim.
        *
        * The house view, quoted and attributed. It is a citation, not a
        * claim about us — Jef I. Richards' line is the agency's own position
        * on how creative work is judged, and it is printed with his name.
+       *
+       * It stands where the hero lede used to. The lede is in the history of
+       * this file, and the line it carried — the three goals, and the senior
+       * people doing the work — is not lost: it opens the "How we work"
+       * section and closes the contact section.
        */
       belief: {
         label: { en: 'Our belief', 'zh-Hant': '我們的信念', 'zh-Hans': '我们的信念' },
@@ -108,21 +107,31 @@ export const content = {
     },
 
     proof: {
-      eyebrow: { en: 'Who we work with', 'zh-Hant': '合作客戶', 'zh-Hans': '合作客户' },
-      title: {
-        en: 'Banks, brokers, developers, auction houses, malls and retailers.',
-        'zh-Hant': '銀行、券商、發展商、拍賣行、購物城及零售商。',
-        'zh-Hans': '银行、券商、开发商、拍卖行、购物城及零售商。',
-      },
-      lede: {
-        en: 'Mostly Hong Kong and Mainland China, with regional campaigns across Southeast Asia. The longest-running partnership on file dates from 2016.',
-        'zh-Hant': '主要為香港及中國內地項目，並於東南亞執行區域性推廣。檔案中最長的合作關係始於 2016 年。',
-        'zh-Hans': '主要为香港及中国内地项目，并于东南亚执行区域性推广。档案中最长的合作关系始于 2016 年。',
-      },
-      statClients: { en: 'named clients', 'zh-Hant': '個已確認客戶', 'zh-Hans': '个已确认客户' },
-      statMarkets: { en: 'markets covered', 'zh-Hant': '個覆蓋市場', 'zh-Hans': '个覆盖市场' },
-      statOffices: { en: 'delivery offices', 'zh-Hant': '個執行辦事處', 'zh-Hans': '个执行办事处' },
-      statTestimonials: { en: 'attributed testimonials', 'zh-Hant': '段具名客戶評語', 'zh-Hans': '段具名客户评语' },
+      /**
+       * The four figures that stand above the client wall.
+       *
+       * Agency figures, supplied in November 2026 — lifetime numbers, not
+       * the site's own evidence. The source file has to be filled in: see
+       * `COPY_COMPLIANCE.md` §4.
+       */
+      figures: [
+        {
+          value: '500+',
+          label: { en: 'named clients', 'zh-Hant': '家客戶', 'zh-Hans': '家客户' },
+        },
+        {
+          value: '1,000+',
+          label: { en: 'campaigns delivered', 'zh-Hant': '個推廣項目', 'zh-Hans': '个推广项目' },
+        },
+        {
+          value: '20',
+          label: { en: 'countries served', 'zh-Hant': '個服務國家', 'zh-Hans': '个服务国家' },
+        },
+        {
+          value: '15+',
+          label: { en: 'years of expertise', 'zh-Hant': '年經驗', 'zh-Hans': '年经验' },
+        },
+      ],
     },
 
     principles: {
@@ -187,21 +196,6 @@ export const content = {
       ],
     },
 
-    capabilities: {
-      eyebrow: { en: 'What we do', 'zh-Hant': '我們做什麼', 'zh-Hans': '我们做什么' },
-      title: {
-        en: 'Three goals, and only three.',
-        'zh-Hant': '三個目標，只有三個。',
-        'zh-Hans': '三个目标，只有三个。',
-      },
-      lede: {
-        en: 'We do not publish a long menu of deliverables. Everything below serves one of three business outcomes — and we can tell you which.',
-        'zh-Hant': '我們不公布一份長長的服務清單。以下每一項，都服務於三個業務目標之一——我們也可以告訴你屬於哪一個。',
-        'zh-Hans': '我们不公布一份长长的服务清单。以下每一项，都服务于三个业务目标之一——我们也可以告诉你属于哪一个。',
-      },
-      cta: { en: 'All capabilities', 'zh-Hant': '查看完整服務範疇', 'zh-Hans': '查看完整服务范围' },
-    },
-
     work: {
       eyebrow: { en: 'Selected work', 'zh-Hant': '精選案例', 'zh-Hans': '精选案例' },
       title: {
@@ -257,9 +251,9 @@ export const content = {
       'zh-Hans': '精品，是刻意的选择。',
     },
     lede: {
-      en: 'Migather Limited is a performance digital creative and media agency in Hong Kong, with delivery teams in Shanghai and Shenzhen and project work across Southeast Asia.',
-      'zh-Hant': 'Migather Limited 是一間設於香港的效能型數位創意及媒體代理公司，在上海及深圳設有執行團隊，並於東南亞承接項目。',
-      'zh-Hans': 'Migather Limited 是一家设于香港的效能型数字创意及媒体代理机构，在上海及深圳设有执行团队，并于东南亚承接项目。',
+      en: 'Migather Limited is a performance digital creative and media agency in Hong Kong, with delivery teams in Hangzhou, ShenZhen and Kuala Lumpur, and project work across Southeast Asia.',
+      'zh-Hant': 'Migather Limited 是一間設於香港的效能型數位創意及媒體代理公司，在杭州、深圳及吉隆坡設有執行團隊，並於東南亞承接項目。',
+      'zh-Hans': 'Migather Limited 是一家设于香港的效能型数字创意及媒体代理机构，在杭州、深圳及吉隆坡设有执行团队，并于东南亚承接项目。',
     },
     story: [
       {
@@ -268,7 +262,7 @@ export const content = {
         'zh-Hans': '我们刻意保持精简。不是网络，也不是需要向上层转交工作的公司——而是一家精品团队，与你提案的人，就是在你项目上做事的人。',
       },
       {
-        en: 'That structure is the business model, not a compromise. It buys senior attention, speed and no hand-off. It also means we only take on work we can do properly — which is why our capability list is organised around three business goals instead of a long menu of deliverables.',
+        en: 'That structure is the business model, not a compromise. It buys senior attention, speed and no hand-off. It also means we only take on work we can do properly — which is why our service list is organised around three business goals instead of a long menu of deliverables.',
         'zh-Hant': '這個結構是商業模式，而不是妥協。它換來的是資深關注、速度，以及沒有交接。同時亦代表我們只承接做得好的工作——這正是我們的服務清單圍繞三個業務目標組織，而不是一份長長的交付項目表的原因。',
         'zh-Hans': '这个结构是商业模式，而不是妥协。它换来的是资深关注、速度，以及没有交接。同时也代表我们只接能做好的工作——这正是我们的服务清单围绕三个业务目标组织，而不是一份长长的交付项目表的原因。',
       },
@@ -326,17 +320,17 @@ export const content = {
   },
 
   /* ───────────────────────────────────────────────────────────────────────
-     Capabilities
+     Services
      ─────────────────────────────────────────────────────────────────────── */
-  capabilities: {
-    eyebrow: { en: 'Capabilities', 'zh-Hant': '服務範疇', 'zh-Hans': '服务范围' },
+  services: {
+    eyebrow: { en: 'Services', 'zh-Hant': '服務範疇', 'zh-Hans': '服务范围' },
     title: {
       en: 'Three goals. Everything we do serves one of them.',
       'zh-Hant': '三個目標。我們做的每一件事，都服務於其中之一。',
       'zh-Hans': '三个目标。我们做的每一件事，都服务于其中之一。',
     },
     lede: {
-      en: 'We do not publish a long menu of deliverables. Here is what we do, organised by the business outcome it is meant to produce — and what each capability actually involves when we deliver it.',
+      en: 'We do not publish a long menu of deliverables. Here is what we do, organised by the business outcome it is meant to produce — and what each service actually involves when we deliver it.',
       'zh-Hant': '我們不公布一份長長的交付項目表。以下是我們的服務，按其擬達成的業務成果組織——並說明每一項在實際交付時具體包含甚麼。',
       'zh-Hans': '我们不公布一份长长的交付项目表。以下是我们的服务，按其拟达成的业务成果组织——并说明每一项在实际交付时具体包含什么。',
     },
@@ -433,9 +427,9 @@ export const content = {
       'zh-Hans': '我们在哪里',
     },
     officesLede: {
-      en: 'Hong Kong is our headquarters. Shanghai and Shenzhen carry Mainland delivery. Street addresses are shared on request.',
-      'zh-Hant': '香港是我們的總部。上海及深圳負責內地執行。辦事處地址按需要提供。',
-      'zh-Hans': '香港是我们的总部。上海及深圳负责内地执行。办事处地址按需要提供。',
+      en: 'Hong Kong is our headquarters. Hangzhou and ShenZhen carry Mainland delivery, and Kuala Lumpur carries Southeast Asia. Street addresses are shared on request.',
+      'zh-Hant': '香港是我們的總部。杭州及深圳負責內地執行，吉隆坡負責東南亞。辦事處地址按需要提供。',
+      'zh-Hans': '香港是我们的总部。杭州及深圳负责内地执行，吉隆坡负责东南亚。办事处地址按需要提供。',
     },
   },
 

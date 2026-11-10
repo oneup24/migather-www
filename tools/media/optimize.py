@@ -9,7 +9,7 @@ before/after so the saving is visible rather than assumed.
 
 Widths are chosen per role, not globally:
 
-    hero-* / work-hero / about-hero / capabilities-hero / careers-hero
+    hero-* / work-hero / about-hero / services-hero / careers-hero
         full-bleed banners — 2400px wide
     home-manifesto / about-studio / contact-city
         editorial in-body images — 1400px wide
@@ -37,7 +37,7 @@ HERO_NAMES = {
     "hero-cinema",
     "work-hero",
     "about-hero",
-    "capabilities-hero",
+    "services-hero",
     "careers-hero",
 }
 FEATURE_NAMES = {"home-manifesto", "about-studio", "contact-city"}

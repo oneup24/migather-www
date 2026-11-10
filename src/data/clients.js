@@ -28,7 +28,15 @@ export const clients = [
   { name: 'Bank of China HK', slug: 'bank-of-china-hk', local: '中銀香港', group: 'finance' },
   { name: 'Hang Seng Bank', slug: 'hang-seng-bank', local: '恒生銀行', group: 'finance' },
   { name: 'Fubon Bank', slug: 'fubon-bank', local: '永明金融', group: 'finance' },
-  { name: 'Wing Fung Financial Group', slug: 'wing-fung', local: '永豐金融集團', group: 'finance' },
+  // On the roster and in the case list, but off the client wall: the
+  // agency asked for it to be taken down in November 2026.
+  {
+    name: 'Wing Fung Financial Group',
+    slug: 'wing-fung',
+    local: '永豐金融集團',
+    group: 'finance',
+    wall: false,
+  },
   { name: 'ATFX Securities', slug: 'atfx', local: '', group: 'finance' },
   { name: 'ICBC Asia', slug: 'icbc-asia', local: '', group: 'finance' },
   { name: 'CTFlife', slug: 'ctf-life', local: '', group: 'finance' },

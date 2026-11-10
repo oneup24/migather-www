@@ -342,7 +342,7 @@ async function main() {
     }
 
     /* ── 4. Every internal link resolves to a real page ─────────────── */
-    const routes = ['/en', '/en/work', '/en/capabilities', '/en/about', '/en/careers', '/en/contact'];
+    const routes = ['/en', '/en/work', '/en/services', '/en/about', '/en/careers', '/en/contact'];
     for (const route of routes) {
       await goto(`${BASE}${route}?capture=1`);
       const result = await evaluate(`
@@ -385,7 +385,7 @@ async function main() {
 
     /* Every full-bleed banner — the homepage hero and every inner-page
        banner — is generated artwork, so it must carry the tag too. */
-    for (const route of ['/en', '/en/work', '/en/about', '/en/capabilities', '/en/careers', '/en/contact']) {
+    for (const route of ['/en', '/en/work', '/en/about', '/en/services', '/en/careers', '/en/contact']) {
       await goto(`${BASE}${route}?capture=1`);
       const bannerTagged = await evaluate(`
         (() => {
