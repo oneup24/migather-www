@@ -290,6 +290,11 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
   check('GitHub was asked to dispatch', context.__calls.dispatched.length === 1);
   check('the event type is right', context.__calls.dispatched[0]?.event_type === 'sync-cases');
   check('the publish was stamped', String(setting(context, 'lastPublish')).length > 10);
+  check(
+    'the status says which publish it belongs to',
+    setting(context, 'lastPublishStatusAt') === setting(context, 'lastPublish'),
+    `${setting(context, 'lastPublishStatusAt')} vs ${setting(context, 'lastPublish')}`,
+  );
   check('the outcome was written', setting(context, 'lastPublishStatus') === 'ok', setting(context, 'lastPublishStatus'));
 }
 

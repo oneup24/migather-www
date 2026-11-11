@@ -142,6 +142,10 @@ function saveImage_(slug, fileName, dataUrl) {
  * or `failed` into the sheet when the build is done. If the build has
  * already finished by the time this looks, the result is written here.
  *
+ * `lastPublishStatusAt` says which publish a status belongs to. The status
+ * alone cannot: two publishes in a row both end in `ok`, and the editor's
+ * page has to be able to tell the first one's result from the second's.
+ *
  * A request is only honoured if the sheet says it was asked for. The editor's
  * page writes `publishRequested` into the sheet before it posts here, and
  * only somebody who can write to the sheet can do that. So knowing this
@@ -167,6 +171,7 @@ function triggerPublish_() {
   var stamp = new Date().toISOString();
   setSetting_('lastPublish', stamp);
   setSetting_('lastPublishStatus', 'dispatched');
+  setSetting_('lastPublishStatusAt', stamp);
 
   var response = UrlFetchApp.fetch(
     'https://api.github.com/repos/' + owner + '/' + repo + '/dispatches',
