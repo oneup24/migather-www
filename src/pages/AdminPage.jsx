@@ -378,6 +378,10 @@ export default function AdminPage() {
 
     try {
       const before = await readSetting(session.accessToken, 'lastPublish');
+      /* The status as it stands now. A publish only counts when the status
+         changes: without this, a result left over from the last publish
+         would be read as this one's answer. */
+      const statusBefore = await readSetting(session.accessToken, 'lastPublishStatus');
 
       /* The sheet records that a publish was asked for. It is what lets the
          script tell a real request from a stranger who found its address:
@@ -425,6 +429,8 @@ export default function AdminPage() {
       while (Date.now() < deadline) {
         await sleep(2000);
         const status = await readSetting(session.accessToken, 'lastPublishStatus');
+        /* A status that has not changed is not this publish's answer. */
+        if (status === statusBefore) continue;
         if (status === 'ok') {
           setProgress('');
           setNotice(

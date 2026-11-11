@@ -17,11 +17,11 @@
  *
  * Options:
  *   --status <ok|failed>   how the build ended        ($PUBLISH_STATUS)
- *   --message <text>       a line for the record      ($PUBLISH_MESSAGE)
- *   --spreadsheet <id>     the sheet id               ($CMS_SPREADSHEET_ID)
- *   --credentials <path>   the service-account key    ($GCP_SERVICE_ACCOUNT_JSON)
+ *   --message <text>       a line for the record       ($PUBLISH_MESSAGE)
+ *   --run-at <time>        when the build was started  ($PUBLISH_RUN_AT)
+ *   --spreadsheet <id>     the sheet id                ($CMS_SPREADSHEET_ID)
+ *   --credentials <path>   the service-account key     ($GCP_SERVICE_ACCOUNT_JSON)
  */
-import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
@@ -42,6 +42,7 @@ function argOf(name) {
 const OPTIONS = {
   status: argOf('--status') ?? process.env.PUBLISH_STATUS,
   message: argOf('--message') ?? process.env.PUBLISH_MESSAGE ?? '',
+  runAt: argOf('--run-at') ?? process.env.PUBLISH_RUN_AT ?? '',
   spreadsheet:
     argOf('--spreadsheet') ??
     process.env.CMS_SPREADSHEET_ID ??
@@ -57,10 +58,26 @@ if (!OPTIONS.status || !['ok', 'failed'].includes(OPTIONS.status)) {
   process.exit(1);
 }
 
-const key = loadCredentials(readFileSync(OPTIONS.credentials, 'utf8'));
+/* The key may be the secret itself or the path to a file — the workflow
+   passes the secret, a person running this by hand passes a path. */
+const key = loadCredentials(OPTIONS.credentials);
 const token = await getAccessToken(key, WRITE_SCOPES);
 
 const rows = (await readRanges(OPTIONS.spreadsheet, token, ['settings']))['settings'] ?? [];
+
+/* Two editors can publish at once. The sheet's `lastPublish` is stamped
+   before the build is asked for, so a stamp later than this build's start
+   belongs to a publish that has taken over — and this build's answer is no
+   longer the one the editor is waiting for. */
+if (OPTIONS.runAt) {
+  const stamped = rows.find((row) => String(row[0]) === 'lastPublish')?.[1];
+  if (stamped && Date.parse(stamped) > Date.parse(OPTIONS.runAt)) {
+    console.log(
+      `a newer publish has been asked for (${stamped} — this build started ${OPTIONS.runAt}); nothing written`,
+    );
+    process.exit(0);
+  }
+}
 
 const writes = [
   ['lastPublishStatus', OPTIONS.status],
