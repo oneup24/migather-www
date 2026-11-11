@@ -144,6 +144,11 @@ anybody configuring anything first. And the script only rebuilds the site if
 the sheet says a publish was asked for, so knowing the script's address is
 not enough to make it happen.
 
+The sign-in was checked against Google rather than assumed: the widget
+builds the right request, with the client id, the two scopes and the site's
+origin, and Google answers it with a sign-in page. The only part that cannot
+be checked from here is what happens after somebody signs in.
+
 ---
 
 ## The works page becomes CMS-driven — 10 November 2026

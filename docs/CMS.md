@@ -142,12 +142,9 @@ Create credentials → OAuth client ID → Web application:**
 - **Authorised JavaScript origins**: the site's origin —
   `https://oneup24.github.io` now, and `https://migather.com` when the
   domain is live.
-- **Authorised redirect URIs**: **the same origin** —
-  `https://oneup24.github.io`, and `http://localhost:4180` for the local
-  preview. The sign-in popup comes back to the page's own address, so the
-  address has to be registered here as well as under JavaScript origins.
-  Without it Google answers `redirect_uri_mismatch` and the sign-in never
-  happens.
+- **Authorised redirect URIs**: leave empty. The sign-in widget sends the
+  origin itself and does its own redirect handling, so the JavaScript
+  origins list is the whole requirement.
 
 The client id is in `src/data/cms.js`, alongside the sheet id and the
 script's address. None of the three is a credential — the sheet's own
@@ -176,6 +173,13 @@ Deploy as a web app: **execute as you**, access **"Anyone with a Google
 account"**. The browser posts here from a hidden frame, which makes it a
 first-party request for script.google.com and therefore carries the
 editor's Google session.
+
+> **The script must be redeployed.** The version that is live is the
+> earlier one, which expected a form of its own; it does not know what to
+> do with a picture or a publish request. Paste the current `Code.gs`, save,
+> and make a new version of the existing deployment — a new *version* keeps
+> the address, a new *deployment* does not, and the address is in
+> `src/data/cms.js`.
 
 ### 3.6 Seeding the sheet
 
