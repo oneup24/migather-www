@@ -33,6 +33,13 @@
  * account" — the browser posts here from a hidden iframe, which makes it a
  * first-party request for script.google.com and therefore carries the
  * editor's Google session.
+ *
+ * ── Reading the form ─────────────────────────────────────────────────────
+ *
+ * The event object carries the form's fields in `request.parameter`, which is
+ * an object of key/value pairs. It is not a method: `request.parameter('action')`
+ * throws, and because the read sits on the first line of `doPost` the publish
+ * request dies before anything is answered. Read `request.parameter.action`.
  */
 
 /** The Drive folder the case images live in. */
