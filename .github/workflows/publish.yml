@@ -49,6 +49,10 @@ jobs:
         with:
           python-version: '3.x'
 
+      # The site's own build tools. The repository has no runtime
+      # dependencies — this installs Vite, which builds the site.
+      - run: npm ci
+
       # Pillow resizes the pictures the editor uploads. The repository has no
       # npm dependencies and this is the only one it needs.
       - run: pip install pillow
