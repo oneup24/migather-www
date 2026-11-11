@@ -280,19 +280,23 @@ function setSetting_(key, value) {
  * happened in its own words.
  */
 function doPost(request) {
-  var action = String(request.parameter('action') || '').toLowerCase();
-
   try {
+    /* The form's fields arrive in `request.parameter`, which is an object of
+       key/value pairs — not a function to call. Reading it wrongly is what
+       stopped the publish request from ever being read. */
+    var params = (request && request.parameter) || {};
+    var action = String(params.action || '').toLowerCase();
+
     if (action === 'image') {
-      var slug = String(request.parameter('slug') || '').trim();
-      var fileName = String(request.parameter('fileName') || '').trim();
+      var slug = String(params.slug || '').trim();
+      var fileName = String(params.fileName || '').trim();
       if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
         throw new Error('the slug "' + slug + '" is not a valid route id');
       }
       if (!fileName || fileName.indexOf('/') !== -1) {
         throw new Error('the file name "' + fileName + '" is not valid');
       }
-      saveImage_(slug, fileName, request.parameter('dataUrl') || '');
+      saveImage_(slug, fileName, params.dataUrl || '');
       return reply_('The picture was saved.');
     }
 
