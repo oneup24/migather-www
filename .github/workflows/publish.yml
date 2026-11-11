@@ -141,4 +141,7 @@ jobs:
         env:
           PUBLISH_STATUS: ${{ steps.build.outcome == 'success' && 'ok' || 'failed' }}
           PUBLISH_MESSAGE: ${{ steps.build.outcome == 'success' && '' || 'the build did not finish — see the Actions tab' }}
+          # The service-account key, to write the outcome into the sheet.
+          GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+          CMS_SPREADSHEET_ID: ${{ secrets.CMS_SPREADSHEET_ID }}
         run: node tools/cms/report-publish.mjs

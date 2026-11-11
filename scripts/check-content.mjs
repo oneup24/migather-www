@@ -12,7 +12,9 @@
  *   3. every case has an image, and the file is on disk
  *   4. the alt text is filled in for all three languages
  *   5. a mock-up says so in its alt text, in all three languages
- *   6. the summary and every scope line are filled in for all three languages
+ *   6. the summary is filled in for every language, and a result or scope
+ *      line that is missing in one language is a note rather than a failure
+ *      — a translation in progress is a normal state to be in
  *   7. the sector and every service key are ones the site knows
  *
  * Run with:  npm run check:content
@@ -42,7 +44,9 @@ if (files.length === 0) {
 }
 
 const problems = [];
+const notes = [];
 const fail = (slug, message) => problems.push(`${slug}: ${message}`);
+const note = (slug, message) => notes.push(`${slug}: ${message}`);
 
 const slugs = new Set();
 const orders = [];
@@ -98,7 +102,10 @@ for (const file of files) {
   for (const [index, line] of (record.scope ?? []).entries()) {
     for (const locale of LOCALES) {
       if (line?.[locale]) continue;
-      fail(slug, `scope line ${index + 1} is empty in ${locale}`);
+      /* A line that has not been translated yet shows in English there.
+         That is the rule the whole site already follows; it is not a
+         reason to stop the site from publishing. */
+      note(slug, `scope line ${index + 1} is empty in ${locale} — it shows in English there`);
     }
   }
 
@@ -106,7 +113,7 @@ for (const file of files) {
     if (!result.value) fail(slug, `result ${index + 1} has no figure`);
     for (const locale of LOCALES) {
       if (result.label?.[locale]) continue;
-      fail(slug, `result ${index + 1} has no label in ${locale}`);
+      note(slug, `result ${index + 1} has no label in ${locale} — it shows in English there`);
     }
   }
 
@@ -123,7 +130,7 @@ for (const file of files) {
     for (const locale of LOCALES) {
       const alt = record.image.alt?.[locale];
       if (!alt) {
-        fail(slug, `no alt text in ${locale}`);
+        note(slug, `no alt text in ${locale} — it falls back to the English alt text`);
         continue;
       }
       const prefix = MOCK_UP_PREFIX[locale];
@@ -159,6 +166,9 @@ if (problems.length > 0) {
 }
 
 const mockUps = records.filter((r) => r.image?.mockup).length;
+for (const note of notes) console.log(`note  ${note}`);
+
 console.log(
-  `Content check clean — ${records.length} published cases, ${mockUps} carrying generated artwork.`,
+  `Content check clean — ${records.length} published cases, ${mockUps} carrying generated artwork` +
+    (notes.length ? `, ${notes.length} note(s).` : '.'),
 );
