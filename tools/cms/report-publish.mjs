@@ -81,6 +81,9 @@ if (OPTIONS.runAt) {
 
 const writes = [
   ['lastPublishStatus', OPTIONS.status],
+  /* Which publish the status belongs to. Two publishes in a row both end
+     in `ok`, so the status alone cannot say which one it is. */
+  ['lastPublishStatusAt', new Date().toISOString()],
   ...(OPTIONS.message ? [['lastPublishMessage', OPTIONS.message]] : []),
 ];
 
