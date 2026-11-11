@@ -29,5 +29,5 @@ export const cms = {
   /** The Apps Script that saves the pictures and asks GitHub to rebuild. */
   scriptUrl:
     import.meta.env.VITE_CMS_SCRIPT_URL ||
-    'https://script.google.com/macros/s/AKfycbzJjrXJIdW4lVW7N6AvCkF7kP9n2o0fpdbUp8CXudl-PXSxCwKRX5QRu2QcgtfOjMxl/exec',
+    'https://script.google.com/macros/s/AKfycbw1dz1vYNJwDNCghtovaEPMOxmQ7pCd3iTgkls3B_yXfPc-2rYuXmxffG4bw-wNtj7h/exec',
 };
