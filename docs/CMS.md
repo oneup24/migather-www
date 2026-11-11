@@ -142,18 +142,19 @@ Create credentials → OAuth client ID → Web application:**
 - **Authorised JavaScript origins**: the site's origin —
   `https://oneup24.github.io` now, and `https://migather.com` when the
   domain is live.
-- **Authorised redirect URIs**: leave empty.
+- **Authorised redirect URIs**: **the same origin** —
+  `https://oneup24.github.io`, and `http://localhost:4180` for the local
+  preview. The sign-in popup comes back to the page's own address, so the
+  address has to be registered here as well as under JavaScript origins.
+  Without it Google answers `redirect_uri_mismatch` and the sign-in never
+  happens.
 
-Copy the client id. It is public — it ends up in the page, like every
-OAuth app's — and it is set as a repository **variable**, not a secret:
-
-| Name | Value |
-| --- | --- |
-| `VITE_CMS_CLIENT_ID` | the client id |
-| `VITE_CMS_SHEET_ID` | the sheet id |
-| `VITE_CMS_SCRIPT_URL` | the Apps Script web-app address |
-
-Repository **Settings → Secrets and variables → Actions → Variables**.
+The client id is in `src/data/cms.js`, alongside the sheet id and the
+script's address. None of the three is a credential — the sheet's own
+sharing is what protects the content — and keeping them in the repository
+means the published build works without anybody having to configure
+anything. The `VITE_CMS_*` environment variables override them for anyone
+who would rather they stayed out; see `.env.example`.
 
 ### 3.5 The Apps Script
 

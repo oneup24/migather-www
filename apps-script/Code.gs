@@ -129,8 +129,22 @@ function saveImage_(slug, fileName, dataUrl) {
  * this watches the run, and writes the outcome into the sheet's `settings`
  * tab — where the editor's page can read it and say what actually
  * happened.
+ *
+ * A request is only honoured if the sheet says it was asked for. The editor's
+ * page writes `publishRequested` into the sheet before it posts here, and
+ * only somebody who can write to the sheet can do that. So knowing this
+ * script's address is not enough to make it rebuild the site — the sheet's
+ * own sharing is the gate.
  */
 function triggerPublish_() {
+  var requested = settings_().publishRequested || '';
+  var age = Date.now() - Date.parse(requested);
+  if (!requested || isNaN(age) || age < 0 || age > 120000) {
+    throw new Error(
+      'the publish was not requested from the sheet — press Publish on the editor page',
+    );
+  }
+
   var owner = setting_('GITHUB_OWNER');
   var repo = setting_('GITHUB_REPO');
   var token = scriptProperty_('GITHUB_TOKEN');

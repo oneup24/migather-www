@@ -136,6 +136,14 @@ The old Apps Script form and its `Index.html` are gone. `npm run cms:test`
 runs the script against a mocked Drive and a mocked GitHub, and
 `npm run cms:test:page` runs the editor page against mocked Google APIs.
 
+Two things about the configuration. The client id, the sheet id and the
+script's address live in `src/data/cms.js` rather than in the build
+environment: none of the three is a credential — the sheet's own sharing is
+what protects the content — and it means the published build works without
+anybody configuring anything first. And the script only rebuilds the site if
+the sheet says a publish was asked for, so knowing the script's address is
+not enough to make it happen.
+
 ---
 
 ## The works page becomes CMS-driven — 10 November 2026

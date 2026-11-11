@@ -28,21 +28,12 @@ import {
 import { useLocale } from '../hooks/useLocale';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { LOCALE_CODES } from '../data/i18n';
+import { cms } from '../data/cms';
 
 /* ── The configuration ────────────────────────────────────────────────── */
 
-/**
- * The ids, read from the build.
- *
- * They are not secrets — the sheet's own permissions are what protect it —
- * but they are not in the repository either, so the build takes them from
- * the environment. If they are missing, the page says so and stops.
- */
-const CONFIG = {
-  clientId: import.meta.env.VITE_CMS_CLIENT_ID ?? '',
-  spreadsheetId: import.meta.env.VITE_CMS_SHEET_ID ?? '',
-  scriptUrl: import.meta.env.VITE_CMS_SCRIPT_URL ?? '',
-};
+
+const CONFIG = cms;
 
 const CASE_TABS = {
   en: 'cases_EN',
@@ -381,6 +372,11 @@ export default function AdminPage() {
     try {
       const before = await readSetting(session.accessToken, 'lastPublish');
 
+      /* The sheet records that a publish was asked for. It is what lets the
+         script tell a real request from a stranger who found its address:
+         only somebody who can write to the sheet can set it. */
+      await writeSetting(session.accessToken, 'publishRequested', new Date().toISOString());
+
       await postToScript(CONFIG.scriptUrl, { action: 'publish' });
 
       const outcome = await waitForPublish(session.accessToken, before);
@@ -422,6 +418,26 @@ export default function AdminPage() {
     const values = await readTabs(CONFIG.spreadsheetId, accessToken, ['settings']);
     const row = rowsAsObjects(values.settings).find((entry) => entry.key === key);
     return row?.value ?? '';
+  }
+
+  /** Write one row of the settings tab. */
+  async function writeSetting(accessToken, key, value) {
+    const values = await readTabs(CONFIG.spreadsheetId, accessToken, ['settings']);
+    const rows = values.settings ?? [];
+    const header = rows[0] ?? ['key', 'value'];
+
+    const existing = rows.findIndex((row, index) => index > 0 && row[0] === key);
+    if (existing === -1) {
+      await writeTab(CONFIG.spreadsheetId, accessToken, 'settings', [
+        header,
+        ...rows.slice(1),
+        [key, String(value)],
+      ]);
+      return;
+    }
+
+    const range = `settings!B${existing + 1}`;
+    await writeTab(CONFIG.spreadsheetId, accessToken, range, [[String(value)]]);
   }
 
   /** Watch the settings tab until the build reports back. */

@@ -99,7 +99,12 @@ function makeSheet(rows) {
       },
     }),
   };
-  return { getSheetByName: (name) => (name === 'settings' ? tab : null), values };
+  return {
+    getSheetByName: (name) => (name === 'settings' ? tab : null),
+    get values() {
+      return values;
+    },
+  };
 }
 
 /** The fake Drive, the fake sheet and the fake GitHub. */
@@ -114,6 +119,7 @@ function makeContext(options = {}) {
     ['github_repo', 'migather-www'],
     ['lastPublish', ''],
     ['lastPublishStatus', ''],
+    ['publishRequested', new Date().toISOString()],
   ];
 
   const sheet = makeSheet(settingsRows);
@@ -279,7 +285,20 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
   check('there is a message to show', String(setting(context, 'lastPublishMessage')).length > 0);
 }
 
-/* ── 5. A stale token is reported, not hidden ─────────────────────────── */
+/* ── 5. A publish nobody asked for is refused ────────────────────────── */
+{
+  console.log('\nA publish nobody asked for');
+  const context = load(makeContext());
+  const rows = context.__sheet.values;
+  const index = rows.findIndex((row) => row[0] === 'publishRequested');
+  rows[index] = ['publishRequested', new Date(Date.now() - 10 * 60 * 1000).toISOString()];
+
+  const reply = context.doPost({ parameter: (name) => ({ action: 'publish' })[name] });
+  check('a stale request is refused', String(reply.body ?? reply).includes('not requested'), String(reply.body ?? reply));
+  check('nothing was dispatched', context.__calls.dispatched.length === 0);
+}
+
+/* ── 6. A stale token is reported, not hidden ─────────────────────────── */
 {
   console.log('\nA token that has expired');
   const context = load(makeContext());
