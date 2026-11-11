@@ -11,7 +11,7 @@ when something goes wrong.
 
 ## 1. What the editor sees
 
-One address. One button.
+One address. One button. Nothing to wait for.
 
 ```
 https://migather.com/en/admin
@@ -21,10 +21,11 @@ https://migather.com/en/admin
   closing the tab forgets the token.
 - **Pick a case, pick a language, fill in the form.** The form is pre-filled
   from the sheet, so it shows the copy as it stands today.
-- **Save.** The sheet is written as them. That is it — the copy is saved.
-- **Publish to the site.** The site rebuilds. The page says whether it
-  worked, and says so honestly: it watches the build and reports what
-  happened, rather than saying "publishing" and leaving you to guess.
+- **Save.** The sheet is written as them. That is it.
+
+There is no publish button and no progress bar. **The sheet is the trigger**:
+the Apps Script watches it, and the site rebuilds by itself within a minute of
+a save. The editor can close the tab.
 
 No git. No commit. No workflow. No Actions tab. The editor never has to know
 any of that exists.
@@ -44,13 +45,15 @@ any of that exists.
     └─ the picture ───────► a form post to the Apps Script
                              (it runs as the editor, and has storage quota)
                                 │
-                                └─ the Drive folder
+                                ├─ the Drive folder
+                                └─ the picture's name and its mock-up flag
+                                    written into the sheet together
 
-  Publish to the site
-    └─ a form post to the Apps Script
-         └─ GitHub: repository_dispatch
-              └─ the sync workflow: pull → validate → compile → commit
-                   └─ the publish workflow: verify → build → deploy
+  The sheet is the trigger
+    └─ the Apps Script's poller, every minute
+         └─ sees that the content changed → GitHub: repository_dispatch
+              └─ one workflow: pull → validate → commit → build → deploy
+                   └─ the outcome written into the sheet
 ```
 
 ### Why there is a script at all
@@ -68,8 +71,43 @@ Only two things, and neither can happen in the browser:
 
 The browser cannot read a reply from the Apps Script — Google sends no CORS
 headers — so the script reports back by writing into the sheet's `settings`
-tab, where the editor's page can read it. That is how "Published" is a
-fact rather than a hope.
+tab, where the editor's page can read it.
+
+### The picture and its flag travel together
+
+The `mockup` column says whether the **picture** is generated artwork. It
+belongs to the picture, not to the case, and it is written into the sheet at
+the same moment as the picture's name — by the script, once the file is
+really in Drive.
+
+That is the whole point. A case cannot say "this is real photography" while
+the picture on the page is still the mock-up, because the two are set
+together. And if a picture does not arrive, the site keeps the old one —
+with the old one's flag and alt text — so generated artwork is never shown
+unlabelled on a client-facing site.
+
+### One workflow, not three
+
+The publish used to be three workflows chained by `workflow_run` — a sync, a
+report and a publish. Each one waited for a runner to be allocated and a
+container to boot, and they ran in series, so a publish cost about a minute
+of mostly waiting.
+
+There is now one: pull the sheet, validate it, compile it, commit it, build
+the site, deploy it, and write the outcome into the sheet. The site is built
+once rather than twice, and the whole thing is about twenty-five seconds.
+
+### The site never freezes
+
+A content inconsistency is reported, and the site publishes anyway. A case
+that is one result ahead in English and one behind in Chinese is a
+translation in progress, not a failure — the site publishes what each
+language has, and falls back to English for what it does not.
+
+Only four things stop a publish: a published case with no source, a
+published case with no picture, a sector or service key the site does not
+know, and a duplicate slug. Those are the ones where the site would be
+wrong rather than merely incomplete.
 
 ### Why the public pages are still a static build
 
@@ -301,10 +339,11 @@ A draft case is allowed to be unfinished. That is what a draft is for.
 | The editor signs in but sees "not on the editor list" | The `editors` row in the sheet. Add the address. |
 | The editor signs in and the case list is empty | The sheet could not be read. Check that the account has access — the sheet's sharing is the gate. |
 | "The sheet could not be written" | The token's scope was not granted, or the account has no edit access to the sheet. |
-| The picture did not appear | The Apps Script could not save it. The sync will fail and name the case. Re-upload. |
-| "The build did not succeed" | The page is reporting a failed build. Open the Actions tab on GitHub to see why — usually a banned word or a missing source. |
-| "The build did not start — the GitHub token may have expired" | The token in the Apps Script's properties has expired. Make a new one. |
-| Nothing happens after "Published" | The build ran but the deploy is still going. The publish workflow runs after the sync workflow; give it a minute or two. |
+| "The picture did not reach Drive" | The Apps Script could not save it. The copy is saved; upload the picture again. The sheet still names the old picture, so the site is unchanged and still correctly labelled. |
+| The site does not update within a minute | The poller is not running. Open the script's address — it starts the poller and says whether it is running. |
+| The site shows the old picture | The new one did not arrive in Drive. The site keeps the old picture, with the old picture's alt text and mock-up flag, and says so in the sync output. |
+| The build failed | The sheet has something the site cannot publish — a case with no source, no picture, or a sector the site does not know. The Actions tab names the case and the column. |
+| The build did not start | The GitHub token in the Apps Script's properties has expired, or the workflow was disabled. The status page says so. |
 
 ---
 

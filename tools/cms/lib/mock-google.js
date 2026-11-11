@@ -105,6 +105,8 @@ export function buildFixture() {
         ['github_repo', 'migather-www'],
         ['lastPublish', ''],
         ['lastPublishStatus', ''],
+        ['lastImageSaved', ''],
+        ['contentChanged', ''],
       ],
     },
   };

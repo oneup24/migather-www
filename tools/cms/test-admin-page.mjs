@@ -85,6 +85,10 @@ function buildTabs() {
       ['editors', 'editor@example.com'],
       ['github_owner', 'oneup24'],
       ['github_repo', 'migather-www'],
+      ['lastPublish', ''],
+      ['lastPublishStatus', ''],
+      ['lastImageSaved', ''],
+      ['contentChanged', ''],
     ],
   };
 }
@@ -215,12 +219,17 @@ const MOCK = `
      real form in a hidden frame — the browser cannot read the answer. So
      the form's submit is intercepted instead. */
   HTMLFormElement.prototype.submit = function () {
-    window.__posts.push({
-      action: this.action,
-      fields: Object.fromEntries(
-        Array.from(this.querySelectorAll('input')).map(function (i) { return [i.name, i.value]; }),
-      ),
-    });
+    const fields = Object.fromEntries(
+      Array.from(this.querySelectorAll('input')).map(function (i) { return [i.name, i.value]; }),
+    );
+    window.__posts.push({ action: this.action, fields: fields });
+
+    /* The script writes the picture's name into the sheet once the file is
+       really in Drive. The mock does the same, so the page's wait ends. */
+    if (fields.action === 'image') {
+      const row = window.__fixture.settings.find(function (r) { return r[0] === 'lastImageSaved'; });
+      if (row) row[1] = fields.fileName;
+    }
   };
 
   /* The fake APIs. */
@@ -317,7 +326,7 @@ await sleep(1500);
 const after = JSON.parse(
   await evaluate(`JSON.stringify({
     writes: window.__writes.length,
-    notice: document.body.textContent.includes('Saved. The sheet is up to date.'),
+    notice: document.body.textContent.includes('rebuilds by itself'),
     error: document.body.textContent.includes('the sheet could not be'),
     summaryWrite: window.__writes.filter(w => JSON.stringify(w.values || '').includes('An edited summary')).length,
   })`),
@@ -352,11 +361,23 @@ check('it carries the slug', image[0]?.fields?.slug === records[0].slug, image[0
 check('it carries a file name', String(image[0]?.fields?.fileName ?? '').endsWith('.jpg'), image[0]?.fields?.fileName);
 check('it carries the bytes', String(image[0]?.fields?.dataUrl ?? '').startsWith('data:image/jpeg;base64,'));
 
-/* The publish button reaches the script. */
-await evaluate(`Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim().includes('Publish')).click()`);
-await sleep(900);
-const posted = await evaluate(`window.__posts.length`);
-check('publishing reached the Apps Script', posted > 0, `${posted} posts`);
+/* There is no publish button: the sheet is the trigger. */
+const hasPublishButton = await evaluate(
+  `Array.from(document.querySelectorAll('button')).some(b => b.textContent.includes('Publish'))`,
+);
+check('there is no publish button to press', hasPublishButton === false);
+
+/* The save is what tells the poller the content changed. */
+const stamped = await evaluate(
+  `JSON.stringify(window.__writes.filter(w => String(w.range || '').startsWith('settings')).map(w => w.range))`,
+);
+check('the save stamped the change for the poller', stamped !== '[]', stamped.slice(0, 160));
+
+/* The picture is posted to the script, which saves it and writes the name. */
+const imagePosts = await evaluate(
+  `JSON.stringify(window.__posts.filter(p => p.fields && p.fields.action === 'image'))`,
+);
+check('the picture was posted to the script', imagePosts !== '[]', imagePosts.slice(0, 120));
 
 console.log(`\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`);
 

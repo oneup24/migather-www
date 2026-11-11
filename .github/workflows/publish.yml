@@ -1,0 +1,144 @@
+name: Publish the site
+
+# One workflow for the whole publish: pull the sheet, validate it, compile
+# it, commit it, build the site and deploy it.
+#
+# It used to be three — a sync, a report and a publish — chained by
+# `workflow_run`. Each one had to wait for a runner to be allocated and a
+# container to boot, and they ran in series, so a publish cost about a
+# minute of mostly waiting. One workflow does the same work in about
+# twenty-five seconds, and the site is built once rather than twice.
+#
+# The trigger is the sheet. The Apps Script watches the sheet and asks for a
+# build when the content changes, so an editor never presses "publish" and
+# never watches a progress bar. A push to `main` also publishes, so a change
+# made in the repository goes live the same way.
+
+on:
+  # The CMS's publish path. The Apps Script fires this when it sees the
+  # sheet change.
+  repository_dispatch:
+    types: [publish]
+  # A change made in the repository — by a developer, or by the sync step
+  # below — publishes the same way.
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  # One publish at a time. Two editors saving at once would otherwise race
+  # for the same commit.
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # Pillow resizes the pictures the editor uploads. The repository has no
+      # npm dependencies and this is the only one it needs.
+      - run: pip install pillow
+
+      - name: Pull the works content from the sheet
+        id: sync
+        env:
+          # The service-account key. It is a secret: it never enters the
+          # repository and never reaches a browser.
+          GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+          CMS_SPREADSHEET_ID: ${{ secrets.CMS_SPREADSHEET_ID }}
+          CMS_DRIVE_FOLDER_ID: ${{ secrets.CMS_DRIVE_FOLDER_ID }}
+        run: node tools/cms/sync-cases.mjs
+
+      - name: Screen the copy
+        # The 中国广告法 restricted terms and Migather's own banned claim
+        # words. A case that carries one does not get committed, so it
+        # cannot be published.
+        run: node scripts/check-copy.mjs
+
+      - name: Check the compiled content
+        # Every published case has a source, and the copy is complete in
+        # every language.
+        run: node scripts/check-content.mjs
+
+      - name: Rebuild the sitemap
+        # The sitemap lists the published cases, so it has to move with them.
+        run: node scripts/build-sitemap.mjs
+
+      - name: Commit the content
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content public/media/cases public/sitemap.xml
+          if git diff --cached --quiet; then
+            echo "The content has not changed — nothing to commit."
+          else
+            # [skip ci] so this commit does not start a second publish. The
+            # run that is doing it is already here.
+            git commit -m "Update the works content from the sheet [skip ci]"
+            git push origin HEAD:main
+          fi
+
+      - name: Check the routes render
+        # Every route renders in every language, and the rendered text
+        # clears the banned-term screen. This step was missing until the CMS
+        # work — a commit carrying a banned word or a broken route used to
+        # reach the published site without a check.
+        run: npm run check:routes
+
+      - name: Build the site
+        id: build
+        # Assembles the app at the Pages root, the mock-up screen gallery
+        # under review/, and the preview note under preview/. The app is
+        # built with the base path baked in, because a GitHub Pages project
+        # site is served from /<repo>/ rather than the domain root.
+        #
+        # This is the only build. The verification above does not build the
+        # client bundle — it checks the routes, the copy and the content —
+        # so the site is built once, here.
+        env:
+          # The VITE_CMS_* variables configure the works editor at /admin.
+          # They are repository variables rather than secrets — the sheet's
+          # own permissions are what protect the content, and the editor
+          # page is useless without a Google sign-in.
+          VITE_CMS_CLIENT_ID: ${{ vars.VITE_CMS_CLIENT_ID }}
+          VITE_CMS_SHEET_ID: ${{ vars.VITE_CMS_SHEET_ID }}
+          VITE_CMS_SCRIPT_URL: ${{ vars.VITE_CMS_SCRIPT_URL }}
+        run: python3 tools/build-pages-site.py
+
+      - name: Publish to the gh-pages branch
+        run: |
+          cd docs/pages-site
+          git init -q
+          git checkout -q -B gh-pages
+          git add -A
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "Publish preview site"
+          git push -q --force \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+            gh-pages
+
+      - name: Report the outcome
+        # The editor's page cannot read the Apps Script's reply — Google
+        # sends no CORS headers — so the outcome is reported through the
+        # sheet, where the page can read it. This runs whatever happened:
+        # a failed build has to be reported as a failure, not left silent.
+        if: always()
+        env:
+          PUBLISH_STATUS: ${{ steps.build.outcome == 'success' && 'ok' || 'failed' }}
+          PUBLISH_MESSAGE: ${{ steps.build.outcome == 'success' && '' || 'the build did not finish — see the Actions tab' }}
+        run: node tools/cms/report-publish.mjs

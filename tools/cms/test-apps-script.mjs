@@ -108,10 +108,31 @@ function makeSheet(rows) {
       },
     }),
   };
+  const caseValues = [
+    ['slug', 'client', 'image'],
+    ['acme-hk-2026', 'Acme HK', 'case-acme.jpg'],
+  ];
+
+  const casesTab = {
+    getDataRange: () => ({ getValues: () => caseValues.map((row) => [...row]) }),
+    getRange: (row, column) => ({
+      setValue: (value) => {
+        caseValues[row - 1][column - 1] = String(value);
+      },
+    }),
+  };
+
   return {
-    getSheetByName: (name) => (name === 'settings' ? tab : null),
+    getSheetByName: (name) => {
+      if (name === 'settings') return tab;
+      if (name.startsWith('cases_')) return casesTab;
+      return null;
+    },
     get values() {
       return values;
+    },
+    get caseValues() {
+      return caseValues;
     },
   };
 }
@@ -128,7 +149,9 @@ function makeContext(options = {}) {
     ['github_repo', 'migather-www'],
     ['lastPublish', ''],
     ['lastPublishStatus', ''],
-    ['publishRequested', new Date().toISOString()],
+    ['contentChanged', ''],
+    ['lastPublishedAt', ''],
+    ['lastImageSaved', ''],
   ];
 
   const sheet = makeSheet(settingsRows);
@@ -258,6 +281,11 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
 
   check('the reply says it saved', /saved/i.test(String(reply.body ?? reply)), String(reply.body ?? reply));
 
+  /* The name is written into the sheet, so the sheet can never name a
+     picture that is not there. */
+  const written = context.__sheet.caseValues[1][2];
+  check('the picture name is written into the sheet', written === 'acme-hk-2026.jpg', written);
+
   const caseFolder = context.__root.children.find((child) => child.name === 'acme-hk-2026');
   check('a folder was created for the case', !!caseFolder);
   const picture = caseFolder?.children?.[0];
@@ -288,7 +316,7 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
 
   check('the reply says it is rebuilding', /rebuild/i.test(String(reply.body ?? reply)));
   check('GitHub was asked to dispatch', context.__calls.dispatched.length === 1);
-  check('the event type is right', context.__calls.dispatched[0]?.event_type === 'sync-cases');
+  check('the event type is right', context.__calls.dispatched[0]?.event_type === 'publish');
   check('the publish was stamped', String(setting(context, 'lastPublish')).length > 10);
   check(
     'the status says which publish it belongs to',
@@ -353,17 +381,34 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
   );
 }
 
-/* ── 5. A publish nobody asked for is refused ────────────────────────── */
+/* ── 5. The poller: the sheet is the trigger ─────────────────────────── */
 {
-  console.log('\nA publish nobody asked for');
+  console.log('\nThe poller');
   const context = load(makeContext());
   const rows = context.__sheet.values;
-  const index = rows.findIndex((row) => row[0] === 'publishRequested');
-  rows[index] = ['publishRequested', new Date(Date.now() - 10 * 60 * 1000).toISOString()];
 
-  const reply = context.doPost({ parameter: formFields({ action: 'publish' }) });
-  check('a stale request is refused', String(reply.body ?? reply).includes('not requested'), String(reply.body ?? reply));
-  check('nothing was dispatched', context.__calls.dispatched.length === 0);
+  const set = (key, value) => {
+    const index = rows.findIndex((row) => row[0] === key);
+    if (index === -1) rows.push([key, value]);
+    else rows[index] = [key, value];
+  };
+
+  /* Nothing has changed: nothing is asked for. */
+  context.pollSheet();
+  check('nothing is asked for when nothing changed', context.__calls.dispatched.length === 0);
+
+  /* The content changed: a build is asked for. */
+  set('contentChanged', new Date().toISOString());
+  context.pollSheet();
+  check('a change asks for a build', context.__calls.dispatched.length === 1);
+  check(
+    'the time of the build is recorded, so it is not asked for twice',
+    Boolean(rows.find((row) => row[0] === 'lastPublishedAt')?.[1]),
+  );
+
+  /* The same change again: nothing more is asked for. */
+  context.pollSheet();
+  check('the same change is not asked for twice', context.__calls.dispatched.length === 1);
 }
 
 /* ── 6. A stale token is reported, not hidden ─────────────────────────── */

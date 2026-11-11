@@ -62,7 +62,8 @@ The operating manual is [`docs/CMS.md`](docs/CMS.md).
 
 **The editor is a page of the website**, at `/admin`. An editor signs in with
 their own Google account, fills in the form, and presses Save. The sheet is
-written as them; the site rebuilds itself. There is no git, no commit and no
+written as them, and the sheet is the trigger: the site rebuilds itself
+within a minute. There is no git, no commit, no publish button and no
 workflow in the editor's path.
 
 ```bash

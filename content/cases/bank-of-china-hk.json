@@ -1,7 +1,7 @@
 {
   "slug": "bank-of-china-hk",
   "order": 2,
-  "client": "Bank of China HK",
+  "client": "Bank of China",
   "clientLocal": {
     "en": "中銀香港",
     "zh-Hant": "中銀香港",
@@ -44,6 +44,15 @@
         "zh-Hans": "独立访客停留时间"
       },
       "note": null
+    },
+    {
+      "value": "+10%",
+      "label": {
+        "en": "GOOODOODAA",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      },
+      "note": null
     }
   ],
   "scope": [
@@ -66,6 +75,11 @@
       "en": "SEO-friendly build",
       "zh-Hant": "搜尋引擎友好的網頁建置",
       "zh-Hans": "搜索引擎友好的网页建置"
+    },
+    {
+      "en": "SOCAIL MEDIA!!~~~",
+      "zh-Hant": "",
+      "zh-Hans": ""
     }
   ],
   "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 11",

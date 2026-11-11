@@ -42,6 +42,13 @@
  * request dies before anything is answered. Read `request.parameter.action`.
  */
 
+/** The tabs the cases live in, one per language. */
+var CASE_TABS = {
+  en: 'cases_EN',
+  'zh-Hant': 'cases_ZH-HANT',
+  'zh-Hans': 'cases_ZH-HANS',
+};
+
 /** The Drive folder the case images live in. */
 function driveFolder_() {
   return DriveApp.getFolderById(setting_('DRIVE_FOLDER_ID'));
@@ -98,7 +105,7 @@ function settings_() {
  * under a new name — is deleted, so the folder does not fill up with
  * orphans.
  */
-function saveImage_(slug, fileName, dataUrl) {
+function saveImage_(slug, fileName, dataUrl, isMockup) {
   var match = String(dataUrl).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/);
   if (!match) throw new Error('the picture was not sent as a base64 image');
 
@@ -119,11 +126,108 @@ function saveImage_(slug, fileName, dataUrl) {
   var same = target.getFilesByName(fileName);
   if (same.hasNext()) {
     same.next().setContent(bytes);
-    return fileName;
+  } else {
+    target.createFile(blob);
   }
 
-  target.createFile(blob);
+  /* The name goes into the sheet here, not in the browser.
+     The browser cannot read this script's reply, so if the browser wrote the
+     name it would write a name for a picture that might never have been
+     saved — and the sheet would name a file that is not there, and the sync
+     would have nothing to download. Written here, the name only ever
+     appears once the picture is really in Drive. */
+  writeImageName_(slug, fileName, isMockup);
+
   return fileName;
+}
+
+/**
+ * Write a case's picture name into all three of its tabs — and the mock-up
+ * flag with it.
+ *
+ * The flag says whether the *picture* is generated artwork. It belongs to the
+ * picture, so it is written at the same moment as the picture's name and
+ * never separately. That is what keeps the two together: a case cannot say
+ * "this is real photography" while the picture on the page is still the
+ * mock-up, which would put unlabelled artwork on a client-facing site.
+ *
+ * The picture is the same in every language, so both go in all three tabs.
+ */
+function writeImageName_(slug, fileName, isMockup) {
+  var sheet = SpreadsheetApp.openById(scriptProperty_('SPREADSHEET_ID'));
+  var header = CASE_TABS;
+
+  for (var tabName in header) {
+    var tab = sheet.getSheetByName(header[tabName]);
+    if (!tab) continue;
+
+    var values = tab.getDataRange().getValues();
+    var slugColumn = values[0].indexOf('slug');
+    var imageColumn = values[0].indexOf('image');
+    var mockupColumn = values[0].indexOf('mockup');
+    if (slugColumn === -1 || imageColumn === -1) continue;
+
+    for (var i = 1; i < values.length; i += 1) {
+      if (String(values[i][slugColumn]) !== slug) continue;
+      tab.getRange(i + 1, imageColumn + 1).setValue(String(fileName));
+      if (mockupColumn !== -1 && isMockup !== undefined && isMockup !== null) {
+        tab.getRange(i + 1, mockupColumn + 1).setValue(isMockup ? 'true' : 'false');
+      }
+    }
+  }
+
+  /* And a note for the editor's page, which waits for it before it writes
+     the row that names the picture. */
+  setSetting_('lastImageSaved', fileName);
+}
+
+/**
+ * The poller — the sheet is the trigger.
+ *
+ * This runs every minute. It looks at the sheet: if the content has changed
+ * since the last time it asked for a build, it asks for one.
+ *
+ * This is what makes the editor's job one action. They fill in the form and
+ * press Save; the sheet records that the content changed; this notices, and
+ * the site rebuilds. There is no publish button to press and no progress bar
+ * to watch.
+ *
+ * Only somebody who can write to the sheet can set that stamp, so knowing
+ * this script's address is not enough to make it rebuild the site.
+ */
+function pollSheet() {
+  var settings = settings_();
+
+  var changed = settings.contentChanged || '';
+  var published = settings.lastPublishedAt || '';
+  if (!changed) return;
+  if (published && Date.parse(changed) <= Date.parse(published)) return;
+
+  try {
+    triggerPublish_();
+    setSetting_('lastPublishedAt', new Date().toISOString());
+  } catch (error) {
+    /* The build could not be asked for. It is recorded, and the next poll
+       tries again — the sheet still says the content changed. */
+    setSetting_('lastPublishStatus', 'failed');
+    setSetting_('lastPublishMessage', error.message);
+  }
+}
+
+/**
+ * Make sure the poller is running.
+ *
+ * The trigger is created here rather than by hand, so the sheet and the
+ * script cannot end up out of step: whoever opens the script's address
+ * turns the poller on.
+ */
+function ensurePollTrigger_() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i += 1) {
+    if (triggers[i].getHandlerFunction() === 'pollSheet') return true;
+  }
+  ScriptApp.newTrigger('pollSheet').timeBased().everyMinutes(1).create();
+  return false;
 }
 
 /**
@@ -153,14 +257,6 @@ function saveImage_(slug, fileName, dataUrl) {
  * own sharing is the gate.
  */
 function triggerPublish_() {
-  var requested = settings_().publishRequested || '';
-  var age = Date.now() - Date.parse(requested);
-  if (!requested || isNaN(age) || age < 0 || age > 120000) {
-    throw new Error(
-      'the publish was not requested from the sheet — press Publish on the editor page',
-    );
-  }
-
   var owner = setting_('GITHUB_OWNER');
   var repo = setting_('GITHUB_REPO');
   var token = scriptProperty_('GITHUB_TOKEN');
@@ -183,7 +279,7 @@ function triggerPublish_() {
         Accept: 'application/vnd.github+json',
         'User-Agent': 'migather-cms',
       },
-      payload: JSON.stringify({ event_type: 'sync-cases' }),
+      payload: JSON.stringify({ event_type: 'publish' }),
       muteHttpExceptions: true,
     },
   );
@@ -333,7 +429,12 @@ function doPost(request) {
       if (!fileName || fileName.indexOf('/') !== -1) {
         throw new Error('the file name "' + fileName + '" is not valid');
       }
-      saveImage_(slug, fileName, request.parameter.dataUrl || '');
+      saveImage_(
+        slug,
+        fileName,
+        request.parameter.dataUrl || '',
+        String(request.parameter.mockup || 'true') === 'true',
+      );
       return reply_('The picture was saved.');
     }
 
@@ -380,6 +481,8 @@ function doGet() {
   checks.push(checkDrive_());
   /* GitHub. */
   checks.push(checkGitHub_());
+  /* The poller — the sheet is the trigger, so this has to be running. */
+  checks.push(checkPoller_());
 
   var site = PropertiesService.getScriptProperties().getProperty('SITE_URL') || '';
   var link = site ? '<p><a href="' + site + '/en/admin">Open the works editor</a></p>' : '';
@@ -466,6 +569,24 @@ function checkDrive_() {
       detail: 'cannot read it — ' + error.message,
     };
   }
+}
+
+/**
+ * Is the poller running?
+ *
+ * The poller is what notices that the sheet changed and asks for a build.
+ * If it is not running, the site only updates when somebody presses a
+ * button — so it is made here, and reported.
+ */
+function checkPoller_() {
+  var running = ensurePollTrigger_();
+  return {
+    name: 'The poller',
+    ok: true,
+    detail: running
+      ? 'already running — the site rebuilds within a minute of a change'
+      : 'started — it now runs every minute',
+  };
 }
 
 /** Is the GitHub token there, and does it work? */

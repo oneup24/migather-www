@@ -125,8 +125,29 @@ async function pullTabs() {
  * the folder is named after the slug, the file after the `image` column.
  * From a fixture directory, the images sit in `media/<slug>/<file>`.
  */
-async function pullImages(records) {
+/**
+ * The pictures, downloaded from Drive.
+ *
+ * A picture that is not there is not a reason to stop the site. The case
+ * keeps the picture it already has — which is in the repository — and the
+ * run says so. A broken picture on a live page is worse than a picture that
+ * did not change.
+ */
+async function pullImages(records, warnings) {
   const images = new Map();
+
+  /** The picture a case already has, so it can be kept if the new one is missing. */
+  const committed = new Map();
+  for (const record of records) {
+    const file = join(CONTENT_PATH, `${record.slug}.json`);
+    if (!existsSync(file)) continue;
+    try {
+      const previous = JSON.parse(readFileSync(file, 'utf8'));
+      if (previous.image?.src) committed.set(record.slug, previous.image.src.split('/').pop());
+    } catch {
+      /* A file that cannot be read simply has no previous picture. */
+    }
+  }
 
   if (OPTIONS.fixtures) {
     for (const record of records) {
@@ -134,7 +155,8 @@ async function pullImages(records) {
       const file = record.image.src.split('/').pop();
       const path = join(OPTIONS.fixtures, 'media', record.slug, file);
       if (!existsSync(path)) {
-        throw new Error(`the fixture for ${record.slug} is missing ${file}`);
+        warnings.push(`the fixture for ${record.slug} is missing ${file}`);
+        continue;
       }
       images.set(record.slug, { path, file });
     }
@@ -157,17 +179,23 @@ async function pullImages(records) {
 
     const folder = folderByName.get(record.slug);
     if (!folder) {
-      throw new Error(
-        `the Drive folder for ${record.slug} does not exist — the case names an image, so the folder has to be there`,
+      warnings.push(
+        `the Drive folder for ${record.slug} does not exist — the case keeps the picture it has`,
       );
+      continue;
     }
 
     const files = await listFolder(token, folder.id);
     const source = files.find((f) => f.name === file);
     if (!source) {
-      throw new Error(
-        `the Drive folder for ${record.slug} has no file called ${file}`,
+      const previous = committed.get(record.slug);
+      warnings.push(
+        `the Drive folder for ${record.slug} has no file called ${file}` +
+          (previous
+            ? ` — the case keeps ${previous.src.split('/').pop()} until the new picture is there`
+            : ' — the case has no picture to keep'),
       );
+      continue;
     }
 
     const bytes = await downloadFile(token, source.id);
@@ -178,6 +206,19 @@ async function pullImages(records) {
   }
 
   return images;
+}
+
+/** The picture a case already has, in the repository — the whole thing. */
+function previousImage(slug) {
+  const file = join(CONTENT_PATH, `${slug}.json`);
+  if (!existsSync(file)) return null;
+  try {
+    const previous = JSON.parse(readFileSync(file, 'utf8'));
+    if (!previous.image?.src) return null;
+    return previous.image;
+  } catch {
+    return null;
+  }
 }
 
 /* ── 2. Write ─────────────────────────────────────────────────────────── */
@@ -261,6 +302,8 @@ const tabs = await pullTabs();
 const byLocale = (tabMap) =>
   Object.fromEntries(LOCALES.map((locale) => [locale, tabs[tabMap[locale]] ?? []]));
 
+const imageWarnings = [];
+
 const { records, errors, warnings } = compile(
   {
     cases: byLocale(CASE_TABS),
@@ -293,7 +336,38 @@ if (OPTIONS.dryRun) {
   process.exit(0);
 }
 
-  const images = await pullImages(records);
+  const images = await pullImages(records, imageWarnings);
+  for (const warning of imageWarnings) console.log(`note  ${warning}`);
+
+  /* A case whose picture could not be downloaded keeps the picture it has.
+     The whole picture comes back — the file, the alt text and the mock-up
+     flag — because the flag and the alt text describe the picture, not the
+     case. Keeping the new flag with the old picture would put generated
+     artwork on the page with no mock-up label on it, which is the one thing
+     the labelling exists to prevent. */
+  for (const record of records) {
+    if (images.has(record.slug)) continue;
+    if (!record.image) continue;
+    const previous = previousImage(record.slug);
+    if (!previous) continue;
+
+    /* The sheet says the new picture is not a mock-up, but the picture
+       that is really there is the old one. Say so loudly: the site is
+       showing the old picture, still labelled as a mock-up, and that is
+       right — but the editor should know their new picture has not
+       arrived. */
+    if (previous.mockup !== record.image.mockup) {
+      imageWarnings.push(
+        `the sheet says the picture for ${record.slug} is ` +
+          `${record.image.mockup ? 'a mock-up' : 'real photography'}, but the picture that is ` +
+          `there is the old one — the site is showing the old picture, still labelled as a ` +
+          `${previous.mockup ? 'mock-up' : 'photograph'}`,
+      );
+    }
+
+    record.image = previous;
+  }
+
   const result = writeContent(records, images);
 
   /* The download scratch space is not a deliverable. */

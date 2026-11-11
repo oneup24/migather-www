@@ -43,7 +43,11 @@
         "zh-Hant": "每次點擊成本",
         "zh-Hans": "每次点击成本"
       },
-      "note": null
+      "note": {
+        "en": "Metric tracked in the deck; the figure is not legible in the source file",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
     },
     {
       "value": "—",

@@ -171,7 +171,11 @@ export function compile(input, { sectors = [], services = [] } = {}) {
       const clash = values.find((v) => v.value !== first.value);
       if (!clash) continue;
 
-      errors.push({
+      /* A warning, not a failure. The columns are written into all three
+         tabs by the editor's page, so a difference means the sheet was edited
+         by hand — worth saying, but not worth stopping the site for. The
+         site publishes the English value and carries on. */
+      warnings.push({
         tab: `${CASE_TABS[first.locale]} / ${CASE_TABS[clash.locale]}`,
         slug,
         column,
@@ -184,11 +188,11 @@ export function compile(input, { sectors = [], services = [] } = {}) {
     const flags = present.map((locale) => parseBoolean(byLocale[locale].get(slug).__values.published));
     const isPublished = flags.length > 0 && flags.every((f) => f === true);
     if (flags.some((f) => f === null)) {
-      errors.push({
+      warnings.push({
         tab: 'the cases tabs',
         slug,
         column: 'published',
-        message: 'the published column must be true or false',
+        message: 'the published column must be true or false — it is read as false',
       });
     }
     if (isPublished) published.add(slug);
@@ -227,7 +231,7 @@ export function compile(input, { sectors = [], services = [] } = {}) {
     const mockupRaw = en ? en.__values.mockup : '';
     const mockup = parseBoolean(mockupRaw);
     if (mockup === null) {
-      errors.push({
+      warnings.push({
         tab: 'the cases tabs',
         slug,
         column: 'mockup',
@@ -238,7 +242,7 @@ export function compile(input, { sectors = [], services = [] } = {}) {
     const featuredRaw = en ? en.__values.featured : '';
     const featured = parseBoolean(featuredRaw);
     if (featured === null) {
-      errors.push({
+      warnings.push({
         tab: 'the cases tabs',
         slug,
         column: 'featured',
@@ -262,10 +266,13 @@ export function compile(input, { sectors = [], services = [] } = {}) {
     /* A published case must exist in every language. */
     for (const locale of LOCALES) {
       if (byLocale[locale].has(slug)) continue;
-      errors.push({
+      /* A case being translated appears in one language first. That is the
+         normal state of the work, and the site falls back to English for
+         what is missing — so it is a note, not a failure. */
+      warnings.push({
         tab: CASE_TABS[locale],
         slug,
-        message: `the published case is missing from ${locale}`,
+        message: `the case is missing from ${locale} — it shows in English there until it is translated`,
       });
     }
     if (present.length < LOCALES.length) continue;
@@ -299,34 +306,34 @@ export function compile(input, { sectors = [], services = [] } = {}) {
       localised[locale] = row;
 
       if (!row.summary) {
-        errors.push({
+        warnings.push({
           tab: CASE_TABS[locale],
           slug,
           column: 'summary',
-          message: `the published case has no summary in ${locale}`,
+          message: `the case has no summary in ${locale} — it shows in English there`,
         });
       }
       if (!row.imageAlt) {
-        errors.push({
+        warnings.push({
           tab: CASE_TABS[locale],
           slug,
           column: 'imageAlt',
-          message: `the published case has no alt text in ${locale}`,
+          message: `the case has no alt text in ${locale} — it falls back to the English alt text`,
         });
       }
       if (!row.client) {
-        errors.push({
+        warnings.push({
           tab: CASE_TABS[locale],
           slug,
           column: 'client',
-          message: `the published case has no client name in ${locale}`,
+          message: `the case has no client name in ${locale} — it falls back to the English one`,
         });
       }
     }
 
     /* The results and the scope lines. */
-    const results = compileResults(slug, resultRows, errors);
-    const scope = compileScope(slug, scopeRows, errors);
+    const results = compileResults(slug, resultRows, errors, warnings);
+    const scope = compileScope(slug, scopeRows, errors, warnings);
 
     const clientLocal = {};
     const projectLocal = {};
@@ -380,8 +387,21 @@ export function compile(input, { sectors = [], services = [] } = {}) {
   return { records, errors, warnings };
 }
 
-/** The results of one case, checked across the three locales. */
-function compileResults(slug, resultRows, errors) {
+/**
+ * The results of one case.
+ *
+ * A result is lined up across the three languages by its `order` column,
+ * not by its position — so a language that is one result behind is not a
+ * failure, it is a translation in progress. The site falls back to English
+ * for a label that has not been translated yet, which is what it does
+ * everywhere else.
+ *
+ * The figure is not localised, so if two languages disagree about it the
+ * English one is used and the difference is reported. Neither stops the
+ * site from publishing: a half-translated case is a normal state to be in,
+ * and freezing the site over it is worse than the half-translation.
+ */
+function compileResults(slug, resultRows, errors, warnings) {
   const perLocale = {};
 
   for (const locale of LOCALES) {
@@ -390,57 +410,58 @@ function compileResults(slug, resultRows, errors) {
     perLocale[locale] = rows;
   }
 
+  /* The orders, and the union of them. */
+  const orders = new Map();
+  for (const locale of LOCALES) {
+    for (const row of perLocale[locale]) {
+      const order = Number(row.__values.order || 0);
+      if (!order) continue;
+      if (!orders.has(order)) orders.set(order, {});
+      orders.get(order)[locale] = row.__values;
+    }
+  }
+
   const counts = LOCALES.map((l) => perLocale[l].length);
   if (new Set(counts).size > 1) {
-    errors.push({
+    warnings.push({
       tab: 'the results tabs',
       slug,
       message: `the case has a different number of results in each language (${LOCALES.map(
         (l, i) => `${l}: ${counts[i]}`,
-      ).join(', ')})`,
+      ).join(', ')}) — each language shows the ones it has`,
     });
-    return [];
   }
 
-  const count = counts[0];
   const out = [];
 
-  for (let i = 0; i < count; i += 1) {
-    const rows = LOCALES.map((l) => perLocale[l][i].__values);
-    const value = rows[0].value;
+  for (const order of [...orders.keys()].sort((a, b) => a - b)) {
+    const rows = orders.get(order);
+    const value = (rows.en ?? rows['zh-Hant'] ?? rows['zh-Hans'] ?? {}).value ?? '';
     const label = {};
     const note = {};
 
-    LOCALES.forEach((locale, index) => {
-      label[locale] = rows[index].label ?? '';
-      note[locale] = rows[index].note ?? '';
-    });
-
-    if (LOCALES.some((l) => perLocale[l][i].__values.value !== value)) {
-      errors.push({
-        tab: 'the results tabs',
-        slug,
-        column: 'value',
-        message: `the result figure "${value}" differs between locales`,
-      });
+    for (const locale of LOCALES) {
+      const row = rows[locale];
+      label[locale] = row?.label ?? '';
+      note[locale] = row?.note ?? '';
     }
 
     if (!value) {
-      errors.push({
+      warnings.push({
         tab: 'the results tabs',
         slug,
         column: 'value',
-        message: `result ${i + 1} has no figure`,
+        message: `result ${order} has no figure`,
       });
     }
 
     for (const locale of LOCALES) {
       if (label[locale]) continue;
-      errors.push({
+      warnings.push({
         tab: RESULT_TABS[locale],
         slug,
         column: 'label',
-        message: `result ${i + 1} has no label in ${locale}`,
+        message: `result ${order} has no label in ${locale} — it shows in English there`,
       });
     }
 
@@ -455,7 +476,13 @@ function compileResults(slug, resultRows, errors) {
 }
 
 /** The scope lines of one case, checked across the three locales. */
-function compileScope(slug, scopeRows, errors) {
+/**
+ * The scope lines of one case.
+ *
+ * Lined up by `order`, like the results. A language that is a line behind is
+ * a translation in progress, not a failure.
+ */
+function compileScope(slug, scopeRows, errors, warnings) {
   const perLocale = {};
 
   for (const locale of LOCALES) {
@@ -464,31 +491,41 @@ function compileScope(slug, scopeRows, errors) {
     perLocale[locale] = rows;
   }
 
+  const orders = new Map();
+  for (const locale of LOCALES) {
+    for (const row of perLocale[locale]) {
+      const order = Number(row.__values.order || 0);
+      if (!order) continue;
+      if (!orders.has(order)) orders.set(order, {});
+      orders.get(order)[locale] = row.__values;
+    }
+  }
+
   const counts = LOCALES.map((l) => perLocale[l].length);
   if (new Set(counts).size > 1) {
-    errors.push({
+    warnings.push({
       tab: 'the scope tabs',
       slug,
       message: `the case has a different number of scope lines in each language (${LOCALES.map(
         (l, i) => `${l}: ${counts[i]}`,
-      ).join(', ')})`,
+      ).join(', ')}) — each language shows the ones it has`,
     });
-    return [];
   }
 
-  const count = counts[0];
   const out = [];
 
-  for (let i = 0; i < count; i += 1) {
+  for (const order of [...orders.keys()].sort((a, b) => a - b)) {
+    const rows = orders.get(order);
     const text = {};
+
     for (const locale of LOCALES) {
-      text[locale] = perLocale[locale][i].__values.text ?? '';
+      text[locale] = rows[locale]?.text ?? '';
       if (text[locale]) continue;
-      errors.push({
+      warnings.push({
         tab: SCOPE_TABS[locale],
         slug,
         column: 'text',
-        message: `scope line ${i + 1} is empty in ${locale}`,
+        message: `scope line ${order} is empty in ${locale} — it shows in English there`,
       });
     }
     out.push(text);

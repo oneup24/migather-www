@@ -150,7 +150,6 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
-  const [progress, setProgress] = useState('');
 
   const [tabs, setTabs] = useState(null);
   const [editors, setEditors] = useState([]);
@@ -270,17 +269,35 @@ export default function AdminPage() {
       const token = session.accessToken;
 
       /* The picture goes to Drive through the Apps Script, which runs as the
-         editor and has storage quota. The browser names the file. */
-      let imageName = form.image;
+         editor and has storage quota. The script writes the picture's name
+         into the sheet once the file is really there, so the sheet can
+         never name a picture that was not saved. */
       if (newFile) {
-        imageName = `${form.slug}${newFile.name.slice(newFile.name.lastIndexOf('.'))}`;
+        const fileName = `${form.slug}${newFile.name.slice(newFile.name.lastIndexOf('.'))}`;
         const base64 = await readAsBase64(newFile);
         await postToScript(CONFIG.scriptUrl, {
           action: 'image',
           slug: form.slug,
-          fileName: imageName,
+          fileName,
+          /* The flag travels with the picture: the script writes both into
+             the sheet together, so the two can never disagree. */
+          mockup: form.mockup ? 'true' : 'false',
           dataUrl: `data:${newFile.type || 'image/jpeg'};base64,${base64}`,
         });
+        const saved = await waitForImage(fileName);
+        if (!saved) {
+          /* The picture did not arrive. Saying so is the whole point — a
+             silent failure here leaves the sheet naming a picture that is
+             not there, and the site shows the old one with the new
+             copy. */
+          throw new Error(
+            t({
+              en: 'The picture did not reach Drive. The copy has been saved; the picture can be uploaded again.',
+              'zh-Hant': '圖片未能上載到 Drive。文字已儲存，圖片可以重新上載。',
+              'zh-Hans': '图片未能上传到 Drive。文字已保存，图片可以重新上传。',
+            }),
+          );
+        }
       }
 
       const published = form.published ? 'true' : 'false';
@@ -300,8 +317,12 @@ export default function AdminPage() {
           partnershipSince: form.partnershipSince,
           summary: each === locale ? form.summary : (existing?.summary ?? ''),
           imageAlt: each === locale ? form.imageAlt : (existing?.imageAlt ?? ''),
-          image: imageName,
-          mockup: form.mockup ? 'true' : 'false',
+          /* The picture's name and its mock-up flag are written by the
+             script, once the file is really in Drive. The row takes them
+             from the sheet, so it cannot name a picture that is not there
+             or label one that is not a mock-up. */
+          image: existing?.image ?? form.image,
+          mockup: existing?.mockup === 'true' ? 'true' : 'false',
           source: form.source,
           featured: form.featured ? 'true' : 'false',
           published,
@@ -314,11 +335,15 @@ export default function AdminPage() {
       /* The scope lines. */
       await writeScope(token, form.slug, locale, scope);
 
+      /* The stamp the poller watches. It is written last, so the poller
+         never picks the change up before it is all there. */
+      await writeSetting(token, 'contentChanged', new Date().toISOString());
+
       setNotice(
         t({
-          en: 'Saved. The sheet is up to date.',
-          'zh-Hant': '已儲存。表格已更新。',
-          'zh-Hans': '已保存。表格已更新。',
+          en: 'Saved. The site rebuilds by itself within a minute — there is nothing to press.',
+          'zh-Hant': '已儲存。網站會在一分鐘內自動更新，沒有其他需要按的按鈕。',
+          'zh-Hans': '已保存。网站会在一分钟内自动更新，没有其他需要按的按钮。',
         }),
       );
       await loadSheet(token);
@@ -357,132 +382,7 @@ export default function AdminPage() {
     await writeTab(CONFIG.spreadsheetId, token, tab, [header, ...block, ...kept.slice(1)]);
   }
 
-  /* ── Publishing ─────────────────────────────────────────────────────── */
-
-  /**
-   * Ask for a rebuild, and find out whether it worked.
-   *
-   * The Apps Script cannot be read from the browser, so it reports back by
-   * writing into the sheet's `settings` tab: `lastPublish` is stamped when
-   * the request goes out, and `lastPublishStatus` when the build has
-   * finished. The page watches that, so "Published" means published — not
-   * "hopefully".
-   */
-  async function handlePublish() {
-    setBusy(true);
-    setError('');
-    setNotice('');
-    setProgress(
-      t({ en: 'Asking the site to rebuild…', 'zh-Hant': '正在要求網站重新建置…', 'zh-Hans': '正在要求网站重新构建…' }),
-    );
-
-    try {
-      const before = await readSetting(session.accessToken, 'lastPublish');
-      /* Which publish the status on record belongs to. The status alone
-         cannot say: two publishes in a row both end in `ok`, so comparing
-         the words would read the first one's result as the second's. */
-      const statusAtBefore = await readSetting(session.accessToken, 'lastPublishStatusAt');
-
-      /* The sheet records that a publish was asked for. It is what lets the
-         script tell a real request from a stranger who found its address:
-         only somebody who can write to the sheet can set it. */
-      await writeSetting(session.accessToken, 'publishRequested', new Date().toISOString());
-
-      await postToScript(CONFIG.scriptUrl, { action: 'publish' });
-
-      /* The script stamps `lastPublish` the moment it dispatches, and
-         `lastPublishStatus` when the build has finished. Watch both, and
-         say what is actually happening — a blank wait that ends in a
-         cheerful message is worse than an honest one. */
-      const deadline = Date.now() + 240000;
-      let stamp = '';
-
-      while (Date.now() < deadline) {
-        await sleep(2000);
-        stamp = await readSetting(session.accessToken, 'lastPublish');
-        if (stamp && stamp !== before) break;
-        setProgress(
-          t({
-            en: 'Waiting for the build to start…',
-            'zh-Hant': '等待建置開始…',
-            'zh-Hans': '等待构建开始…',
-          }),
-        );
-      }
-
-      if (!stamp || stamp === before) {
-        setProgress('');
-        setError(
-          t({
-            en: 'The publish did not report back. The Apps Script that is live does not know how to publish — it has to be redeployed.',
-            'zh-Hant': '發佈沒有回報。現行的 Apps Script 不懂得發佈，需要重新部署。',
-            'zh-Hans': '发布没有回报。现行的 Apps Script 不懂得发布，需要重新部署。',
-          }),
-        );
-        return;
-      }
-
-      setProgress(
-        t({ en: 'The build is running…', 'zh-Hant': '建置進行中…', 'zh-Hans': '构建进行中…' }),
-      );
-
-      while (Date.now() < deadline) {
-        await sleep(2000);
-        const status = await readSetting(session.accessToken, 'lastPublishStatus');
-        /* A status that belongs to an earlier publish is not this one's
-           answer. The stamp says which publish it belongs to. */
-        const statusAt = await readSetting(session.accessToken, 'lastPublishStatusAt');
-        if (statusAt === statusAtBefore) continue;
-        if (status === 'ok') {
-          setProgress('');
-          setNotice(
-            t({
-              en: 'Published. The site is rebuilding now — it will be live in a minute or two.',
-              'zh-Hant': '已發佈。網站正在重新建置，約一兩分鐘後上線。',
-              'zh-Hans': '已发布。网站正在重新构建，约一两分钟后上线。',
-            }),
-          );
-          return;
-        }
-        if (status === 'failed') {
-          setProgress('');
-          setError(
-            t({
-              en: 'The build failed. Open the Actions tab on GitHub to see why.',
-              'zh-Hant': '建置失敗。請到 GitHub 的 Actions 分頁查看原因。',
-              'zh-Hans': '构建失败。请到 GitHub 的 Actions 标签页查看原因。',
-            }),
-          );
-          return;
-        }
-        if (status === 'unknown') {
-          setProgress('');
-          setError(
-            t({
-              en: 'The build did not start — the GitHub token in the Apps Script may have expired.',
-              'zh-Hant': '建置沒有開始——Apps Script 內的 GitHub token 可能已過期。',
-              'zh-Hans': '构建没有开始——Apps Script 里的 GitHub token 可能已过期。',
-            }),
-          );
-          return;
-        }
-      }
-
-      setProgress('');
-      setNotice(
-        t({
-          en: 'The build is running. The site will be live in a minute or two.',
-          'zh-Hant': '建置進行中，網站約一兩分鐘後上線。',
-          'zh-Hans': '构建进行中，网站约一两分钟后上线。',
-        }),
-      );
-    } catch (failure) {
-      setProgress('');
-      setError(failure.message ?? String(failure));
-    } finally {
-      setBusy(false);
-    }
-  }
+  /* ── The settings tab ────────────────────────────────────────────────── */
 
   /** Read one row of the settings tab. */
   async function readSetting(accessToken, key) {
@@ -507,8 +407,27 @@ export default function AdminPage() {
       return;
     }
 
-    const range = `settings!B${existing + 1}`;
-    await writeTab(CONFIG.spreadsheetId, accessToken, range, [[String(value)]]);
+    await writeTab(CONFIG.spreadsheetId, accessToken, `settings!B${existing + 1}`, [
+      [String(value)],
+    ]);
+  }
+
+  /**
+   * Wait for the script to confirm the picture.
+   *
+   * The script writes the picture's name into the sheet once the file is
+   * really in Drive, and stamps `lastImageSaved` so this can see it. The
+   * browser cannot read the script's reply, so the sheet is how the two
+   * sides talk.
+   */
+  async function waitForImage(fileName) {
+    const deadline = Date.now() + 45000;
+    while (Date.now() < deadline) {
+      const saved = await readSetting(session.accessToken, 'lastImageSaved');
+      if (saved === fileName) return true;
+      await sleep(1500);
+    }
+    return false;
   }
 
   /* ── The page ───────────────────────────────────────────────────────── */
@@ -871,18 +790,16 @@ export default function AdminPage() {
               >
                 {t({ en: 'Save', 'zh-Hant': '儲存', 'zh-Hans': '保存' })}
               </button>
-              <button
-                type="button"
-                onClick={handlePublish}
-                disabled={busy}
-                className="border border-ink bg-white px-6 py-3 font-display text-[14px] font-medium text-ink disabled:opacity-50"
-              >
-                {t({ en: 'Publish to the site', 'zh-Hant': '發佈到網站', 'zh-Hans': '发布到网站' })}
-              </button>
-              {(progress || busy) && (
+              <span className="text-[13px] text-muted">
+                {t({
+                  en: 'That is all there is to do — the site rebuilds by itself.',
+                  'zh-Hant': '只需要這樣——網站會自動更新。',
+                  'zh-Hans': '只需要这样——网站会自动更新。',
+                })}
+              </span>
+              {busy && (
                 <span className="text-[13px] text-muted">
-                  {progress ||
-                    t({ en: 'Working…', 'zh-Hant': '處理中…', 'zh-Hans': '处理中…' })}
+                  {t({ en: 'Saving…', 'zh-Hant': '儲存中…', 'zh-Hans': '保存中…' })}
                 </span>
               )}
             </div>

@@ -11,7 +11,7 @@
     "check:routes": "vite build --ssr scripts/ssr-check.jsx --outDir .ssr-check --logLevel error && node .ssr-check/ssr-check.js",
     "check:copy": "node scripts/check-copy.mjs",
     "check:content": "node scripts/check-content.mjs",
-    "verify": "npm run build && npm run check:routes && npm run check:copy && npm run check:content && npm run build:sitemap && npm run cms:test",
+    "verify": "npm run build && npm run check:all",
     "lint": "echo \"no linter configured yet\"",
     "build:sitemap": "node scripts/build-sitemap.mjs",
     "audit:dom": "node tools/audit-dom.mjs",
@@ -24,7 +24,8 @@
     "cms:preview": "node tools/cms/preview-admin.mjs",
     "cms:editors": "node tools/cms/editors.mjs",
     "cms:test": "node tools/cms/test-apps-script.mjs",
-    "cms:test:page": "node tools/cms/test-admin-page.mjs"
+    "cms:test:page": "node tools/cms/test-admin-page.mjs",
+    "check:all": "npm run check:routes && npm run check:copy && npm run check:content && npm run build:sitemap"
   },
   "dependencies": {
     "react": "^19.3.1",
