@@ -110,6 +110,9 @@ function localisedValue(value, locale) {
   return value[locale] ?? value.en ?? '';
 }
 
+/** A pause. */
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /** A file as base64, without the data-url prefix. */
 function readAsBase64(file) {
   return new Promise((resolve, reject) => {
@@ -147,6 +150,7 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState('');
 
   const [tabs, setTabs] = useState(null);
   const [editors, setEditors] = useState([]);
@@ -368,6 +372,9 @@ export default function AdminPage() {
     setBusy(true);
     setError('');
     setNotice('');
+    setProgress(
+      t({ en: 'Asking the site to rebuild…', 'zh-Hant': '正在要求網站重新建置…', 'zh-Hans': '正在要求网站重新构建…' }),
+    );
 
     try {
       const before = await readSetting(session.accessToken, 'lastPublish');
@@ -379,34 +386,90 @@ export default function AdminPage() {
 
       await postToScript(CONFIG.scriptUrl, { action: 'publish' });
 
-      const outcome = await waitForPublish(session.accessToken, before);
+      /* The script stamps `lastPublish` the moment it dispatches, and
+         `lastPublishStatus` when the build has finished. Watch both, and
+         say what is actually happening — a blank wait that ends in a
+         cheerful message is worse than an honest one. */
+      const deadline = Date.now() + 240000;
+      let stamp = '';
 
-      if (outcome === 'ok') {
-        setNotice(
+      while (Date.now() < deadline) {
+        await sleep(2000);
+        stamp = await readSetting(session.accessToken, 'lastPublish');
+        if (stamp && stamp !== before) break;
+        setProgress(
           t({
-            en: 'Published. The site is rebuilding now — it will be live in a minute or two.',
-            'zh-Hant': '已發佈。網站正在重新建置，約一兩分鐘後上線。',
-            'zh-Hans': '已发布。网站正在重新构建，约一两分钟后上线。',
-          }),
-        );
-      } else if (outcome === 'running') {
-        setNotice(
-          t({
-            en: 'The build has started. It will be live in a minute or two.',
-            'zh-Hant': '建置已開始，約一兩分鐘後上線。',
-            'zh-Hans': '构建已开始，约一两分钟后上线。',
-          }),
-        );
-      } else {
-        setError(
-          t({
-            en: 'The build did not succeed. Open the Actions tab on GitHub to see why.',
-            'zh-Hant': '建置沒有成功。請到 GitHub 的 Actions 分頁查看原因。',
-            'zh-Hans': '构建没有成功。请到 GitHub 的 Actions 标签页查看原因。',
+            en: 'Waiting for the build to start…',
+            'zh-Hant': '等待建置開始…',
+            'zh-Hans': '等待构建开始…',
           }),
         );
       }
+
+      if (!stamp || stamp === before) {
+        setProgress('');
+        setError(
+          t({
+            en: 'The publish did not report back. The Apps Script that is live does not know how to publish — it has to be redeployed.',
+            'zh-Hant': '發佈沒有回報。現行的 Apps Script 不懂得發佈，需要重新部署。',
+            'zh-Hans': '发布没有回报。现行的 Apps Script 不懂得发布，需要重新部署。',
+          }),
+        );
+        return;
+      }
+
+      setProgress(
+        t({ en: 'The build is running…', 'zh-Hant': '建置進行中…', 'zh-Hans': '构建进行中…' }),
+      );
+
+      while (Date.now() < deadline) {
+        await sleep(2000);
+        const status = await readSetting(session.accessToken, 'lastPublishStatus');
+        if (status === 'ok') {
+          setProgress('');
+          setNotice(
+            t({
+              en: 'Published. The site is rebuilding now — it will be live in a minute or two.',
+              'zh-Hant': '已發佈。網站正在重新建置，約一兩分鐘後上線。',
+              'zh-Hans': '已发布。网站正在重新构建，约一两分钟后上线。',
+            }),
+          );
+          return;
+        }
+        if (status === 'failed') {
+          setProgress('');
+          setError(
+            t({
+              en: 'The build failed. Open the Actions tab on GitHub to see why.',
+              'zh-Hant': '建置失敗。請到 GitHub 的 Actions 分頁查看原因。',
+              'zh-Hans': '构建失败。请到 GitHub 的 Actions 标签页查看原因。',
+            }),
+          );
+          return;
+        }
+        if (status === 'unknown') {
+          setProgress('');
+          setError(
+            t({
+              en: 'The build did not start — the GitHub token in the Apps Script may have expired.',
+              'zh-Hant': '建置沒有開始——Apps Script 內的 GitHub token 可能已過期。',
+              'zh-Hans': '构建没有开始——Apps Script 里的 GitHub token 可能已过期。',
+            }),
+          );
+          return;
+        }
+      }
+
+      setProgress('');
+      setNotice(
+        t({
+          en: 'The build is running. The site will be live in a minute or two.',
+          'zh-Hant': '建置進行中，網站約一兩分鐘後上線。',
+          'zh-Hans': '构建进行中，网站约一两分钟后上线。',
+        }),
+      );
     } catch (failure) {
+      setProgress('');
       setError(failure.message ?? String(failure));
     } finally {
       setBusy(false);
@@ -438,23 +501,6 @@ export default function AdminPage() {
 
     const range = `settings!B${existing + 1}`;
     await writeTab(CONFIG.spreadsheetId, accessToken, range, [[String(value)]]);
-  }
-
-  /** Watch the settings tab until the build reports back. */
-  async function waitForPublish(accessToken, before) {
-    for (let attempt = 0; attempt < 30; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const stamp = await readSetting(accessToken, 'lastPublish');
-      if (!stamp || stamp === before) continue;
-
-      const status = await readSetting(accessToken, 'lastPublishStatus');
-      if (!status) return 'running';
-      if (status === 'ok') return 'ok';
-      if (status === 'running') return 'running';
-      return 'failed';
-    }
-    return 'running';
   }
 
   /* ── The page ───────────────────────────────────────────────────────── */
@@ -825,9 +871,10 @@ export default function AdminPage() {
               >
                 {t({ en: 'Publish to the site', 'zh-Hant': '發佈到網站', 'zh-Hans': '发布到网站' })}
               </button>
-              {busy && (
+              {(progress || busy) && (
                 <span className="text-[13px] text-muted">
-                  {t({ en: 'Working…', 'zh-Hant': '處理中…', 'zh-Hans': '处理中…' })}
+                  {progress ||
+                    t({ en: 'Working…', 'zh-Hant': '處理中…', 'zh-Hans': '处理中…' })}
                 </span>
               )}
             </div>
