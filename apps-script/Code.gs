@@ -458,20 +458,46 @@ function checkGitHub_() {
     muteHttpExceptions: true,
   });
 
-  if (response.getResponseCode() === 200) {
+  var code = response.getResponseCode();
+  var scopes = response.getHeaders()['X-OAuth-Scopes'] || '';
+
+  if (code === 200) {
     return {
       name: 'GitHub',
       ok: true,
-      detail: 'the token works, and ' + owner + '/' + repo + ' is reachable',
+      detail:
+        'the token works, and ' +
+        owner +
+        '/' +
+        repo +
+        ' is reachable' +
+        (scopes ? ' — scopes: ' + scopes : ''),
+    };
+  }
+
+  if (code === 401) {
+    return {
+      name: 'GitHub',
+      ok: false,
+      detail:
+        'the token was refused (401) — it is not a valid token. Check it for a stray ' +
+        'space or a missing character, and make a new one if it has expired',
+    };
+  }
+
+  if (code === 403) {
+    return {
+      name: 'GitHub',
+      ok: false,
+      detail:
+        'the token is valid but not allowed to write here (403)' +
+        (scopes ? ' — it has: ' + scopes : ''),
     };
   }
 
   return {
     name: 'GitHub',
     ok: false,
-    detail:
-      'the token was refused (' +
-      response.getResponseCode() +
-      ') — it may be expired, revoked, or mistyped',
+    detail: 'the token was refused (' + code + ')',
   };
 }
