@@ -84,13 +84,22 @@ function makeFolder(name) {
 /** A sheet with one tab, writable. */
 function makeSheet(rows) {
   const values = rows.map((row) => [...row]);
+
+  /* The sheet grows to fit what is written to it, the way the real one
+     does. A row that is written past the end is a new row. */
+  const ensure = (rowCount) => {
+    while (values.length < rowCount) values.push([]);
+  };
+
   const tab = {
     getDataRange: () => ({ getValues: () => values.map((row) => [...row]) }),
     getRange: (row, column, numRows = 1, numColumns = 1) => ({
       setValue: (value) => {
+        ensure(row);
         values[row - 1][column - 1] = String(value);
       },
       setValues: (block) => {
+        ensure(row + block.length - 1);
         block.forEach((line, r) => {
           line.forEach((cell, c) => {
             values[row - 1 + r][column - 1 + c] = String(cell);
@@ -199,6 +208,21 @@ function makeContext(options = {}) {
   return context;
 }
 
+/**
+ * The form fields, the way Apps Script hands them over.
+ *
+ * This is an object, not a method. `request.parameter` is a plain object of
+ * key/value pairs, so `request.parameter('action')` throws — and because
+ * that read sits on the first line of `doPost`, a publish request dies
+ * before anything is answered.
+ *
+ * The mock used to be a function, which hid that: the test passed against
+ * code that could not work in Apps Script. Every call below now uses this.
+ */
+function formFields(fields) {
+  return { ...fields };
+}
+
 /* ── Run the script ───────────────────────────────────────────────────── */
 
 const source = readFileSync(join(ROOT, 'apps-script', 'Code.gs'), 'utf8');
@@ -224,13 +248,12 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
   console.log('Saving a picture');
   const context = load(makeContext());
   const reply = context.doPost({
-    parameter: (name) =>
-      ({
-        action: 'image',
-        slug: 'acme-hk-2026',
-        fileName: 'acme-hk-2026.jpg',
-        dataUrl: 'data:image/jpeg;base64,AAAA',
-      })[name],
+    parameter: formFields({
+      action: 'image',
+      slug: 'acme-hk-2026',
+      fileName: 'acme-hk-2026.jpg',
+      dataUrl: 'data:image/jpeg;base64,AAAA',
+    }),
   });
 
   check('the reply says it saved', /saved/i.test(String(reply.body ?? reply)), String(reply.body ?? reply));
@@ -247,8 +270,12 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
   console.log('\nRefusing nonsense');
   const context = load(makeContext());
   context.doPost({
-    parameter: (name) =>
-      ({ action: 'image', slug: 'Not A Slug', fileName: 'x.jpg', dataUrl: 'data:image/jpeg;base64,AA' })[name],
+    parameter: formFields({
+      action: 'image',
+      slug: 'Not A Slug',
+      fileName: 'x.jpg',
+      dataUrl: 'data:image/jpeg;base64,AA',
+    }),
   });
   check('no folder was made for a bad slug', context.__root.children.length === 0);
 }
@@ -257,13 +284,42 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
 {
   console.log('\nPublishing');
   const context = load(makeContext());
-  const reply = context.doPost({ parameter: (name) => ({ action: 'publish' })[name] });
+  const reply = context.doPost({ parameter: formFields({ action: 'publish' }) });
 
   check('the reply says it is rebuilding', /rebuild/i.test(String(reply.body ?? reply)));
   check('GitHub was asked to dispatch', context.__calls.dispatched.length === 1);
   check('the event type is right', context.__calls.dispatched[0]?.event_type === 'sync-cases');
   check('the publish was stamped', String(setting(context, 'lastPublish')).length > 10);
   check('the outcome was written', setting(context, 'lastPublishStatus') === 'ok', setting(context, 'lastPublishStatus'));
+}
+
+/* ── 3b. A build that is still going is left to the report workflow ──── */
+{
+  console.log('\nA build that has not finished yet');
+  const context = load(
+    makeContext({
+      runs: {
+        workflow_runs: [
+          {
+            created_at: new Date(Date.now() + 1000).toISOString(),
+            status: 'in_progress',
+            conclusion: null,
+          },
+        ],
+      },
+    }),
+  );
+  context.doPost({ parameter: formFields({ action: 'publish' }) });
+
+  /* The script has answered by now. The build is still running, and the
+     report workflow is what writes the result when it ends — so the script
+     must not claim a result it does not have. */
+  check(
+    'the status is left as dispatched',
+    setting(context, 'lastPublishStatus') === 'dispatched',
+    setting(context, 'lastPublishStatus'),
+  );
+  check('no result was invented', !['ok', 'failed'].includes(setting(context, 'lastPublishStatus')));
 }
 
 /* ── 4. A failed build is reported as a failure ───────────────────────── */
@@ -282,10 +338,14 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
       },
     }),
   );
-  context.doPost({ parameter: (name) => ({ action: 'publish' })[name] });
+  context.doPost({ parameter: formFields({ action: 'publish' }) });
 
   check('the outcome says it failed', setting(context, 'lastPublishStatus') === 'failed', setting(context, 'lastPublishStatus'));
-  check('there is a message to show', String(setting(context, 'lastPublishMessage')).length > 0);
+  check(
+    'there is a message to show',
+    String(setting(context, 'lastPublishMessage') ?? '').length > 0,
+    String(setting(context, 'lastPublishMessage')),
+  );
 }
 
 /* ── 5. A publish nobody asked for is refused ────────────────────────── */
@@ -296,7 +356,7 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
   const index = rows.findIndex((row) => row[0] === 'publishRequested');
   rows[index] = ['publishRequested', new Date(Date.now() - 10 * 60 * 1000).toISOString()];
 
-  const reply = context.doPost({ parameter: (name) => ({ action: 'publish' })[name] });
+  const reply = context.doPost({ parameter: formFields({ action: 'publish' }) });
   check('a stale request is refused', String(reply.body ?? reply).includes('not requested'), String(reply.body ?? reply));
   check('nothing was dispatched', context.__calls.dispatched.length === 0);
 }
@@ -314,9 +374,18 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
     return original(url, opts);
   };
 
-  const reply = context.doPost({ parameter: (name) => ({ action: 'publish' })[name] });
+  const reply = context.doPost({ parameter: formFields({ action: 'publish' }) });
   check('the refusal is reported', String(reply.body ?? reply).includes('401'), String(reply.body ?? reply));
-  check('nothing was stamped as published', !String(setting(context, 'lastPublishStatus')));
+  check(
+    'the sheet says the build did not start',
+    setting(context, 'lastPublishStatus') === 'unknown',
+    setting(context, 'lastPublishStatus'),
+  );
+  check(
+    'there is a message to show',
+    String(setting(context, 'lastPublishMessage') ?? '').length > 0,
+    String(setting(context, 'lastPublishMessage')),
+  );
 }
 
 console.log(`\n${failed === 0 ? 'All checks passed.' : `${failed} check(s) failed.`}`);

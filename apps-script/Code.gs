@@ -133,9 +133,14 @@ function saveImage_(slug, fileName, dataUrl) {
  *
  * The dispatch is only half the story: the browser cannot read a reply, so
  * it cannot know whether the run started, let alone whether it passed. So
- * this watches the run, and writes the outcome into the sheet's `settings`
- * tab — where the editor's page can read it and say what actually
- * happened.
+ * the outcome is reported through the sheet's `settings` tab — where the
+ * editor's page can read it and say what actually happened.
+ *
+ * This script cannot write the final answer itself. The build happens
+ * after this has answered, and a web app's request cannot wait for a
+ * build. So this stamps `dispatched`, and the report workflow writes `ok`
+ * or `failed` into the sheet when the build is done. If the build has
+ * already finished by the time this looks, the result is written here.
  *
  * A request is only honoured if the sheet says it was asked for. The editor's
  * page writes `publishRequested` into the sheet before it posts here, and
@@ -156,6 +161,13 @@ function triggerPublish_() {
   var repo = setting_('GITHUB_REPO');
   var token = scriptProperty_('GITHUB_TOKEN');
 
+  /* The stamp goes in before the dispatch, not after it. The editor's page
+     watches this value to know the request was taken, and it should not have
+     to wait for GitHub to answer. */
+  var stamp = new Date().toISOString();
+  setSetting_('lastPublish', stamp);
+  setSetting_('lastPublishStatus', 'dispatched');
+
   var response = UrlFetchApp.fetch(
     'https://api.github.com/repos/' + owner + '/' + repo + '/dispatches',
     {
@@ -172,6 +184,14 @@ function triggerPublish_() {
   );
 
   if (response.getResponseCode() !== 204) {
+    /* GitHub would not take the request, so no build was started. The
+       editor's page reads `unknown` as "the build did not start", which is
+       exactly what happened. */
+    setSetting_('lastPublishStatus', 'unknown');
+    setSetting_(
+      'lastPublishMessage',
+      'GitHub refused the publish (' + response.getResponseCode() + ')',
+    );
     throw new Error(
       'GitHub refused the publish (' +
         response.getResponseCode() +
@@ -180,12 +200,15 @@ function triggerPublish_() {
     );
   }
 
-  var stamp = new Date().toISOString();
-  setSetting_('lastPublish', stamp);
-
+  /* A short look at the run. If the build has already finished, the
+     outcome is known now and is written down. If it is still going, the
+     report workflow writes the result when it ends — this script has
+     answered by then, and a web app's request cannot wait for a build. */
   var outcome = watchRun_(owner, repo, token, stamp);
-  setSetting_('lastPublishStatus', outcome.status);
-  if (outcome.message) setSetting_('lastPublishMessage', outcome.message);
+  if (outcome.status === 'ok' || outcome.status === 'failed') {
+    setSetting_('lastPublishStatus', outcome.status);
+    if (outcome.message) setSetting_('lastPublishMessage', outcome.message);
+  }
 
   return outcome;
 }
@@ -193,13 +216,19 @@ function triggerPublish_() {
 /**
  * Watch the workflow run the dispatch started.
  *
- * Returns `{ status, message }`. A run that has not appeared within a
- * minute is treated as "not started" — the token may have gone stale, or
- * the workflow may have been disabled.
+ * Returns `{ status, message }`. The wait is deliberately short. A web app's
+ * request has to be answered in seconds and the build takes a minute, so
+ * waiting for the build here would only risk the request being cut off. If
+ * the build is still going when the wait ends, the report workflow writes
+ * the result when it ends.
+ *
+ * A run that has not appeared at all is not treated as a failure: GitHub
+ * can be slow to start one, and saying "failed" when the build is about to
+ * start would be worse than saying nothing.
  */
 function watchRun_(owner, repo, token, stamp) {
   var started = Date.parse(stamp);
-  var deadline = Date.now() + 3 * 60 * 1000;
+  var deadline = Date.now() + 5 * 1000;
 
   while (Date.now() < deadline) {
     var runs = github_(
@@ -228,12 +257,12 @@ function watchRun_(owner, repo, token, stamp) {
       }
     }
 
-    Utilities.sleep(8000);
+    Utilities.sleep(1500);
   }
 
   return {
-    status: 'unknown',
-    message: 'the build did not start — the GitHub token may have expired',
+    status: 'running',
+    message: 'the build has not finished yet — the report workflow will say how it went',
   };
 }
 
