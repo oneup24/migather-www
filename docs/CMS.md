@@ -181,7 +181,17 @@ editor's Google session.
 > the address, a new *deployment* does not, and the address is in
 > `src/data/cms.js`.
 
-### 3.6 Seeding the sheet
+### 3.6 Checking it is set up
+
+Open the script's address. It answers with a status page: whether the
+sheet is readable, whether the picture folder is, and whether the GitHub
+token works. **No secret is printed** — only whether each property is
+there and whether it does.
+
+That is the first thing to look at when a publish does not happen, and it
+means a token never has to be pasted anywhere to be tested.
+
+### 3.7 Seeding the sheet
 
 ```bash
 node tools/cms/seed-sheet.mjs \
@@ -200,7 +210,7 @@ clobbers: a case whose slug is already in a tab is left alone.
 > 16 pictures were uploaded by hand; the editor's browser now hands new ones
 > to the Apps Script, which runs as the editor and has quota.
 
-### 3.7 The editor allow-list
+### 3.8 The editor allow-list
 
 The `editors` row of the `settings` tab, comma-separated. It can be
 managed from the command line:

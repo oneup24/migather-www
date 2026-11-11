@@ -168,11 +168,6 @@ function makeContext(options = {}) {
     },
     UrlFetchApp: {
       fetch: (url, opts) => {
-        calls.fetched.push({ url, opts });
-        if (url.includes('/dispatches')) {
-          calls.dispatched.push(JSON.parse(opts.payload));
-          return { getResponseCode: () => 204, getContentText: () => '' };
-        }
         if (url.includes('/actions/workflows/')) {
           const body = options.runs ?? {
             workflow_runs: [
@@ -184,6 +179,14 @@ function makeContext(options = {}) {
             ],
           };
           return { getResponseCode: () => 200, getContentText: () => JSON.stringify(body) };
+        }
+        if (url.includes('api.github.com/repos/') && !url.includes('/dispatches')) {
+          return { getResponseCode: () => 200, getContentText: () => '{}' };
+        }
+        calls.fetched.push({ url, opts });
+        if (url.includes('/dispatches')) {
+          calls.dispatched.push(JSON.parse(opts.payload));
+          return { getResponseCode: () => 204, getContentText: () => '' };
         }
         return { getResponseCode: () => 200, getContentText: () => '{}' };
       },

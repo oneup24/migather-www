@@ -323,19 +323,155 @@ function reply_(message, isError) {
 /**
  * Opening the script's address directly.
  *
- * The editor is a page of the website now. This says so, and points at it.
+ * A status page: whether the script is set up correctly, and which piece is
+ * missing if it is not. It never prints a secret — only whether each
+ * property is there and whether it works.
+ *
+ * This is the first thing to look at when a publish does not happen, and
+ * it saves having to paste a token into a chat to find out whether it works.
  */
 function doGet() {
+  var checks = [];
+
+  /* The sheet. */
+  checks.push(checkSheet_());
+  /* The Drive folder. */
+  checks.push(checkDrive_());
+  /* GitHub. */
+  checks.push(checkGitHub_());
+
   var site = PropertiesService.getScriptProperties().getProperty('SITE_URL') || '';
   var link = site ? '<p><a href="' + site + '/en/admin">Open the works editor</a></p>' : '';
 
+  var rows = checks
+    .map(function (check) {
+      var mark = check.ok ? '✓' : '✗';
+      var colour = check.ok ? '#1d7a4c' : '#950534';
+      return (
+        '<tr><td style="padding:6px 12px 6px 0;color:' +
+        colour +
+        ';font-weight:600">' +
+        mark +
+        '</td><td style="padding:6px 0"><strong>' +
+        check.name +
+        '</strong> — ' +
+        check.detail +
+        '</td></tr>'
+      );
+    })
+    .join('');
+
   return HtmlService.createHtmlOutput(
-    '<!doctype html><html><head><meta charset="utf-8"><title>Migather</title></head>' +
-      '<body style="font-family:system-ui,sans-serif;max-width:34rem;margin:4rem auto;padding:0 1.5rem;color:#1c1c1c">' +
-      '<h1 style="font-size:1.4rem">The works editor has moved</h1>' +
-      '<p>It is now a page of the website. Sign in with your Migather account and edit ' +
-      'the works there — the sheet is written as you, and the site updates itself.</p>' +
+    '<!doctype html><html><head><meta charset="utf-8"><title>Migather — editor status</title>' +
+      '<style>body{font-family:system-ui,-apple-system,sans-serif;max-width:46rem;margin:3rem auto;padding:0 1.5rem;color:#1c1c1c}' +
+      'table{border-collapse:collapse;width:100%;margin:1.5rem 0;font-size:14px}' +
+      'h1{font-size:1.3rem;margin:0 0 .3rem}p{margin:.4rem 0;color:#555}</style></head><body>' +
+      '<h1>The works editor — status</h1>' +
+      '<p>Whether the script can save a picture and ask the site to rebuild. ' +
+      'No secret is printed here.</p>' +
+      '<table>' +
+      rows +
+      '</table>' +
       link +
       '</body></html>',
-  ).setTitle('Migather — works editor');
+  ).setTitle('Migather — editor status');
+}
+
+/** Is the sheet there, and can this script read it? */
+function checkSheet_() {
+  var id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+  if (!id) {
+    return { name: 'The sheet', ok: false, detail: 'the script property SPREADSHEET_ID is not set' };
+  }
+  try {
+    var sheet = SpreadsheetApp.openById(id);
+    var tabs = sheet.getSheets().length;
+    return {
+      name: 'The sheet',
+      ok: true,
+      detail: 'readable — ' + tabs + ' tab(s)',
+    };
+  } catch (error) {
+    return {
+      name: 'The sheet',
+      ok: false,
+      detail: 'cannot read it — ' + error.message,
+    };
+  }
+}
+
+/** Is the Drive folder there, and can this script see it? */
+function checkDrive_() {
+  var id = PropertiesService.getScriptProperties().getProperty('DRIVE_FOLDER_ID');
+  if (!id) {
+    return {
+      name: 'The picture folder',
+      ok: false,
+      detail: 'the script property DRIVE_FOLDER_ID is not set',
+    };
+  }
+  try {
+    var folder = DriveApp.getFolderById(id);
+    var count = folder.getFolders().length;
+    return {
+      name: 'The picture folder',
+      ok: true,
+      detail: 'readable — ' + count + ' case folder(s)',
+    };
+  } catch (error) {
+    return {
+      name: 'The picture folder',
+      ok: false,
+      detail: 'cannot read it — ' + error.message,
+    };
+  }
+}
+
+/** Is the GitHub token there, and does it work? */
+function checkGitHub_() {
+  var properties = PropertiesService.getScriptProperties();
+  var token = properties.getProperty('GITHUB_TOKEN');
+  var owner = properties.getProperty('GITHUB_OWNER');
+  var repo = properties.getProperty('GITHUB_REPO');
+
+  if (!token) {
+    return {
+      name: 'GitHub',
+      ok: false,
+      detail: 'the script property GITHUB_TOKEN is not set',
+    };
+  }
+  if (!owner || !repo) {
+    return {
+      name: 'GitHub',
+      ok: false,
+      detail: 'GITHUB_OWNER or GITHUB_REPO is not set',
+    };
+  }
+
+  var response = UrlFetchApp.fetch('https://api.github.com/repos/' + owner + '/' + repo, {
+    headers: {
+      Authorization: 'Bearer ' + token,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'migather-cms',
+    },
+    muteHttpExceptions: true,
+  });
+
+  if (response.getResponseCode() === 200) {
+    return {
+      name: 'GitHub',
+      ok: true,
+      detail: 'the token works, and ' + owner + '/' + repo + ' is reachable',
+    };
+  }
+
+  return {
+    name: 'GitHub',
+    ok: false,
+    detail:
+      'the token was refused (' +
+      response.getResponseCode() +
+      ') — it may be expired, revoked, or mistyped',
+  };
 }
