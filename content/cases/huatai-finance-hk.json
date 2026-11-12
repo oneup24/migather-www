@@ -1,7 +1,7 @@
 {
   "slug": "huatai-finance-hk",
   "order": 0,
-  "client": "Huatai Finance HK",
+  "client": "Huatai Finance HK_Hi~~~",
   "clientLocal": {
     "en": "華泰證券",
     "zh-Hant": "華泰證券",
@@ -64,7 +64,11 @@
         "zh-Hant": "",
         "zh-Hans": ""
       },
-      "note": null
+      "note": {
+        "en": "Organic, without paid social budget",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
     }
   ],
   "scope": [

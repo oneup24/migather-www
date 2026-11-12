@@ -65,7 +65,11 @@
         "zh-Hant": "直播活動報名人數",
         "zh-Hans": "直播活动报名人数"
       },
-      "note": null
+      "note": {
+        "en": "Metric tracked in the deck; the figure is not legible in the source file",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
     }
   ],
   "scope": [

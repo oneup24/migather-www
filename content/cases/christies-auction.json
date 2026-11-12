@@ -20,8 +20,8 @@
   ],
   "partnershipSince": {
     "en": "2021",
-    "zh-Hant": "2021年",
-    "zh-Hans": "2021年"
+    "zh-Hant": "2021",
+    "zh-Hans": "2021"
   },
   "featured": true,
   "published": true,
@@ -30,7 +30,21 @@
     "zh-Hant": "為國際拍賣行統籌的中國社群創意項目——由創意規劃、策略至製作，涵蓋微信紅包封面、動畫、文章，以及由草圖起稿的貼圖製作。",
     "zh-Hans": "为国际拍卖行统筹的中国社群创意项目——由创意规划、策略至制作，涵盖微信红包封面、动画、文章，以及由草图起稿的贴图制作。"
   },
-  "results": [],
+  "results": [
+    {
+      "value": "+60%",
+      "label": {
+        "en": "Social Follower",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      },
+      "note": {
+        "en": "Paid Social",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
+    }
+  ],
   "scope": [
     {
       "en": "Creative planning, strategy and production",
