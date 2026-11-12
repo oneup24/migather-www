@@ -556,7 +556,8 @@ function checkDrive_() {
   }
   try {
     var folder = DriveApp.getFolderById(id);
-    var count = folder.getFolders().length;
+    /* A FolderIterator counts itself with getCount(), not with length. */
+    var count = folder.getFolders().getCount();
     return {
       name: 'The picture folder',
       ok: true,

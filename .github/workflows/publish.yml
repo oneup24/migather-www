@@ -65,7 +65,22 @@ jobs:
           GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
           CMS_SPREADSHEET_ID: ${{ secrets.CMS_SPREADSHEET_ID }}
           CMS_DRIVE_FOLDER_ID: ${{ secrets.CMS_DRIVE_FOLDER_ID }}
-        run: node tools/cms/sync-cases.mjs
+        run: |
+          # The output is kept, and the reason it failed is written into
+          # the sheet — so "why did it not publish?" has an answer in one
+          # place, rather than in a log only someone with admin rights can
+          # open.
+          set +e
+          node tools/cms/sync-cases.mjs > sync.log 2>&1
+          status=$?
+          cat sync.log
+          {
+            echo "message<<MIGATHER_EOF"
+            echo "The sheet could not be published. The sync said:"
+            tail -20 sync.log
+            echo "MIGATHER_EOF"
+          } >> "$GITHUB_OUTPUT"
+          exit $status
 
       - name: Screen the copy
         # The 中国广告法 restricted terms and Migather's own banned claim
@@ -144,7 +159,9 @@ jobs:
         if: always()
         env:
           PUBLISH_STATUS: ${{ steps.build.outcome == 'success' && 'ok' || 'failed' }}
-          PUBLISH_MESSAGE: ${{ steps.build.outcome == 'success' && '' || 'the build did not finish — see the Actions tab' }}
+          # The reason, when there is one. The sync's own words if it was
+          # the sheet; the build's if it was the build.
+          PUBLISH_MESSAGE: ${{ steps.sync.outputs.message || 'the build did not finish — see the Actions tab' }}
           # The service-account key, to write the outcome into the sheet.
           GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
           CMS_SPREADSHEET_ID: ${{ secrets.CMS_SPREADSHEET_ID }}
