@@ -1,7 +1,7 @@
 {
   "slug": "christies-auction",
   "order": 6,
-  "client": "Christie's Auction",
+  "client": "Christie's Auction +++HI",
   "clientLocal": {
     "en": "佳士得",
     "zh-Hant": "佳士得",
@@ -43,6 +43,19 @@
         "zh-Hant": "",
         "zh-Hans": ""
       }
+    },
+    {
+      "value": "+10",
+      "label": {
+        "en": "Website Traffic",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      },
+      "note": {
+        "en": "Google Ad",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
     }
   ],
   "scope": [
@@ -70,6 +83,11 @@
       "en": "WeChat sticker production, from sketch",
       "zh-Hant": "微信貼圖製作，由草圖起稿",
       "zh-Hans": "微信贴图制作，由草图起稿"
+    },
+    {
+      "en": "KOL collaboration",
+      "zh-Hant": "",
+      "zh-Hans": ""
     }
   ],
   "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 14",
