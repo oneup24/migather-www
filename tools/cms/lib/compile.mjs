@@ -301,17 +301,23 @@ export function compile(input, { sectors = [], services = [] } = {}) {
 
     /* The copy, in every language. */
     const localised = {};
+    let hasSummary = false;
     for (const locale of LOCALES) {
       const row = byLocale[locale].get(slug).__values;
       localised[locale] = row;
 
       if (!row.summary) {
+        /* A summary missing in one language is a translation in progress.
+           A summary missing in every language is an empty page, and that
+           stops the publish. */
         warnings.push({
           tab: CASE_TABS[locale],
           slug,
           column: 'summary',
           message: `the case has no summary in ${locale} — it shows in English there`,
         });
+      } else {
+        hasSummary = true;
       }
       if (!row.imageAlt) {
         warnings.push({
@@ -329,6 +335,15 @@ export function compile(input, { sectors = [], services = [] } = {}) {
           message: `the case has no client name in ${locale} — it falls back to the English one`,
         });
       }
+    }
+
+    if (!hasSummary) {
+      errors.push({
+        tab: 'the cases tabs',
+        slug,
+        column: 'summary',
+        message: 'a published case must have a summary in at least one language',
+      });
     }
 
     /* The results and the scope lines. */

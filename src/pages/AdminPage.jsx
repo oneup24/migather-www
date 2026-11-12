@@ -15,7 +15,7 @@
  * account and the service account, and the allow-list in the sheet's
  * `settings` tab is checked on top of that.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { cloneElement, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -159,6 +159,7 @@ export default function AdminPage() {
   const [results, setResults] = useState([]);
   const [scope, setScope] = useState([]);
   const [newFile, setNewFile] = useState(null);
+  const [newSlug, setNewSlug] = useState('');
   const fileInput = useRef(null);
 
   /* Sign in. */
@@ -208,9 +209,12 @@ export default function AdminPage() {
     const cases = rowsAsObjects(tabs[CASE_TABS[locale]]);
     const row = cases.find((entry) => entry.slug === slug);
 
-    const values = row
-      ? { ...row }
-      : Object.fromEntries(CASE_COLUMNS.map((column) => [column, '']));
+    /* A case that is not in the sheet yet is one being written for the
+       first time. Loading it would wipe what the editor has just typed, so
+       the form is left alone until the case is saved and the sheet has it. */
+    if (!row) return;
+
+    const values = { ...row };
 
     setForm({
       slug,
@@ -248,14 +252,96 @@ export default function AdminPage() {
 
   const caseList = useMemo(() => {
     if (!tabs) return [];
-    return rowsAsObjects(tabs[CASE_TABS[locale]]).map((row) => ({
+    const list = rowsAsObjects(tabs[CASE_TABS[locale]]).map((row) => ({
       slug: row.slug,
       client: row.client || row.slug,
       published: row.published === 'true',
     }));
-  }, [tabs, locale]);
+
+    /* The case being written is not in the sheet yet, so it is put at the
+       top of the list — otherwise the picker would show a different case
+       from the one on screen. */
+    if (newSlug && !list.some((entry) => entry.slug === newSlug)) {
+      list.unshift({ slug: newSlug, client: form?.client || newSlug, published: false });
+    }
+    return list;
+  }, [tabs, locale, newSlug, form?.client]);
 
   const allowed = session ? editors.includes(session.email.toLowerCase()) : false;
+
+  /* ── A new case ─────────────────────────────────────────────────────── */
+
+  /**
+   * Start a new case.
+   *
+   * The case is not in the sheet yet — it appears there when it is saved.
+   * The id it asks for becomes the page address, so it has to be the one
+   * the URL will use for good: `migather.com/en/work/<id>`.
+   */
+  function handleNewCase() {
+    const asked = window.prompt(
+      t({
+        en: 'The case id — lowercase letters, digits and single hyphens.\n\nThis becomes the page address: /en/work/<id>\n\nFor example: acme-hk-2026',
+        'zh-Hant': '案例代號——小寫字母、數字及連字號。這會成為頁面網址：/zh-Hant/work/<代號>\n\n例如：acme-hk-2026',
+        'zh-Hans': '案例代号——小写字母、数字及连字号。这会成为页面网址：/zh-Hans/work/<代号>\n\n例如：acme-hk-2026',
+      }),
+    );
+    if (!asked) return;
+
+    const newSlug = asked.trim().toLowerCase();
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(newSlug)) {
+      setError(
+        t({
+          en: 'That id is not valid — lowercase letters, digits and single hyphens only.',
+          'zh-Hant': '該代號無效——只能是小寫字母、數字及單一連字號。',
+          'zh-Hans': '该代号无效——只能是小写字母、数字及单一连字号。',
+        }),
+      );
+      return;
+    }
+
+    const client = window.prompt(
+      t({
+        en: 'The client name, for example: Acme HK',
+        'zh-Hant': '客戶名稱，例如：Acme HK',
+        'zh-Hans': '客户名称，例如：Acme HK',
+      }),
+    );
+    if (client === null) return;
+
+    setError('');
+    setNotice('');
+    setSlug(newSlug);
+    setNewSlug(newSlug);
+
+    setForm({
+      slug: newSlug,
+      client: (client ?? '').trim(),
+      clientLocal: '',
+      projectLocal: '',
+      sector: 'finance',
+      services: '',
+      partnershipSince: '',
+      summary: '',
+      imageAlt: '',
+      image: '',
+      mockup: true,
+      source: '',
+      featured: false,
+      published: true,
+    });
+    setResults([]);
+    setScope([]);
+    setNewFile(null);
+
+    setNotice(
+      t({
+        en: 'A new case. Fill it in and press Save — it will be written to the sheet and the site will pick it up by itself.',
+        'zh-Hant': '新增案例。填寫後按儲存——內容會寫入表格，網站會自行更新。',
+        'zh-Hans': '新增案例。填写后按保存——内容会写入表格，网站会自行更新。',
+      }),
+    );
+  }
 
   /* ── Saving ─────────────────────────────────────────────────────────── */
 
@@ -308,7 +394,7 @@ export default function AdminPage() {
       for (const each of LOCALE_CODES) {
         const existing = rowsAsObjects(tabs[CASE_TABS[each]]).find((r) => r.slug === form.slug);
         const row = {
-          slug: form.slug,
+          slug,
           client: form.client,
           clientLocal: form.clientLocal,
           projectLocal: form.projectLocal,
@@ -346,6 +432,7 @@ export default function AdminPage() {
           'zh-Hans': '已保存。网站会在一分钟内自动更新，没有其他需要按的按钮。',
         }),
       );
+      setNewSlug('');
       await loadSheet(token);
     } catch (failure) {
       setError(failure.message ?? String(failure));
@@ -513,13 +600,26 @@ export default function AdminPage() {
       <div className="mt-10 grid gap-10 lg:grid-cols-[260px_1fr]">
         {/* The case list. */}
         <div>
-          <label className="eyebrow text-muted" htmlFor="case-picker">
-            {t({ en: 'Case', 'zh-Hant': '案例', 'zh-Hans': '案例' })}
-          </label>
+          <div className="flex items-baseline justify-between gap-3">
+            <label className="eyebrow text-muted" htmlFor="case-picker">
+              {t({ en: 'Case', 'zh-Hant': '案例', 'zh-Hans': '案例' })}
+            </label>
+            <button
+              type="button"
+              id="newCase"
+              onClick={handleNewCase}
+              className="font-display text-[13px] text-brandBlue underline underline-offset-4"
+            >
+              {t({ en: '＋ New case', 'zh-Hant': '＋ 新增案例', 'zh-Hans': '＋ 新增案例' })}
+            </button>
+          </div>
           <select
             id="case-picker"
             value={slug ?? ''}
-            onChange={(event) => setSlug(event.target.value)}
+            onChange={(event) => {
+              setSlug(event.target.value);
+              setNewSlug('');
+            }}
             className={`mt-3 ${INPUT}`}
           >
             {caseList.map((entry) => (
@@ -555,7 +655,7 @@ export default function AdminPage() {
         {/* The form. */}
         {form && (
           <div>
-            <Field label={t({ en: 'Client', 'zh-Hant': '客戶', 'zh-Hans': '客户' })}>
+            <Field id="client" label={t({ en: 'Client', 'zh-Hant': '客戶', 'zh-Hans': '客户' })}>
               <input
                 type="text"
                 className={INPUT}
@@ -564,8 +664,7 @@ export default function AdminPage() {
               />
             </Field>
 
-            <Field
-              label={t({ en: 'Client, local name', 'zh-Hant': '客戶本地名稱', 'zh-Hans': '客户本地名称' })}
+            <Field id="clientLocal" label={t({ en: 'Client, local name', 'zh-Hant': '客戶本地名稱', 'zh-Hans': '客户本地名称' })}
             >
               <input
                 type="text"
@@ -575,7 +674,17 @@ export default function AdminPage() {
               />
             </Field>
 
-            <Field label={t({ en: 'Sector', 'zh-Hant': '範疇', 'zh-Hans': '范畴' })}>
+            <Field id="projectLocal" label={t({ en: 'Project, local name', 'zh-Hant': '項目本地名稱', 'zh-Hans': '项目本地名称' })}
+            >
+              <input
+                type="text"
+                className={INPUT}
+                value={form.projectLocal}
+                onChange={(event) => setForm({ ...form, projectLocal: event.target.value })}
+              />
+            </Field>
+
+            <Field id="sector" label={t({ en: 'Sector', 'zh-Hant': '範疇', 'zh-Hans': '范畴' })}>
               <input
                 type="text"
                 className={INPUT}
@@ -584,8 +693,7 @@ export default function AdminPage() {
               />
             </Field>
 
-            <Field
-              label={t({ en: 'Categories', 'zh-Hant': '分類', 'zh-Hans': '分类' })}
+            <Field id="services" label={t({ en: 'Categories', 'zh-Hant': '分類', 'zh-Hans': '分类' })}
               hint={t({
                 en: 'The service keys, separated by commas.',
                 'zh-Hant': '服務項目代碼，用逗號分隔。',
@@ -600,8 +708,7 @@ export default function AdminPage() {
               />
             </Field>
 
-            <Field
-              label={t({ en: 'Partner since', 'zh-Hant': '合作開始', 'zh-Hans': '合作开始' })}
+            <Field id="partnershipSince" label={t({ en: 'Partner since', 'zh-Hant': '合作開始', 'zh-Hans': '合作开始' })}
             >
               <input
                 type="text"
@@ -611,7 +718,7 @@ export default function AdminPage() {
               />
             </Field>
 
-            <Field label={t({ en: 'Summary', 'zh-Hant': '摘要', 'zh-Hans': '摘要' })}>
+            <Field id="summary" label={t({ en: 'Summary', 'zh-Hant': '摘要', 'zh-Hans': '摘要' })}>
               <textarea
                 rows={4}
                 className={INPUT}
@@ -620,8 +727,7 @@ export default function AdminPage() {
               />
             </Field>
 
-            <Field
-              label={t({ en: 'Source', 'zh-Hant': '來源', 'zh-Hans': '来源' })}
+            <Field id="source" label={t({ en: 'Source', 'zh-Hant': '來源', 'zh-Hans': '来源' })}
               hint={t({
                 en: 'The deck and slide this came from. Required — a case with no source will not publish.',
                 'zh-Hant': '簡報及頁碼。必須填寫——沒有來源的案例無法發佈。',
@@ -636,8 +742,7 @@ export default function AdminPage() {
               />
             </Field>
 
-            <Field
-              label={t({ en: 'Alt text', 'zh-Hant': '替代文字', 'zh-Hans': '替代文字' })}
+            <Field id="imageAlt" label={t({ en: 'Alt text', 'zh-Hant': '替代文字', 'zh-Hans': '替代文字' })}
               hint={t({
                 en: 'Describe the picture. Do not type “mock-up” — the site adds that word itself.',
                 'zh-Hant': '描述圖片。不用輸入「樣機」——網站會自行加上。',
@@ -652,8 +757,7 @@ export default function AdminPage() {
               />
             </Field>
 
-            <Field
-              label={t({ en: 'Is it a mock-up?', 'zh-Hant': '是樣機嗎？', 'zh-Hans': '是样机吗？' })}
+            <Field id="mockup" label={t({ en: 'Is it a mock-up?', 'zh-Hant': '是樣機嗎？', 'zh-Hans': '是样机吗？' })}
               hint={t({
                 en: 'A mock-up is labelled on screen and in the alt text. Real photography is not.',
                 'zh-Hant': '樣機會在畫面上和替代文字中標示。實拍則不會。',
@@ -674,8 +778,7 @@ export default function AdminPage() {
               </select>
             </Field>
 
-            <Field
-              label={t({ en: 'The picture', 'zh-Hant': '圖片', 'zh-Hans': '图片' })}
+            <Field id="picture" label={t({ en: 'The picture', 'zh-Hant': '圖片', 'zh-Hans': '图片' })}
               hint={
                 newFile
                   ? t({
@@ -781,6 +884,44 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {/* Published. A draft is saved but does not appear on the site,
+                and does not block the ones that do — so a case can be written
+                in one language and finished in another without holding
+                anything up. */}
+            <div className="mt-10 border-t border-rule pt-8">
+              <label className="eyebrow text-muted" htmlFor="published">
+                {t({ en: 'On the site?', 'zh-Hant': '是否上架？', 'zh-Hans': '是否上架？' })}
+              </label>
+              <select
+                id="published"
+                value={form.published ? 'true' : 'false'}
+                onChange={(event) => setForm({ ...form, published: event.target.value === 'true' })}
+                className="mt-2 w-full border border-rule bg-white px-3 py-2 font-display text-[14px] text-ink"
+              >
+                <option value="false">
+                  {t({
+                    en: 'No — keep it as a draft',
+                    'zh-Hant': '否——先存為草稿',
+                    'zh-Hans': '否——先存为草稿',
+                  })}
+                </option>
+                <option value="true">
+                  {t({
+                    en: 'Yes — show it on the site',
+                    'zh-Hant': '是——在網站上顯示',
+                    'zh-Hans': '是——在网站上显示',
+                  })}
+                </option>
+              </select>
+              <p className="mt-2 text-[12.5px] leading-relaxed text-muted">
+                {t({
+                  en: 'A draft is saved but does not appear. Publish when the copy is ready — a case that is only half translated can be published, and the missing language falls back to English.',
+                  'zh-Hant': '草稿會被儲存，但不會出現在網站上。文字准备好後再上架——只翻譯了一半也可以上架，缺少的語言會以英文顯示。',
+                  'zh-Hans': '草稿会被保存，但不会出现在网站上。文字准备好后再上架——只翻译了一半也可以上架，缺少的语言会以英文显示。',
+                })}
+              </p>
+            </div>
+
             <div className="mt-12 flex flex-wrap items-center gap-4 border-t border-rule pt-8">
               <button
                 type="button"
@@ -820,11 +961,17 @@ function Shell({ children }) {
   );
 }
 
-function Field({ label, hint, children }) {
+/**
+ * One field.
+ *
+ * The id goes on the control and the label points at it, so clicking the
+ * label focuses the field — and so a test can find it.
+ */
+function Field({ id, label, hint, children }) {
   return (
-    <label className="mt-6 block">
+    <label className="mt-6 block" htmlFor={id}>
       <span className="eyebrow text-muted">{label}</span>
-      <div className="mt-2">{children}</div>
+      <div className="mt-2">{id ? cloneElement(children, { id }) : children}</div>
       {hint && <span className="mt-2 block text-[12.5px] leading-relaxed text-muted">{hint}</span>}
     </label>
   );
