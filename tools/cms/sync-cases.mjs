@@ -143,7 +143,9 @@ async function pullImages(records, warnings) {
     if (!existsSync(file)) continue;
     try {
       const previous = JSON.parse(readFileSync(file, 'utf8'));
-      if (previous.image?.src) committed.set(record.slug, previous.image.src.split('/').pop());
+      /* The whole picture — the file, the alt text and the mock-up flag —
+         because the three describe the picture, not the case. */
+      if (previous.image?.src) committed.set(record.slug, previous.image);
     } catch {
       /* A file that cannot be read simply has no previous picture. */
     }
@@ -155,7 +157,9 @@ async function pullImages(records, warnings) {
       const file = record.image.src.split('/').pop();
       const path = join(OPTIONS.fixtures, 'media', record.slug, file);
       if (!existsSync(path)) {
-        warnings.push(`the fixture for ${record.slug} is missing ${file}`);
+        warnings.push(
+          `the picture for ${record.slug} is missing (${file}) — the case keeps the one it has`,
+        );
         continue;
       }
       images.set(record.slug, { path, file });
@@ -180,7 +184,7 @@ async function pullImages(records, warnings) {
     const folder = folderByName.get(record.slug);
     if (!folder) {
       warnings.push(
-        `the Drive folder for ${record.slug} does not exist — the case keeps the picture it has`,
+        `the picture folder for ${record.slug} does not exist — the case keeps the picture it has`,
       );
       continue;
     }
@@ -190,7 +194,7 @@ async function pullImages(records, warnings) {
     if (!source) {
       const previous = committed.get(record.slug);
       warnings.push(
-        `the Drive folder for ${record.slug} has no file called ${file}` +
+        `the picture for ${record.slug} is missing (${file})` +
           (previous
             ? ` — the case keeps ${previous.src.split('/').pop()} until the new picture is there`
             : ' — the case has no picture to keep'),

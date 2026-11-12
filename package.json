@@ -25,7 +25,8 @@
     "cms:editors": "node tools/cms/editors.mjs",
     "cms:test": "node tools/cms/test-apps-script.mjs",
     "cms:test:page": "node tools/cms/test-admin-page.mjs",
-    "check:all": "npm run check:routes && npm run check:copy && npm run check:content && npm run build:sitemap"
+    "check:all": "npm run check:routes && npm run check:copy && npm run check:content && npm run build:sitemap",
+    "cms:test:sync": "node tools/cms/test-sync.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",
