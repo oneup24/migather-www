@@ -118,7 +118,7 @@ function settings_() {
   return out;
 }
 
-/* ── The two jobs ─────────────────────────────────────────────────────── */
+/* ── The three jobs ───────────────────────────────────────────────────── */
 
 /**
  * Save a picture into the case's folder.
@@ -679,9 +679,9 @@ function setSetting_(key, value) {
 /* ── The entry points ─────────────────────────────────────────────────── */
 
 /**
- * The picture and the publish request.
+ * The picture, the frame and the publish request.
  *
- * Both arrive as a form post from the editor's page, in a hidden iframe.
+ * They arrive as a form post from the editor's page, in a hidden iframe.
  * The browser cannot read the reply — Google sends no CORS headers — so
  * the answer lands in the frame and is not shown. The page says what
  * happened in its own words.
