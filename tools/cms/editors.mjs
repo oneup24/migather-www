@@ -21,6 +21,7 @@
  *                         ($GCP_SERVICE_ACCOUNT_JSON)
  */
 import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
@@ -35,8 +36,14 @@ const argOf = (flag) => {
 };
 
 const OPTIONS = {
-  spreadsheet: argOf('--spreadsheet') ?? process.env.CMS_SPREADSHEET_ID,
-  credentials: argOf('--credentials') ?? process.env.GCP_SERVICE_ACCOUNT_JSON,
+  spreadsheet:
+    argOf('--spreadsheet') ??
+    process.env.CMS_SPREADSHEET_ID ??
+    '141I1EcV1sG3bCemBNcA_7nJlcQXwLPrvP_SzHMvomgg',
+  credentials:
+    argOf('--credentials') ??
+    process.env.GCP_SERVICE_ACCOUNT_JSON ??
+    join(homedir(), 'Downloads', 'migather-cms-102c87ca9323.json'),
 };
 
 const SETTINGS_TAB = 'settings';
@@ -46,6 +53,8 @@ if (!OPTIONS.spreadsheet) {
   process.exit(1);
 }
 
+/* The key may be the secret itself or the path to the file — the workflow
+   passes the secret, a person running this by hand passes a path. */
 const key = JSON.parse(
   OPTIONS.credentials.trim().startsWith('{')
     ? OPTIONS.credentials

@@ -248,10 +248,23 @@ clobbers: a case whose slug is already in a tab is left alone.
 > 16 pictures were uploaded by hand; the editor's browser now hands new ones
 > to the Apps Script, which runs as the editor and has quota.
 
-### 3.8 The editor allow-list
+### 3.8 Adding an editor
 
-The `editors` row of the `settings` tab, comma-separated. It can be
-managed from the command line:
+Three things. **The allow-list on its own is not enough** — the editor's
+browser writes the sheet with their own Google account, so they must be
+able to open the sheet as well.
+
+**1 · Share the sheet with them.** Open the sheet → Share → add their Google
+address → **Editor**. Without this they sign in successfully and then find
+an empty case list, because the sheet could not be read.
+
+**2 · Let them sign in.** The OAuth app is in *Testing*, so Google only lets
+signed-in test users through. Cloud console → **Google Auth Platform →
+目標對象 (Audiences)** → **Test users** → add their address. If the app has
+been *published* instead, this step is not needed.
+
+**3 · Add them to the allow-list.** The `editors` row of the sheet's
+`settings` tab, comma-separated:
 
 ```bash
 npm run cms:editors -- --list
@@ -261,6 +274,10 @@ npm run cms:editors -- --remove someone@migather.com
 
 The script reads the row on every request, so a change takes effect
 immediately. Nothing needs redeploying.
+
+To take somebody off, do the third step. To take them off the sheet as
+well, remove the share there too — and take them off the OAuth app's test
+users if you want to be thorough.
 
 ---
 
