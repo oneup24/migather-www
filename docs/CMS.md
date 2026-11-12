@@ -143,6 +143,13 @@ One sheet, **twelve content tabs** plus a `settings` tab:
 The columns are in `tools/cms/lib/schema.mjs`, and the seed writes the
 header rows for you.
 
+**The gallery tabs are optional until they are used.** The Sheets API
+refuses a read that names a range which is not there — and it refuses the
+whole batch, the cases and the results with it — so the sync reads the
+gallery tabs on their own and treats their absence as a case with no
+frames. The seed creates them, and so does the editor's page the first time
+it is opened.
+
 **Keep the sheet private.** It holds unpublished drafts and client names.
 Only the agency account and the service account should be able to open it —
 that sharing is the real gate, and the allow-list is a friendly layer on

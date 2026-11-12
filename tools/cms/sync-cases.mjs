@@ -98,6 +98,12 @@ const TAB_NAMES = [
  * directory, each tab is a JSON file holding the same array-of-arrays the
  * Sheets API returns — so a dry run exercises the same code as the real
  * thing.
+ *
+ * The gallery tabs are read on their own, because a sheet that has never
+ * had a frame in it does not have them: the Sheets API refuses a batch
+ * that names a range which is not there, and it refuses the whole batch —
+ * the cases, the results and the scope with it. A case may have no frames,
+ * so their absence is not a failure; it is a case with no frames.
  */
 async function pullTabs() {
   if (OPTIONS.fixtures) {
@@ -117,7 +123,22 @@ async function pullTabs() {
 
   const key = loadCredentials(OPTIONS.credentials);
   const token = await getAccessToken(key);
-  return readRanges(OPTIONS.spreadsheet, token, TAB_NAMES);
+
+  const galleryTabs = LOCALES.map((l) => GALLERY_TABS[l]);
+  const values = await readRanges(
+    OPTIONS.spreadsheet,
+    token,
+    TAB_NAMES.filter((tab) => !galleryTabs.includes(tab)),
+  );
+
+  let gallery = {};
+  try {
+    gallery = await readRanges(OPTIONS.spreadsheet, token, galleryTabs);
+  } catch (error) {
+    console.log('note  the sheet has no gallery tabs — no case carries any frames yet.');
+  }
+
+  return { ...values, ...gallery };
 }
 
 /**
