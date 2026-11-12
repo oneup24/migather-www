@@ -2,11 +2,12 @@ import { Link, useParams } from 'react-router-dom';
 import { cases, getCase, sectors } from '../data/cases';
 import { content } from '../data/content';
 import { contentV3 } from '../data/content.v3';
-import { asset } from '../data/media';
+import { asset, caseGalleries } from '../data/media';
 import { useLocale } from '../hooks/useLocale';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import Editorial from '../components/v3/Editorial';
 import PageBanner from '../components/v3/PageBanner';
+import V3CaseGallery from '../components/v3/V3CaseGallery';
 
 export default function WorkDetailPage() {
   const { slug } = useParams();
@@ -33,6 +34,11 @@ export default function WorkDetailPage() {
   const currentIndex = cases.findIndex((c) => c.slug === item.slug);
   const next = cases[(currentIndex + 1) % cases.length];
   const image = item.image ?? null;
+  /* The frames live in the case record — the CMS owns them, one row per
+     frame, and the sync compiles them into the case. The hand-edited
+     manifest is the fallback for the case that still carries the mock-up
+     frames while the sheet does not. */
+  const gallery = item.gallery?.length ? item.gallery : (caseGalleries[item.slug] ?? []);
 
   return (
     <>
@@ -154,8 +160,11 @@ export default function WorkDetailPage() {
         </div>
       </section>
 
+      {/* Gallery — the campaign in frames, directly under the description */}
+      {gallery.length > 0 && <V3CaseGallery images={gallery} />}
+
       {/* Next case */}
-      <section className="bg-paper py-20 md:py-24">
+      <section className="bg-surface py-20 md:py-24">
         <div className="mx-auto max-w-7xl px-6">
           <div className="border-t border-rule pt-8">
             <div className="eyebrow text-muted">{t(sectors[next.sector].label)}</div>

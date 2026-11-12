@@ -170,6 +170,43 @@ export async function writeTab(spreadsheetId, accessToken, tab, rows) {
 }
 
 /**
+ * Make sure the tabs exist, with their header rows.
+ *
+ * A sheet that has never had a frame in it has no gallery tab, and the
+ * Sheets API refuses a read that names a range which is not there — so the
+ * whole editor would go down over a picture nobody has uploaded yet. The
+ * tabs are created first, and every read that follows finds them.
+ */
+export async function ensureTabs(spreadsheetId, accessToken, tabs) {
+  const response = await fetch(`${SHEETS}/${spreadsheetId}?fields=sheets.properties.title`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) return false;
+
+  const existing = new Set((body.sheets ?? []).map((sheet) => sheet.properties?.title));
+  const missing = tabs.filter((tab) => !existing.has(tab.title));
+  if (missing.length === 0) return true;
+
+  const created = await fetch(`${SHEETS}/${spreadsheetId}:batchUpdate`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      requests: missing.map((tab) => ({ addSheet: { properties: { title: tab.title } } })),
+    }),
+  });
+  if (!created.ok) return false;
+
+  for (const tab of missing) {
+    await writeTab(spreadsheetId, accessToken, tab.title, [tab.header]);
+  }
+  return true;
+}
+
+/**
  * Write one row of a tab, matched on its slug.
  *
  * The sheet is the source of truth and two people may be in it at once, so

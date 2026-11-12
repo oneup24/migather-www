@@ -49,12 +49,23 @@ const modules = import.meta.glob('../../content/cases/*.json', { eager: true });
  * "/media/x.jpg" would look for the file at the domain root and 404. The
  * path in the compiled file is the site's own path; the base is added here,
  * once, at load time.
+ *
+ * The frames carry their own paths, so they are resolved too — a frame that
+ * was left alone would be a broken image on a live page.
  */
 function withBasePath(record) {
-  if (!record?.image?.src) return record;
+  if (!record) return record;
+
+  const gallery = (record.gallery ?? []).map((frame) =>
+    frame?.src ? { ...frame, src: asset(frame.src) } : frame,
+  );
+
+  if (!record.image?.src && gallery.length === 0) return record;
+
   return {
     ...record,
-    image: { ...record.image, src: asset(record.image.src) },
+    image: record.image?.src ? { ...record.image, src: asset(record.image.src) } : record.image,
+    gallery,
   };
 }
 

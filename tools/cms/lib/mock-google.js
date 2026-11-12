@@ -21,6 +21,8 @@ const CASE_COLUMNS = [
   'featured', 'published',
 ];
 
+const GALLERY_COLUMNS = ['slug', 'order', 'file', 'alt', 'caption', 'mockup'];
+
 const pick = (value, locale) => {
   if (value == null) return '';
   if (typeof value === 'string') return value;
@@ -45,6 +47,11 @@ export function buildFixture() {
     en: [['slug', 'order', 'text']],
     'zh-Hant': [['slug', 'order', 'text']],
     'zh-Hans': [['slug', 'order', 'text']],
+  };
+  const gallery = {
+    en: [GALLERY_COLUMNS],
+    'zh-Hant': [GALLERY_COLUMNS],
+    'zh-Hans': [GALLERY_COLUMNS],
   };
 
   for (const record of records) {
@@ -83,6 +90,16 @@ export function buildFixture() {
       scope[locale].push(
         ...record.scope.map((line, i) => [record.slug, String(i + 1), pick(line, locale)]),
       );
+      gallery[locale].push(
+        ...(record.gallery ?? []).map((frame, i) => [
+          record.slug,
+          String(i + 1),
+          frame.src.split('/').pop(),
+          pick(frame.alt, locale),
+          pick(frame.caption, locale),
+          frame.mockup ? 'true' : 'false',
+        ]),
+      );
     }
   }
 
@@ -98,6 +115,9 @@ export function buildFixture() {
       scope_EN: scope.en,
       scope_ZH_HANT: scope['zh-Hant'],
       scope_ZH_HANS: scope['zh-Hans'],
+      'gallery_EN': gallery.en,
+      'gallery_ZH-HANT': gallery['zh-Hant'],
+      'gallery_ZH-HANS': gallery['zh-Hans'],
       settings: [
         ['key', 'value'],
         ['editors', 'editor@example.com'],
@@ -106,6 +126,7 @@ export function buildFixture() {
         ['lastPublish', ''],
         ['lastPublishStatus', ''],
         ['lastImageSaved', ''],
+        ['lastGalleryImageSaved', ''],
         ['contentChanged', ''],
       ],
     },
@@ -143,12 +164,19 @@ export function mockScript(tabs) {
      form in a hidden frame — the browser cannot read the answer. So the
      form's submit is intercepted instead. */
   HTMLFormElement.prototype.submit = function () {
-    window.__posts.push({
-      action: this.action,
-      fields: Object.fromEntries(
-        Array.from(this.querySelectorAll('input')).map(function (i) { return [i.name, i.value]; }),
-      ),
-    });
+    const fields = Object.fromEntries(
+      Array.from(this.querySelectorAll('input')).map(function (i) { return [i.name, i.value]; }),
+    );
+    window.__posts.push({ action: this.action, fields: fields });
+
+    /* The script writes the name into the sheet once the file is really in
+       Drive, and stamps the settings tab so the page's wait ends. The mock
+       does the same, or the page would wait for a reply that never comes. */
+    if (fields.action === 'image' || fields.action === 'gallery-image') {
+      const key = fields.action === 'image' ? 'lastImageSaved' : 'lastGalleryImageSaved';
+      const row = window.__fixture.settings.find(function (r) { return r[0] === key; });
+      if (row) row[1] = (fields.fileName || fields.alt || 'frame') + '|' + Date.now();
+    }
   };
 
   const realFetch = window.fetch;
@@ -167,6 +195,17 @@ export function mockScript(tabs) {
       const body = options && options.body ? JSON.parse(options.body) : null;
 
       if (method === 'GET') {
+        /* The list of tabs — what the page asks for before it reads, so a
+           sheet without the gallery tabs can have them made. */
+        if (href.includes('fields=sheets')) {
+          const sheets = Object.keys(window.__fixture).map(function (title) {
+            return { properties: { title: title } };
+          });
+          return Promise.resolve(new Response(JSON.stringify({ sheets: sheets }), {
+            status: 200, headers: { 'Content-Type': 'application/json' },
+          }));
+        }
+
         const wanted = (href.match(/ranges=([^&]*)/g) || []).map(function (r) {
           return decodeURIComponent(r.replace('ranges=', ''));
         });
@@ -178,7 +217,7 @@ export function mockScript(tabs) {
             .replace('results_ZH-HANS', 'results_ZH_HANS')
             .replace('scope_ZH-HANT', 'scope_ZH_HANT')
             .replace('scope_ZH-HANS', 'scope_ZH_HANS');
-          return { range: name, values: window.__fixture[key] || [] };
+          return { range: name, values: window.__fixture[key] || window.__fixture[name] || [] };
         });
         return Promise.resolve(new Response(JSON.stringify({ valueRanges: valueRanges }), {
           status: 200, headers: { 'Content-Type': 'application/json' },

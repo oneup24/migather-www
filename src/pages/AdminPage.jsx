@@ -19,6 +19,7 @@ import { cloneElement, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
+  ensureTabs,
   postToScript,
   readTabs,
   signIn,
@@ -29,6 +30,7 @@ import { useLocale } from '../hooks/useLocale';
 import { useDocumentMeta } from '../hooks/useDocumentMeta';
 import { LOCALE_CODES } from '../data/i18n';
 import { cms } from '../data/cms';
+import { asset } from '../data/media';
 
 /* ── The configuration ────────────────────────────────────────────────── */
 
@@ -53,6 +55,18 @@ const SCOPE_TABS = {
   'zh-Hans': 'scope_ZH-HANS',
 };
 
+/**
+ * The tabs the frames live in — one per language, like every other copy.
+ *
+ * A frame is a second picture for the case: a file, a mock-up flag, and
+ * alt text and a caption in each language.
+ */
+const GALLERY_TABS = {
+  en: 'gallery_EN',
+  'zh-Hant': 'gallery_ZH-HANT',
+  'zh-Hans': 'gallery_ZH-HANS',
+};
+
 const CASE_COLUMNS = [
   'slug',
   'client',
@@ -72,6 +86,10 @@ const CASE_COLUMNS = [
 
 const RESULT_COLUMNS = ['slug', 'order', 'value', 'label', 'note'];
 const SCOPE_COLUMNS = ['slug', 'order', 'text'];
+const GALLERY_COLUMNS = ['slug', 'order', 'file', 'alt', 'caption', 'mockup'];
+
+/** How many frames a case may carry. The page shows three across. */
+const GALLERY_MAX_FRAMES = 12;
 
 /** Every field is the same: a rule, a white ground, the display face. */
 const INPUT =
@@ -127,6 +145,54 @@ function readAsBase64(file) {
   });
 }
 
+/** The extension of a file name, lowercased and without the dot. */
+function extensionOf(name) {
+  const parts = String(name ?? '').split('.');
+  if (parts.length < 2) return 'jpg';
+  return parts.pop().toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+}
+
+/**
+ * The frames of a case, lined up across the three languages.
+ *
+ * The file and the mock-up flag belong to the picture, so they are the same
+ * in every language; the alt text and the caption are copy, and each
+ * language carries its own. The frames are lined up by their order, and the
+ * copy of every language is kept with its frame — so moving a frame does
+ * not leave one language's words on another language's picture.
+ */
+function readGallery(tabs, slug) {
+  const frames = new Map();
+
+  for (const each of LOCALE_CODES) {
+    for (const row of rowsAsObjects(tabs[GALLERY_TABS[each]])) {
+      if (row.slug !== slug) continue;
+      const order = Number(row.order || 0);
+      if (!order) continue;
+
+      let frame = frames.get(order);
+      if (!frame) {
+        frame = {
+          order,
+          file: '',
+          mockup: true,
+          alt: { en: '', 'zh-Hant': '', 'zh-Hans': '' },
+          caption: { en: '', 'zh-Hant': '', 'zh-Hans': '' },
+          newFile: null,
+        };
+        frames.set(order, frame);
+      }
+
+      if (!frame.file && row.file) frame.file = row.file;
+      if (row.mockup === 'true' || row.mockup === 'false') frame.mockup = row.mockup === 'true';
+      frame.alt[each] = row.alt ?? '';
+      frame.caption[each] = row.caption ?? '';
+    }
+  }
+
+  return [...frames.values()].sort((a, b) => a.order - b.order);
+}
+
 /* ── The page ─────────────────────────────────────────────────────────── */
 
 export default function AdminPage() {
@@ -158,6 +224,8 @@ export default function AdminPage() {
   const [form, setForm] = useState(null);
   const [results, setResults] = useState([]);
   const [scope, setScope] = useState([]);
+  const [gallery, setGallery] = useState([]);
+  const [removedFrames, setRemovedFrames] = useState([]);
   const [newFile, setNewFile] = useState(null);
   const [newSlug, setNewSlug] = useState('');
   const fileInput = useRef(null);
@@ -178,10 +246,20 @@ export default function AdminPage() {
   async function loadSheet(accessToken) {
     setBusy(true);
     try {
+      /* The gallery tabs may not exist yet — a sheet that has never had a
+         frame in it. The Sheets API refuses a read that names a range which
+         is not there, so they are made first. */
+      await ensureTabs(
+        CONFIG.spreadsheetId,
+        accessToken,
+        LOCALE_CODES.map((l) => ({ title: GALLERY_TABS[l], header: GALLERY_COLUMNS })),
+      );
+
       const names = [
         ...LOCALE_CODES.map((l) => CASE_TABS[l]),
         ...LOCALE_CODES.map((l) => RESULT_TABS[l]),
         ...LOCALE_CODES.map((l) => SCOPE_TABS[l]),
+        ...LOCALE_CODES.map((l) => GALLERY_TABS[l]),
         'settings',
       ];
       const values = await readTabs(CONFIG.spreadsheetId, accessToken, names);
@@ -246,6 +324,9 @@ export default function AdminPage() {
         .sort((a, b) => Number(a.order) - Number(b.order))
         .map((entry) => entry.text ?? ''),
     );
+
+    setGallery(readGallery(tabs, slug));
+    setRemovedFrames([]);
 
     setNewFile(null);
   }, [tabs, slug, locale]);
@@ -332,6 +413,8 @@ export default function AdminPage() {
     });
     setResults([]);
     setScope([]);
+    setGallery([]);
+    setRemovedFrames([]);
     setNewFile(null);
 
     setNotice(
@@ -341,6 +424,62 @@ export default function AdminPage() {
         'zh-Hans': '新增案例。填写后按保存——内容会写入表格，网站会自行更新。',
       }),
     );
+  }
+
+  /* ── The frames ───────────────────────────────────────────────────────── */
+
+  /**
+   * Change one frame.
+   *
+   * The order is the frame's place on the page, and it is renumbered after
+   * every change — so the sheet and the page agree on which frame is first.
+   */
+  function updateFrame(index, patch) {
+    setGallery(gallery.map((frame, at) => (at === index ? { ...frame, ...patch } : frame)));
+  }
+
+  /** Move a frame earlier or later. */
+  function moveFrame(index, delta) {
+    const to = index + delta;
+    if (to < 0 || to >= gallery.length) return;
+
+    const next = [...gallery];
+    const [frame] = next.splice(index, 1);
+    next.splice(to, 0, frame);
+    setGallery(next.map((entry, at) => ({ ...entry, order: at + 1 })));
+  }
+
+  /**
+   * Take a frame off the page.
+   *
+   * The row goes from the sheet when the case is saved, and the file in
+   * Drive goes with it. The file name is remembered until then, so the
+   * script can throw the file away.
+   */
+  function removeFrame(index) {
+    const frame = gallery[index];
+    if (frame?.file) setRemovedFrames([...removedFrames, frame.file]);
+    setGallery(
+      gallery
+        .filter((_, at) => at !== index)
+        .map((entry, at) => ({ ...entry, order: at + 1 })),
+    );
+  }
+
+  /** Add a frame to the end. */
+  function addFrame() {
+    if (gallery.length >= GALLERY_MAX_FRAMES) return;
+    setGallery([
+      ...gallery,
+      {
+        order: gallery.length + 1,
+        file: '',
+        mockup: true,
+        alt: { en: '', 'zh-Hant': '', 'zh-Hans': '' },
+        caption: { en: '', 'zh-Hant': '', 'zh-Hans': '' },
+        newFile: null,
+      },
+    ]);
   }
 
   /* ── Saving ─────────────────────────────────────────────────────────── */
@@ -358,6 +497,7 @@ export default function AdminPage() {
          editor and has storage quota. The script writes the picture's name
          into the sheet once the file is really there, so the sheet can
          never name a picture that was not saved. */
+      let uploadedFileName = '';
       if (newFile) {
         const fileName = `${form.slug}${newFile.name.slice(newFile.name.lastIndexOf('.'))}`;
         const base64 = await readAsBase64(newFile);
@@ -384,7 +524,11 @@ export default function AdminPage() {
             }),
           );
         }
+        uploadedFileName = fileName;
       }
+
+      /* The frames. */
+      await saveGallery(token, form.slug, gallery, removedFrames);
 
       const published = form.published ? 'true' : 'false';
 
@@ -406,9 +550,17 @@ export default function AdminPage() {
           /* The picture's name and its mock-up flag are written by the
              script, once the file is really in Drive. The row takes them
              from the sheet, so it cannot name a picture that is not there
-             or label one that is not a mock-up. */
-          image: existing?.image ?? form.image,
-          mockup: existing?.mockup === 'true' ? 'true' : 'false',
+             or label one that is not a mock-up — and when a picture has just
+             been uploaded, it takes the name the script has just written
+             rather than the one the sheet held when the page was opened. */
+          image: uploadedFileName || existing?.image || form.image,
+          mockup: uploadedFileName
+            ? form.mockup
+              ? 'true'
+              : 'false'
+            : existing?.mockup === 'true'
+              ? 'true'
+              : 'false',
           source: form.source,
           featured: form.featured ? 'true' : 'false',
           published,
@@ -433,6 +585,10 @@ export default function AdminPage() {
         }),
       );
       setNewSlug('');
+      /* The frames are in Drive now, and the files that were taken off the
+         page have been thrown away. */
+      setGallery(gallery.map((frame) => ({ ...frame, newFile: null })));
+      setRemovedFrames([]);
       await loadSheet(token);
     } catch (failure) {
       setError(failure.message ?? String(failure));
@@ -467,6 +623,120 @@ export default function AdminPage() {
       .filter((text) => text.trim())
       .map((text, index) => [caseSlug, String(index + 1), text]);
     await writeTab(CONFIG.spreadsheetId, token, tab, [header, ...block, ...kept.slice(1)]);
+  }
+
+  /**
+   * Save the frames.
+   *
+   * The pictures go to Drive through the Apps Script, which runs as the
+   * editor and has storage quota. The script names each file after the page
+   * and the alt text, and writes the name and the mock-up flag into the
+   * sheet together — once the file is really there, so the sheet can never
+   * name a picture that was not saved.
+   *
+   * The rows are written after that, with the copy of every language, so
+   * the sheet names the pictures that are there and the copy that goes with
+   * them.
+   */
+  async function saveGallery(token, caseSlug, frames, removed) {
+    if (!frames.length && !removed.length) return;
+
+    /* The pictures first: the script has to write the file name into a row
+       before the row can name it. */
+    for (const frame of frames) {
+      if (!frame.newFile) continue;
+
+      const base64 = await readAsBase64(frame.newFile);
+      await postToScript(CONFIG.scriptUrl, {
+        action: 'gallery-image',
+        slug: caseSlug,
+        order: String(frame.order),
+        /* The alt text the editor typed — it is half of the file's name,
+           and it is the picture's description. */
+        alt: frame.alt[locale] ?? '',
+        ext: extensionOf(frame.newFile.name),
+        mockup: frame.mockup ? 'true' : 'false',
+        dataUrl: `data:${frame.newFile.type || 'image/jpeg'};base64,${base64}`,
+      });
+
+      const saved = await waitForGalleryImage();
+      if (!saved) {
+        throw new Error(
+          t({
+            en: 'A frame did not reach Drive. The copy has been saved; the frame can be uploaded again.',
+            'zh-Hant': '畫格未能上載到 Drive。文字已儲存，畫格可以重新上載。',
+            'zh-Hans': '画格未能上传到 Drive。文字已保存，画格可以重新上传。',
+          }),
+        );
+      }
+    }
+
+    /* The names the script gave the files. */
+    const written = await readGalleryNames(token, caseSlug);
+    const named = frames.map((frame) => ({
+      ...frame,
+      file: written.get(frame.order) || frame.file,
+    }));
+
+    await writeGalleryRows(token, caseSlug, named);
+
+    /* And the files of the frames that were taken off the page. */
+    for (const file of removed) {
+      await postToScript(CONFIG.scriptUrl, {
+        action: 'gallery-delete',
+        slug: caseSlug,
+        fileName: file,
+      });
+    }
+  }
+
+  /**
+   * The file names the sheet holds for a case's frames, by order.
+   *
+   * Read after the upload, because the name of a new file is the script's to
+   * give: it is written into the sheet only once the file is really in
+   * Drive.
+   */
+  async function readGalleryNames(token, caseSlug) {
+    const names = new Map();
+    for (const each of LOCALE_CODES) {
+      const tab = GALLERY_TABS[each];
+      const values = await readTabs(CONFIG.spreadsheetId, token, [tab]);
+      for (const row of rowsAsObjects(values[tab])) {
+        if (row.slug !== caseSlug || !row.file) continue;
+        const order = Number(row.order || 0);
+        if (!order || names.has(order)) continue;
+        names.set(order, row.file);
+      }
+    }
+    return names;
+  }
+
+  /**
+   * The rows of the gallery tabs, for this case, in every language.
+   *
+   * Each frame's copy is written with it, in every language — so moving a
+   * frame does not leave one language's words on another language's
+   * picture.
+   */
+  async function writeGalleryRows(token, caseSlug, frames) {
+    for (const each of LOCALE_CODES) {
+      const tab = GALLERY_TABS[each];
+      const values = await readTabs(CONFIG.spreadsheetId, token, [tab]);
+      const header = values[tab]?.[0] ?? GALLERY_COLUMNS;
+      const kept = (values[tab] ?? []).filter((row, index) => index === 0 || row[0] !== caseSlug);
+
+      const block = frames.map((frame, index) => [
+        caseSlug,
+        String(index + 1),
+        frame.file,
+        frame.alt[each] ?? '',
+        frame.caption[each] ?? '',
+        frame.mockup ? 'true' : 'false',
+      ]);
+
+      await writeTab(CONFIG.spreadsheetId, token, tab, [header, ...block, ...kept.slice(1)]);
+    }
   }
 
   /* ── The settings tab ────────────────────────────────────────────────── */
@@ -512,6 +782,24 @@ export default function AdminPage() {
     while (Date.now() < deadline) {
       const saved = await readSetting(session.accessToken, 'lastImageSaved');
       if (saved === fileName) return true;
+      await sleep(1500);
+    }
+    return false;
+  }
+
+  /**
+   * Wait for the script to confirm a frame.
+   *
+   * The script writes the frame's file name into the sheet once the file is
+   * really in Drive, and stamps `lastGalleryImageSaved` so this can see it.
+   * The stamp carries the time as well as the name, so a frame uploaded
+   * twice under the same name is still a new save.
+   */
+  async function waitForGalleryImage() {
+    const deadline = Date.now() + 45000;
+    while (Date.now() < deadline) {
+      const saved = await readSetting(session.accessToken, 'lastGalleryImageSaved');
+      if (saved) return true;
       await sleep(1500);
     }
     return false;
@@ -803,6 +1091,178 @@ export default function AdminPage() {
                 onChange={(event) => setNewFile(event.target.files?.[0] ?? null)}
               />
             </Field>
+
+            <div className="mt-8">
+              <div className="eyebrow text-muted">
+                {t({ en: 'The frames', 'zh-Hant': '畫格', 'zh-Hans': '画格' })}
+              </div>
+              <p className="mt-2 max-w-2xl text-[12.5px] leading-relaxed text-muted">
+                {t({
+                  en: 'The campaign in squares, under the case information. The alt text describes the picture; the caption names the campaign element it stands for. The file is named after the page and the alt text when it is uploaded.',
+                  'zh-Hant': '項目資訊下方的方形畫格。替代文字描述圖片，說明標示其代表的工作項目。檔案上載時會以頁面名稱及替代文字命名。',
+                  'zh-Hans': '项目资讯下方的方形画格。替代文字描述图片，说明标示其代表的工作项目。档案上传时会以页面名称及替代文字命名。',
+                })}
+              </p>
+
+              <div className="mt-4 space-y-4">
+                {gallery.map((frame, index) => (
+                  <div key={index} className="border border-rule bg-white p-4">
+                    <div className="flex flex-wrap items-start gap-4">
+                      <span className="mt-1 w-6 shrink-0 font-display text-[11px] font-medium tracking-[0.14em] text-brandCrimson">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+
+                      <div className="h-24 w-24 shrink-0 overflow-hidden bg-surface">
+                        {frame.file && (
+                          <img
+                            src={asset(`/media/cases/${form.slug}/${frame.file}`)}
+                            alt=""
+                            className="h-full w-full object-cover"
+                            onError={(event) => {
+                              event.currentTarget.style.visibility = 'hidden';
+                            }}
+                          />
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1 space-y-3">
+                        <label className="block" htmlFor={`frame-alt-${index}`}>
+                          <span className="eyebrow text-muted">
+                            {t({ en: 'Alt text', 'zh-Hant': '替代文字', 'zh-Hans': '替代文字' })}
+                          </span>
+                          <input
+                            id={`frame-alt-${index}`}
+                            type="text"
+                            className={`${INPUT} mt-2`}
+                            value={frame.alt[locale] ?? ''}
+                            onChange={(event) =>
+                              updateFrame(index, {
+                                alt: { ...frame.alt, [locale]: event.target.value },
+                              })
+                            }
+                          />
+                        </label>
+
+                        <label className="block" htmlFor={`frame-caption-${index}`}>
+                          <span className="eyebrow text-muted">
+                            {t({ en: 'Caption', 'zh-Hant': '說明', 'zh-Hans': '说明' })}
+                          </span>
+                          <input
+                            id={`frame-caption-${index}`}
+                            type="text"
+                            className={`${INPUT} mt-2`}
+                            value={frame.caption[locale] ?? ''}
+                            onChange={(event) =>
+                              updateFrame(index, {
+                                caption: { ...frame.caption, [locale]: event.target.value },
+                              })
+                            }
+                          />
+                        </label>
+
+                        <div>
+                          <input
+                            id={`frame-file-${index}`}
+                            type="file"
+                            className="block w-full font-display text-[13px] text-ink"
+                            accept="image/*"
+                            onChange={(event) =>
+                              updateFrame(index, { newFile: event.target.files?.[0] ?? null })
+                            }
+                          />
+                          <span className="mt-1 block text-[12.5px] leading-relaxed text-muted">
+                            {frame.newFile
+                              ? t({
+                                  en: `Ready to upload: ${frame.newFile.name}`,
+                                  'zh-Hant': `準備上載：${frame.newFile.name}`,
+                                  'zh-Hans': `准备上传：${frame.newFile.name}`,
+                                })
+                              : frame.file
+                                ? t({
+                                    en: `Current file: ${frame.file}`,
+                                    'zh-Hant': `現有檔案：${frame.file}`,
+                                    'zh-Hans': `现有文件：${frame.file}`,
+                                  })
+                                : t({
+                                    en: 'No picture yet — choose a file above.',
+                                    'zh-Hant': '尚未有圖片——請在 above 選擇檔案。',
+                                    'zh-Hans': '尚未有图片——请在 above 选择文件。',
+                                  })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-4">
+                      <select
+                        className="w-auto max-w-full border border-rule bg-white px-3 py-2 font-display text-[13px] text-ink"
+                        value={frame.mockup ? 'true' : 'false'}
+                        onChange={(event) =>
+                          updateFrame(index, { mockup: event.target.value === 'true' })
+                        }
+                      >
+                        <option value="true">
+                          {t({
+                            en: 'Mock-up — generated artwork',
+                            'zh-Hant': '樣機——生成 artwork',
+                            'zh-Hans': '样机——生成 artwork',
+                          })}
+                        </option>
+                        <option value="false">
+                          {t({
+                            en: 'Real photography',
+                            'zh-Hant': '實拍',
+                            'zh-Hans': '实拍',
+                          })}
+                        </option>
+                      </select>
+
+                      <div className="flex flex-wrap gap-4 text-[13px]">
+                        <button
+                          type="button"
+                          onClick={() => moveFrame(index, -1)}
+                          disabled={index === 0}
+                          className="font-display text-brandBlue underline underline-offset-4 disabled:text-muted disabled:no-underline"
+                        >
+                          {t({ en: '↑ Earlier', 'zh-Hant': '↑ 提早', 'zh-Hans': '↑ 提前' })}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveFrame(index, 1)}
+                          disabled={index === gallery.length - 1}
+                          className="font-display text-brandBlue underline underline-offset-4 disabled:text-muted disabled:no-underline"
+                        >
+                          {t({ en: '↓ Later', 'zh-Hant': '↓ 遲後', 'zh-Hans': '↓ 推后' })}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeFrame(index)}
+                          className="font-display text-brandCrimson underline underline-offset-4"
+                        >
+                          {t({ en: 'Remove', 'zh-Hant': '移除', 'zh-Hans': '移除' })}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                id="addFrame"
+                onClick={addFrame}
+                disabled={gallery.length >= GALLERY_MAX_FRAMES}
+                className="mt-4 font-display text-[13px] text-brandBlue underline underline-offset-4 disabled:text-muted disabled:no-underline"
+              >
+                {gallery.length >= GALLERY_MAX_FRAMES
+                  ? t({
+                      en: `The page carries at most ${GALLERY_MAX_FRAMES} frames`,
+                      'zh-Hant': `頁面最多載 ${GALLERY_MAX_FRAMES} 幅畫格`,
+                      'zh-Hans': `页面最多载 ${GALLERY_MAX_FRAMES} 幅画格`,
+                    })
+                  : t({ en: '＋ Add a frame', 'zh-Hant': '＋ 新增畫格', 'zh-Hans': '＋ 新增画格' })}
+              </button>
+            </div>
 
             <div className="mt-8">
               <div className="eyebrow text-muted">

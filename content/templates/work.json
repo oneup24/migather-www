@@ -1,0 +1,62 @@
+{
+  "slug": "new-work",
+  "order": 0,
+  "client": "Client name",
+  "clientLocal": {
+    "en": "本地名稱",
+    "zh-Hant": "本地名稱",
+    "zh-Hans": "本地名称"
+  },
+  "projectLocal": {
+    "en": "項目名稱",
+    "zh-Hant": "項目名稱",
+    "zh-Hans": "项目名称"
+  },
+  "sector": "finance",
+  "services": [],
+  "partnershipSince": {
+    "en": "Month Year",
+    "zh-Hant": "Month Year",
+    "zh-Hans": "Month Year"
+  },
+  "featured": false,
+  "published": false,
+  "summary": {
+    "en": "One sentence: what the work was, for whom, and what it had to achieve.",
+    "zh-Hant": "一句話說明：這份工作是甚麼、為誰而做、要達成甚麼。",
+    "zh-Hans": "一句话说明：这份工作是什么、为谁而做、要达成什么。"
+  },
+  "results": [
+    {
+      "value": "+0%",
+      "label": {
+        "en": "Result label",
+        "zh-Hant": "成效標籤",
+        "zh-Hans": "成效标签"
+      },
+      "note": {
+        "en": "Where the figure came from, or what it was measured against.",
+        "zh-Hant": "數字的來源，或量度基準。",
+        "zh-Hans": "数字的来源，或量度基准。"
+      }
+    }
+  ],
+  "scope": [
+    {
+      "en": "What was delivered — one line per deliverable.",
+      "zh-Hant": "交付了甚麼——每一行一項。",
+      "zh-Hans": "交付了什么——每一行一项。"
+    }
+  ],
+  "source": "DECK NAME — slide N",
+  "image": {
+    "src": "/media/cases/new-work/case-new-work.jpg",
+    "alt": {
+      "en": "Mock-up: what the picture shows, described plainly.",
+      "zh-Hant": "樣機：平實描述圖片內容。",
+      "zh-Hans": "样机：平实描述图片内容。"
+    },
+    "mockup": true
+  },
+  "gallery": []
+}

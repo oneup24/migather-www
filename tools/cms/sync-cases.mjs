@@ -45,6 +45,7 @@ import { serialiseRecord } from './lib/records.mjs';
 import {
   CASE_TABS,
   CONTENT_DIR,
+  GALLERY_TABS,
   IMAGE_MAX_WIDTH,
   LOCALES,
   PUBLIC_CASE_IMAGE_DIR,
@@ -82,15 +83,16 @@ const OPTIONS = {
 
 /* ── 1. Pull ──────────────────────────────────────────────────────────── */
 
-/** The nine tab names, in the order they are read. */
+/** The tab names, in the order they are read. */
 const TAB_NAMES = [
   ...LOCALES.map((l) => CASE_TABS[l]),
   ...LOCALES.map((l) => RESULT_TABS[l]),
   ...LOCALES.map((l) => SCOPE_TABS[l]),
+  ...LOCALES.map((l) => GALLERY_TABS[l]),
 ];
 
 /**
- * Read the nine tabs.
+ * Read the content tabs.
  *
  * From Google, the tabs are read in one batch call. From a fixture
  * directory, each tab is a JSON file holding the same array-of-arrays the
@@ -132,9 +134,15 @@ async function pullTabs() {
  * keeps the picture it already has — which is in the repository — and the
  * run says so. A broken picture on a live page is worse than a picture that
  * did not change.
+ *
+ * The frames are pulled the same way, and they are treated differently on
+ * purpose: a frame that is missing is dropped from the page rather than
+ * kept. There is no earlier version of a frame to fall back on, and a
+ * picture that was deleted should not stay on the site.
  */
 async function pullImages(records, warnings) {
   const images = new Map();
+  const galleryImages = new Map();
 
   /** The picture a case already has, so it can be kept if the new one is missing. */
   const committed = new Map();
@@ -164,7 +172,17 @@ async function pullImages(records, warnings) {
       }
       images.set(record.slug, { path, file });
     }
-    return images;
+
+    for (const record of records) {
+      for (const frame of record.gallery ?? []) {
+        const file = frame.src.split('/').pop();
+        const path = join(OPTIONS.fixtures, 'media', record.slug, file);
+        if (!existsSync(path)) continue;
+        galleryImages.set(`${record.slug}|${file}`, { path, file });
+      }
+    }
+
+    return { images, galleryImages };
   }
 
   if (!OPTIONS.driveFolder) {
@@ -178,38 +196,55 @@ async function pullImages(records, warnings) {
   const folderByName = new Map(folders.map((f) => [f.name, f]));
 
   for (const record of records) {
-    if (!record.image) continue;
-    const file = record.image.src.split('/').pop();
+    if (!record.image && !(record.gallery ?? []).length) continue;
 
     const folder = folderByName.get(record.slug);
     if (!folder) {
-      warnings.push(
-        `the picture folder for ${record.slug} does not exist — the case keeps the picture it has`,
-      );
+      if (record.image) {
+        warnings.push(
+          `the picture folder for ${record.slug} does not exist — the case keeps the picture it has`,
+        );
+      }
       continue;
     }
 
     const files = await listFolder(token, folder.id);
-    const source = files.find((f) => f.name === file);
-    if (!source) {
-      const previous = committed.get(record.slug);
-      warnings.push(
-        `the picture for ${record.slug} is missing (${file})` +
-          (previous
-            ? ` — the case keeps ${previous.src.split('/').pop()} until the new picture is there`
-            : ' — the case has no picture to keep'),
-      );
-      continue;
+
+    if (record.image) {
+      const file = record.image.src.split('/').pop();
+      const source = files.find((f) => f.name === file);
+      if (!source) {
+        const previous = committed.get(record.slug);
+        warnings.push(
+          `the picture for ${record.slug} is missing (${file})` +
+            (previous
+              ? ` — the case keeps ${previous.src.split('/').pop()} until the new picture is there`
+              : ' — the case has no picture to keep'),
+        );
+      } else {
+        const bytes = await downloadFile(token, source.id);
+        const tmp = join(ROOT, '.cms-tmp', record.slug, file);
+        mkdirSync(join(tmp, '..'), { recursive: true });
+        writeFileSync(tmp, bytes);
+        images.set(record.slug, { path: tmp, file });
+      }
     }
 
-    const bytes = await downloadFile(token, source.id);
-    const tmp = join(ROOT, '.cms-tmp', record.slug, file);
-    mkdirSync(join(tmp, '..'), { recursive: true });
-    writeFileSync(tmp, bytes);
-    images.set(record.slug, { path: tmp, file });
+    /* The frames. */
+    for (const frame of record.gallery ?? []) {
+      const file = frame.src.split('/').pop();
+      const source = files.find((f) => f.name === file);
+      if (!source) continue;
+
+      const bytes = await downloadFile(token, source.id);
+      const tmp = join(ROOT, '.cms-tmp', record.slug, file);
+      mkdirSync(join(tmp, '..'), { recursive: true });
+      writeFileSync(tmp, bytes);
+      galleryImages.set(`${record.slug}|${file}`, { path: tmp, file });
+    }
   }
 
-  return images;
+  return { images, galleryImages };
 }
 
 /** The picture a case already has, in the repository — the whole thing. */
@@ -244,7 +279,7 @@ function resizeImage(source, destination) {
 }
 
 /** Write the compiled case files, and remove the ones that are no longer published. */
-function writeContent(records, images) {
+function writeContent(records, images, galleryImages) {
   mkdirSync(CONTENT_PATH, { recursive: true });
 
   const written = [];
@@ -286,6 +321,21 @@ function writeContent(records, images) {
     imagesWritten.push(record.slug);
   }
 
+  /* The frames, in the case's own folder, beside the banner. */
+  const framesWritten = [];
+  for (const record of records) {
+    for (const frame of record.gallery ?? []) {
+      const file = frame.src.split('/').pop();
+      const image = galleryImages.get(`${record.slug}|${file}`);
+      if (!image) continue;
+
+      const destination = join(PUBLIC_CASES_PATH, record.slug, image.file);
+      mkdirSync(join(destination, '..'), { recursive: true });
+      resizeImage(image.path, destination);
+      framesWritten.push(`${record.slug}/${file}`);
+    }
+  }
+
   /* An image folder for a case that is no longer published goes too. */
   if (existsSync(PUBLIC_CASES_PATH)) {
     for (const folder of readdirSync(PUBLIC_CASES_PATH)) {
@@ -294,7 +344,7 @@ function writeContent(records, images) {
     }
   }
 
-  return { written, unchanged, removed, imagesWritten };
+  return { written, unchanged, removed, imagesWritten, framesWritten };
 }
 
 /* ── 3. Run ───────────────────────────────────────────────────────────── */
@@ -313,6 +363,7 @@ const { records, errors, warnings } = compile(
     cases: byLocale(CASE_TABS),
     results: byLocale(RESULT_TABS),
     scope: byLocale(SCOPE_TABS),
+    gallery: byLocale(GALLERY_TABS),
   },
   { sectors: SECTOR_KEYS, services: SERVICE_KEYS },
 );
@@ -340,7 +391,29 @@ if (OPTIONS.dryRun) {
   process.exit(0);
 }
 
-  const images = await pullImages(records, imageWarnings);
+  const { images, galleryImages } = await pullImages(records, imageWarnings);
+
+  /* A frame whose file is not in Drive is dropped from the page.
+     There is no earlier version of a frame to fall back on — a frame that
+     was deleted should not stay on the site — but the run says which one, so
+     the editor knows the upload did not arrive. */
+  for (const record of records) {
+    if (!record.gallery?.length) continue;
+
+    const kept = [];
+    for (const frame of record.gallery) {
+      const file = frame.src.split('/').pop();
+      if (galleryImages.has(`${record.slug}|${file}`)) {
+        kept.push(frame);
+        continue;
+      }
+      imageWarnings.push(
+        `the frame ${file} for ${record.slug} is not in Drive — it is not shown on the page`,
+      );
+    }
+    record.gallery = kept;
+  }
+
   for (const warning of imageWarnings) console.log(`note  ${warning}`);
 
   /* A case whose picture could not be downloaded keeps the picture it has.
@@ -372,16 +445,17 @@ if (OPTIONS.dryRun) {
     record.image = previous;
   }
 
-  const result = writeContent(records, images);
+  const result = writeContent(records, images, galleryImages);
 
   /* The download scratch space is not a deliverable. */
   rmSync(join(ROOT, '.cms-tmp'), { recursive: true, force: true });
 
   console.log(
     `\n${result.written.length} case file(s) written, ${result.unchanged.length} unchanged.` +
-    (result.removed.length ? ` ${result.removed.length} removed.` : '') +
-    `\n${result.imagesWritten.length} image(s) written to ${PUBLIC_CASE_IMAGE_DIR}/.`,
+      (result.removed.length ? ` ${result.removed.length} removed.` : '') +
+      `\n${result.imagesWritten.length} image(s) and ${result.framesWritten.length} frame(s) written to ${PUBLIC_CASE_IMAGE_DIR}/.`,
   );
+
 
 if (result.written.length === 0 && result.removed.length === 0) {
   console.log('\nNothing changed — the workflow will not make a commit.\n');

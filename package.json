@@ -6,6 +6,7 @@
   "description": "Migather Limited \u2014 corporate website v2.0 (Vite + React + Tailwind v4). Homepage-led redesign on an Odoo-inspired design system.",
   "scripts": {
     "dev": "vite",
+    "dev:editor": "VITE_CMS_MOCK=1 vite --port 8899 --strictPort",
     "build": "vite build",
     "preview": "vite preview",
     "check:routes": "vite build --ssr scripts/ssr-check.jsx --outDir .ssr-check --logLevel error && node .ssr-check/ssr-check.js",

@@ -13,7 +13,7 @@
  *   node tools/cms/test-sync.mjs
  */
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,13 +30,14 @@ function check(label, condition, detail = '') {
   }
 }
 
-/** The sheet, as a fixture: the nine tabs and the pictures. */
-function buildFixture(directory, { pictureMissing = false } = {}) {
+/** The sheet, as a fixture: the content tabs and the pictures. */
+function buildFixture(directory, { pictureMissing = false, frameMissing = false } = {}) {
   mkdirSync(directory, { recursive: true });
 
   const cases = ['cases_EN', 'cases_ZH-HANT', 'cases_ZH-HANS'];
   const results = ['results_EN', 'results_ZH-HANT', 'results_ZH-HANS'];
   const scope = ['scope_EN', 'scope_ZH-HANT', 'scope_ZH-HANS'];
+  const gallery = ['gallery_EN', 'gallery_ZH-HANT', 'gallery_ZH-HANS'];
 
   const caseRows = [
     ['slug', 'client', 'clientLocal', 'projectLocal', 'sector', 'services', 'partnershipSince',
@@ -44,8 +45,9 @@ function buildFixture(directory, { pictureMissing = false } = {}) {
   ];
   const resultRows = [['slug', 'order', 'value', 'label', 'note']];
   const scopeRows = [['slug', 'order', 'text']];
+  const galleryRows = [['slug', 'order', 'file', 'alt', 'caption', 'mockup']];
 
-  for (const [index, tab] of [...cases, ...results, ...scope].entries()) {
+  for (const [index, tab] of [...cases, ...results, ...scope, ...gallery].entries()) {
     const file = join(directory, `${tab}.json`);
     if (tab.startsWith('cases_')) {
       writeFileSync(
@@ -76,16 +78,35 @@ function buildFixture(directory, { pictureMissing = false } = {}) {
       );
     } else if (tab.startsWith('results_')) {
       writeFileSync(file, JSON.stringify([resultRows[0], ['huatai-finance-hk', '1', '+38%', 'Fans', '']], null, 2));
-    } else {
+    } else if (tab.startsWith('scope_')) {
       writeFileSync(file, JSON.stringify([scopeRows[0], ['huatai-finance-hk', '1', 'Branding video']], null, 2));
+    } else {
+      /* A frame that is not there is named in the sheet all the same — the
+         frame that has gone missing is the one the run has to report. */
+      writeFileSync(
+        file,
+        JSON.stringify(
+          [
+            galleryRows[0],
+            ['huatai-finance-hk', '1', 'frame-that-is-not-there.jpg', 'A frame', 'A caption', 'true'],
+          ],
+          null,
+          2,
+        ),
+      );
     }
   }
 
-  /* The pictures. The missing one is simply not there. */
+  /* The pictures. The missing one is simply not there. The others are a
+     real picture, because the sync resizes them on the way in. */
   const media = join(directory, 'media', 'huatai-finance-hk');
   mkdirSync(media, { recursive: true });
+  const real = join(ROOT, 'public', 'media', 'cases', 'huatai-finance-hk', 'case-huatai.jpg');
   if (!pictureMissing) {
-    writeFileSync(join(media, 'case-huatai.jpg'), 'not really a jpeg');
+    copyFileSync(real, join(media, 'case-huatai.jpg'));
+  }
+  if (!frameMissing) {
+    copyFileSync(real, join(media, 'frame-that-is-not-there.jpg'));
   }
 }
 
@@ -158,6 +179,69 @@ const work = mkdtempSync(join(tmpdir(), 'migather-sync-'));
   check('the case still has a picture', Boolean(written.image?.src), JSON.stringify(written.image));
   check('the picture it keeps is the old one', /case-huatai\.jpg$/.test(written.image?.src ?? ''), written.image?.src);
   check('the mock-up flag still goes with it', written.image?.mockup === true, String(written.image?.mockup));
+}
+
+/* ── 3. The frames ────────────────────────────────────────────────────── */
+{
+  console.log('\nA sheet whose frames are all there');
+  const fixture = join(work, 'fixture-frames');
+  buildFixture(fixture);
+
+  const repo = join(work, 'repo-frames');
+  const output = runSync(repo, fixture);
+  check('it compiles', output.includes('compiled cleanly'), output.slice(-200));
+
+  const written = JSON.parse(
+    readFileSync(join(repo, 'content', 'cases', 'huatai-finance-hk.json'), 'utf8'),
+  );
+  check('the case carries the frame', written.gallery?.length === 1, JSON.stringify(written.gallery));
+  check(
+    'the frame points at the file in the case folder',
+    written.gallery?.[0]?.src === '/media/cases/huatai-finance-hk/frame-that-is-not-there.jpg',
+    written.gallery?.[0]?.src,
+  );
+  check('the frame carries its alt text', written.gallery?.[0]?.alt?.en === 'Mock-up: A frame', JSON.stringify(written.gallery?.[0]?.alt));
+  check('the frame carries its caption', written.gallery?.[0]?.caption?.en === 'A caption', JSON.stringify(written.gallery?.[0]?.caption));
+  check('the frame carries the mock-up flag', written.gallery?.[0]?.mockup === true, String(written.gallery?.[0]?.mockup));
+
+  /* The alt text is prefixed by the compiler, so a screen-reader user is
+     told the picture is generated artwork. */
+  check(
+    'the alt text says it is a mock-up',
+    String(written.gallery?.[0]?.alt?.en ?? '').startsWith('Mock-up: '),
+    written.gallery?.[0]?.alt?.en,
+  );
+
+  /* And the file itself is in the repository, beside the banner. */
+  check(
+    'the frame was written into the repository',
+    existsSync(join(repo, 'public', 'media', 'cases', 'huatai-finance-hk', 'frame-that-is-not-there.jpg')),
+  );
+}
+
+/* ── 4. A frame that is not there ─────────────────────────────────────── */
+{
+  console.log('\nA sheet that names a frame which is not in Drive');
+  const fixture = join(work, 'fixture-frame-missing');
+  buildFixture(fixture, { frameMissing: true });
+
+  const repo = join(work, 'repo-frame-missing');
+  let output = '';
+  let threw = false;
+  try {
+    output = runSync(repo, fixture);
+  } catch (error) {
+    threw = true;
+    output = `${error.stdout ?? ''}${error.stderr ?? ''}`;
+  }
+
+  check('it does not crash', !threw, output.slice(-200));
+  check('it says the frame is not there', /frame .* is not in Drive/.test(output), output.slice(-200));
+
+  const written = JSON.parse(
+    readFileSync(join(repo, 'content', 'cases', 'huatai-finance-hk.json'), 'utf8'),
+  );
+  check('the frame is not on the page', (written.gallery ?? []).length === 0, JSON.stringify(written.gallery));
 }
 
 rmSync(work, { recursive: true, force: true });

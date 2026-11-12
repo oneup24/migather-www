@@ -121,6 +121,7 @@ Three locales, URL-prefixed: `/en/*`, `/zh-Hant/*`, `/zh-Hans/*`.
 | --- | --- |
 | `src/data/` | Everything factual. `content.js` (copy), `cases.js` (the loader over the compiled case files), `sectors.js` (the sector taxonomy), `services.js` (25 published service lines, derived from the CRM's 23 agreed scope rows — one row is presented as three add-on lines), `clients.js` (roster + testimonials), `site.js` (constants, offices, platforms), `media.js` (page-banner imagery), `content.v3.js` (v3.0 structural copy), `i18n.js` (locale registry). |
 | `content/cases/` | The 16 sourced cases, one file per case, all three locales merged. Written by the CMS sync, read by the site. |
+| `content/templates/` | The skeleton every new case starts from — `content/templates/work.json`. See [`docs/WORK_TEMPLATE.md`](docs/WORK_TEMPLATE.md). |
 | `apps-script/` | The Google Apps Script web app an editor works in. |
 | `tools/cms/` | The CMS tooling: the pull, the seed, the compiler and the validator. |
 | `src/components/v3/` | The v3.0 component library. |
@@ -129,7 +130,7 @@ Three locales, URL-prefixed: `/en/*`, `/zh-Hant/*`, `/zh-Hans/*`.
 | `src/pages/` | 9 route templates. |
 | `src/styles/` | `index.css` (tokens) and `v3.css` (the editorial grammar). |
 | `public/media/` | The 24 generated mock-up images, plus the 23 client marks in `public/media/clients/`. |
-| `docs/` | `DESIGN_V3.md`, `LAUNCH_CHECKLIST.md`, `COPY_COMPLIANCE.md`, `REVIEW_GUIDE.md`, `VERSION.md`, `mockups/`. |
+| `docs/` | `DESIGN_V3.md`, `WORK_TEMPLATE.md`, `LAUNCH_CHECKLIST.md`, `COPY_COMPLIANCE.md`, `REVIEW_GUIDE.md`, `VERSION.md`, `mockups/`. |
 | `tools/` | Screenshot and image tooling. |
 
 ---

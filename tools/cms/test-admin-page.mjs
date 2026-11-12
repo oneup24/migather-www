@@ -35,6 +35,8 @@ const CASE_COLUMNS = [
   'featured', 'published',
 ];
 
+const GALLERY_COLUMNS = ['slug', 'order', 'file', 'alt', 'caption', 'mockup'];
+
 const pick = (value, locale) => {
   if (value == null) return '';
   if (typeof value === 'string') return value;
@@ -47,6 +49,7 @@ function buildTabs() {
   const cases = { en: [CASE_COLUMNS], 'zh-Hant': [CASE_COLUMNS], 'zh-Hans': [CASE_COLUMNS] };
   const results = { en: [['slug', 'order', 'value', 'label', 'note']], 'zh-Hant': [['slug', 'order', 'value', 'label', 'note']], 'zh-Hans': [['slug', 'order', 'value', 'label', 'note']] };
   const scope = { en: [['slug', 'order', 'text']], 'zh-Hant': [['slug', 'order', 'text']], 'zh-Hans': [['slug', 'order', 'text']] };
+  const gallery = { en: [GALLERY_COLUMNS], 'zh-Hant': [GALLERY_COLUMNS], 'zh-Hans': [GALLERY_COLUMNS] };
 
   for (const record of records) {
     for (const locale of ['en', 'zh-Hant', 'zh-Hans']) {
@@ -67,6 +70,16 @@ function buildTabs() {
       );
       results[locale].push(...record.results.map((r, i) => [record.slug, String(i + 1), r.value, pick(r.label, locale), pick(r.note, locale)]));
       scope[locale].push(...record.scope.map((line, i) => [record.slug, String(i + 1), pick(line, locale)]));
+      gallery[locale].push(
+        ...(record.gallery ?? []).map((frame, i) => [
+          record.slug,
+          String(i + 1),
+          frame.src.split('/').pop(),
+          pick(frame.alt, locale),
+          pick(frame.caption, locale),
+          frame.mockup ? 'true' : 'false',
+        ]),
+      );
     }
   }
 
@@ -80,6 +93,9 @@ function buildTabs() {
     scope_EN: scope.en,
     scope_ZH_HANT: scope['zh-Hant'],
     scope_ZH_HANS: scope['zh-Hans'],
+    gallery_EN: gallery.en,
+    'gallery_ZH-HANT': gallery['zh-Hant'],
+    'gallery_ZH-HANS': gallery['zh-Hans'],
     settings: [
       ['key', 'value'],
       ['editors', 'editor@example.com'],
@@ -88,6 +104,7 @@ function buildTabs() {
       ['lastPublish', ''],
       ['lastPublishStatus', ''],
       ['lastImageSaved', ''],
+      ['lastGalleryImageSaved', ''],
       ['contentChanged', ''],
     ],
   };
@@ -230,6 +247,12 @@ const MOCK = `
       const row = window.__fixture.settings.find(function (r) { return r[0] === 'lastImageSaved'; });
       if (row) row[1] = fields.fileName;
     }
+
+    /* And the same for a frame. */
+    if (fields.action === 'gallery-image') {
+      const row = window.__fixture.settings.find(function (r) { return r[0] === 'lastGalleryImageSaved'; });
+      if (row) row[1] = (fields.fileName || 'frame') + '|' + Date.now();
+    }
   };
 
   /* The fake APIs. */
@@ -248,14 +271,26 @@ const MOCK = `
       const body = options && options.body ? JSON.parse(options.body) : null;
 
       if (method === 'GET') {
+        /* The list of tabs — what the page asks for before it reads, so a
+           sheet without the gallery tabs can have them made. */
+        if (href.includes('fields=sheets')) {
+          const sheets = Object.keys(window.__fixture).map(function (title) {
+            return { properties: { title: title } };
+          });
+          return Promise.resolve(new Response(JSON.stringify({ sheets: sheets }), {
+            status: 200, headers: { 'Content-Type': 'application/json' },
+          }));
+        }
+
         const wanted = (href.match(/ranges=([^&]*)/g) || []).map(function (r) {
           return decodeURIComponent(r.replace('ranges=', ''));
         });
         const valueRanges = wanted.map(function (name) {
           const key = name.replace('cases_ZH-HANT', 'cases_ZH_HANT').replace('cases_ZH-HANS', 'cases_ZH_HANS')
             .replace('results_ZH-HANT', 'results_ZH_HANT').replace('results_ZH-HANS', 'results_ZH_HANS')
-            .replace('scope_ZH-HANT', 'scope_ZH_HANT').replace('scope_ZH-HANS', 'scope_ZH_HANS');
-          return { range: name, values: window.__fixture[key] || [] };
+            .replace('scope_ZH-HANT', 'scope_ZH_HANT').replace('scope_ZH-HANS', 'scope_ZH_HANS')
+            .replace('gallery_ZH-HANT', 'gallery_ZH_HANT').replace('gallery_ZH-HANS', 'gallery_ZH_HANS');
+          return { range: name, values: window.__fixture[key] || window.__fixture[name] || [] };
         });
         return Promise.resolve(new Response(JSON.stringify({ valueRanges: valueRanges }), {
           status: 200, headers: { 'Content-Type': 'application/json' },
@@ -280,12 +315,24 @@ const MOCK = `
  * a picture to reach Drive takes a moment — so a test has to wait for the
  * page to be ready again before the next one.
  */
-async function saveAndWait() {
-  const isDisabled = () =>
-    evaluate(
-      `Array.from(document.querySelectorAll('button')).some(b => b.textContent.trim() === 'Save' && b.disabled)`,
-    );
+const isDisabled = () =>
+  evaluate(
+    `Array.from(document.querySelectorAll('button')).some(b => b.textContent.trim() === 'Save' && b.disabled)`,
+  );
 
+/**
+ * Wait for the page to settle.
+ *
+ * A save ends by reading the sheet again, and that read can land after the
+ * editor has moved on — so a test waits for the save to be over before it
+ * starts typing.
+ */
+async function waitIdle() {
+  for (let i = 0; i < 120 && (await isDisabled()); i += 1) await sleep(500);
+  await sleep(300);
+}
+
+async function saveAndWait() {
   /* Wait for the page to be ready — a save that waits for a picture to
      reach Drive takes a moment, and the button is disabled until it is
      done. */
@@ -386,6 +433,76 @@ check('the picture was posted to the script', image.length > 0, `${image.length}
 check('it carries the slug', image[0]?.fields?.slug === records[0].slug, image[0]?.fields?.slug);
 check('it carries a file name', String(image[0]?.fields?.fileName ?? '').endsWith('.jpg'), image[0]?.fields?.fileName);
 check('it carries the bytes', String(image[0]?.fields?.dataUrl ?? '').startsWith('data:image/jpeg;base64,'));
+
+/* ── A frame ────────────────────────────────────────────────────────────
+   The second picture of a case: added in the editor, given its alt text
+   and its caption, and posted to the script — which is the only party with
+   the quota to put a file in Drive. */
+{
+  console.log('\nA frame');
+  await waitIdle();
+  await evaluate(`document.getElementById('addFrame').click()`);
+  await sleep(300);
+
+  const opened = await evaluate(`JSON.stringify({
+    alt: !!document.getElementById('frame-alt-0'),
+    caption: !!document.getElementById('frame-caption-0'),
+    file: !!document.getElementById('frame-file-0'),
+  })`);
+  check('the frame has an alt text field', JSON.parse(opened).alt);
+  check('the frame has a caption field', JSON.parse(opened).caption);
+  check('the frame has a picture', JSON.parse(opened).file);
+
+  /* The alt text and the caption. */
+  await evaluate(`(() => {
+    const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    const alt = document.getElementById('frame-alt-0');
+    set.call(alt, 'A camera on a studio set');
+    alt.dispatchEvent(new Event('input', { bubbles: true }));
+    const caption = document.getElementById('frame-caption-0');
+    set.call(caption, 'Branding video');
+    caption.dispatchEvent(new Event('input', { bubbles: true }));
+  })()`);
+  await sleep(200);
+
+  /* And a picture to go with it. */
+  await evaluate(`(() => {
+    const input = document.getElementById('frame-file-0');
+    const file = new File([new Uint8Array([5, 6, 7, 8])], 'frame.png', { type: 'image/png' });
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await sleep(300);
+
+  await saveAndWait();
+
+
+  const frames = JSON.parse(
+    await evaluate(`JSON.stringify(window.__posts.filter(p => p.fields && p.fields.action === 'gallery-image'))`),
+  );
+  check('the frame was posted to the script', frames.length > 0, `${frames.length} posts`);
+  check('it carries the slug', frames[0]?.fields?.slug === records[0].slug, frames[0]?.fields?.slug);
+  check('it carries the alt text', frames[0]?.fields?.alt === 'A camera on a studio set', frames[0]?.fields?.alt);
+  check('it carries its place', frames[0]?.fields?.order === '1', frames[0]?.fields?.order);
+  check('it carries the extension', frames[0]?.fields?.ext === 'png', frames[0]?.fields?.ext);
+  check('it carries the mock-up flag', frames[0]?.fields?.mockup === 'true', frames[0]?.fields?.mockup);
+  check('it carries the bytes', String(frames[0]?.fields?.dataUrl ?? '').startsWith('data:image/png;base64,'));
+
+  /* And the rows: the alt text and the caption go into every language's
+     tab, and the file name is the script's to give. */
+  const rows = JSON.parse(
+    await evaluate(`JSON.stringify(window.__writes.filter(w => String(w.range || '').startsWith('gallery')))`),
+  );
+  check('the gallery rows were written', rows.length > 0, `${rows.length} writes`);
+
+  const withAlt = rows.filter((w) => JSON.stringify(w.values || '').includes('A camera on a studio set'));
+  check('the alt text was written', withAlt.length > 0, `${withAlt.length} writes carried it`);
+
+  const withCaption = rows.filter((w) => JSON.stringify(w.values || '').includes('Branding video'));
+  check('the caption was written', withCaption.length > 0, `${withCaption.length} writes carried it`);
+}
 
 /* ── A new case, from nothing ───────────────────────────────────────────
    The whole flow an editor follows when a client comes on board: press

@@ -2,8 +2,10 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+import { mockEditor } from './tools/cms/vite-mock-editor.js';
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), mockEditor()],
   // The base path the site is served from. '/' locally; a sub-path when it is
   // published under a project site (e.g. /migather-www/site/). The router
   // reads this too — see the basename in src/App.jsx.

@@ -13,6 +13,7 @@
  */
 import {
   CASE_COLUMNS,
+  GALLERY_COLUMNS,
   LOCALES,
   MOCK_UP_PREFIX,
   RESULT_COLUMNS,
@@ -75,6 +76,7 @@ export function buildRecord({
   summary,
   results,
   scope,
+  gallery,
   source,
   image,
 }) {
@@ -96,6 +98,15 @@ export function buildRecord({
       note: r.note ? localised(r.note) : null,
     })),
     scope: scope.map((s) => localised(s)),
+    /* The frames, in reading order. A frame carries the same things a
+       banner carries — a file, alt text in three languages and a mock-up
+       flag — and a caption, which is the campaign element it stands for. */
+    gallery: (gallery ?? []).map((frame) => ({
+      src: frame.src,
+      alt: localised(frame.alt ?? {}),
+      caption: localised(frame.caption ?? {}),
+      mockup: Boolean(frame.mockup),
+    })),
     source,
     image: image
       ? {
@@ -188,6 +199,26 @@ export function recordToScopeRows(record, locale) {
   }));
 }
 
+/**
+ * The rows of the `gallery_<locale>` tab for one case.
+ *
+ * The file name and the mock-up flag are the same in every language — they
+ * belong to the picture — so they are written identically into all three
+ * tabs. The alt text and the caption are copy, and each language carries
+ * its own; the alt text is written without the mock-up prefix, because the
+ * compiler adds it.
+ */
+export function recordToGalleryRows(record, locale) {
+  return (record.gallery ?? []).map((frame, index) => ({
+    slug: record.slug,
+    order: String(index + 1),
+    file: frame.src.split('/').pop() ?? '',
+    alt: stripMockUpPrefix(frame.alt?.[locale] ?? '', locale),
+    caption: frame.caption?.[locale] ?? '',
+    mockup: frame.mockup ? 'true' : 'false',
+  }));
+}
+
 /** The header rows, in column order. */
 export function headerRow(columns) {
   return [...columns];
@@ -203,4 +234,4 @@ export function sameValue(a, b) {
   return String(a ?? '').trim() === String(b ?? '').trim();
 }
 
-export { CASE_COLUMNS, RESULT_COLUMNS, SCOPE_COLUMNS };
+export { CASE_COLUMNS, GALLERY_COLUMNS, RESULT_COLUMNS, SCOPE_COLUMNS };

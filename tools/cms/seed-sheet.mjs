@@ -15,7 +15,7 @@
  *
  *   node tools/cms/seed-sheet.mjs --fixtures ./fixtures
  *
- * The `--fixtures` mode writes the nine tabs and the images to a local
+ * The `--fixtures` mode writes the content tabs and the images to a local
  * directory instead of Google. That directory is what the sync's dry run
  * reads, which is how the migration is proved lossless: the same cases go
  * in as tabs and come back out as byte-identical case files.
@@ -32,6 +32,7 @@ import { join } from 'node:path';
 
 import {
   recordToCaseRows,
+  recordToGalleryRows,
   recordToResultRows,
   recordToScopeRows,
   rowToArray,
@@ -39,6 +40,8 @@ import {
 import {
   CASE_COLUMNS,
   CASE_TABS,
+  GALLERY_COLUMNS,
+  GALLERY_TABS,
   LOCALES,
   PUBLIC_CASE_IMAGE_DIR,
   RESULT_COLUMNS,
@@ -103,11 +106,12 @@ if (records.length === 0) {
 
 /* ── The tabs ─────────────────────────────────────────────────────────── */
 
-/** The nine content tabs. */
+/** The content tabs. */
 const ALL_CONTENT_TABS = [
   ...LOCALES.map((l) => CASE_TABS[l]),
   ...LOCALES.map((l) => RESULT_TABS[l]),
   ...LOCALES.map((l) => SCOPE_TABS[l]),
+  ...LOCALES.map((l) => GALLERY_TABS[l]),
 ];
 
 /** Which tab is this, and which locale does it hold? */
@@ -116,6 +120,7 @@ function tabInfo(tab) {
     if (tab === CASE_TABS[locale]) return { kind: 'cases', locale, columns: CASE_COLUMNS };
     if (tab === RESULT_TABS[locale]) return { kind: 'results', locale, columns: RESULT_COLUMNS };
     if (tab === SCOPE_TABS[locale]) return { kind: 'scope', locale, columns: SCOPE_COLUMNS };
+    if (tab === GALLERY_TABS[locale]) return { kind: 'gallery', locale, columns: GALLERY_COLUMNS };
   }
   throw new Error(`unknown tab ${tab}`);
 }
@@ -126,12 +131,13 @@ function rowsForTab(tab) {
 
   if (kind === 'cases') return records.map((record) => recordToCaseRows(record, locale));
   if (kind === 'results') return records.flatMap((record) => recordToResultRows(record, locale));
-  return records.flatMap((record) => recordToScopeRows(record, locale));
+  if (kind === 'scope') return records.flatMap((record) => recordToScopeRows(record, locale));
+  return records.flatMap((record) => recordToGalleryRows(record, locale));
 }
 
 /* ── The fixture mode ─────────────────────────────────────────────────── */
 
-/** Write the nine tabs and the images to a local directory. */
+/** Write the content tabs and the images to a local directory. */
 function seedFixtures(directory) {
   mkdirSync(directory, { recursive: true });
 
@@ -143,12 +149,17 @@ function seedFixtures(directory) {
   }
 
   for (const record of records) {
-    if (!record.image) continue;
-    const file = record.image.src.split('/').pop();
-    const source = join(PUBLIC_CASES_PATH, record.slug, file);
-    const destination = join(directory, 'media', record.slug, file);
-    mkdirSync(join(destination, '..'), { recursive: true });
-    copyFileSync(source, destination);
+    const pictures = [
+      ...(record.image ? [record.image.src] : []),
+      ...(record.gallery ?? []).map((frame) => frame.src),
+    ];
+    for (const src of pictures) {
+      const file = src.split('/').pop();
+      const source = join(PUBLIC_CASES_PATH, record.slug, file);
+      const destination = join(directory, 'media', record.slug, file);
+      mkdirSync(join(destination, '..'), { recursive: true });
+      copyFileSync(source, destination);
+    }
   }
 
   console.log(`Fixtures written to ${directory}`);
@@ -184,7 +195,7 @@ async function seedGoogle() {
 
   /* The blank tab a new spreadsheet comes with. It is left alone if it holds
      anything — the seed never destroys work — but an empty "Sheet1" beside
-     nine content tabs only confuses an editor. */
+     content tabs only confuses an editor. */
   const contentTabs = [...ALL_CONTENT_TABS, SETTINGS_TAB];
   for (const tab of tabs) {
     if (contentTabs.includes(tab.title)) continue;
@@ -267,14 +278,16 @@ async function seedGoogle() {
     console.log('refreshed the vocabulary in the settings tab');
   }
 
-  /* The Drive folders and the images. */
+  /* The Drive folders, and the pictures in them. */
   const folders = await listFolder(token, OPTIONS.driveFolder);
   const folderByName = new Map(folders.map((f) => [f.name, f]));
 
   for (const record of records) {
-    if (!record.image) continue;
-    const file = record.image.src.split('/').pop();
-    const source = join(PUBLIC_CASES_PATH, record.slug, file);
+    const pictures = [
+      ...(record.image ? [{ src: record.image.src }] : []),
+      ...(record.gallery ?? []).map((frame) => ({ src: frame.src })),
+    ];
+    if (!pictures.length) continue;
 
     let folder = folderByName.get(record.slug);
     if (!folder) {
@@ -283,14 +296,19 @@ async function seedGoogle() {
       console.log(`created the Drive folder ${record.slug}`);
     }
 
-    const inside = await listFolder(token, folder.id);
-    if (inside.some((f) => f.name === file)) {
-      console.log(`${record.slug}: the image is already in Drive`);
-      continue;
-    }
+    for (const picture of pictures) {
+      const file = picture.src.split('/').pop();
+      const source = join(PUBLIC_CASES_PATH, record.slug, file);
 
-    await uploadFile(token, folder.id, file, readFileSync(source), 'image/jpeg');
-    console.log(`${record.slug}: uploaded ${file}`);
+      const inside = await listFolder(token, folder.id);
+      if (inside.some((f) => f.name === file)) {
+        console.log(`${record.slug}: ${file} is already in Drive`);
+        continue;
+      }
+
+      await uploadFile(token, folder.id, file, readFileSync(source), 'image/jpeg');
+      console.log(`${record.slug}: uploaded ${file}`);
+    }
   }
 }
 

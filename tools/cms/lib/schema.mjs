@@ -5,7 +5,7 @@
  * Script, the sync, the seed and the content check all read it, so a column
  * cannot be renamed in one place and missed in another.
  *
- * Nine tabs, one per (kind × locale). One locale per tab, so the editing
+ * One tab per (kind × locale). One locale per tab, so the editing
  * form never shows two Chinese scripts at once and a missing translation is
  * visible as a missing tab row rather than as a blank field.
  */
@@ -32,11 +32,24 @@ export const SCOPE_TABS = {
   'zh-Hans': 'scope_ZH-HANS',
 };
 
+/**
+ * The tabs the frames live in — one per language, like every other copy.
+ *
+ * A frame is a second picture for the case, and a picture needs the same
+ * treatment: a file name, a mock-up flag and alt text in every language.
+ */
+export const GALLERY_TABS = {
+  en: 'gallery_EN',
+  'zh-Hant': 'gallery_ZH-HANT',
+  'zh-Hans': 'gallery_ZH-HANS',
+};
+
 /** Every tab the sheet must carry, in the order they are created. */
 export const ALL_TABS = [
   ...LOCALES.map((l) => CASE_TABS[l]),
   ...LOCALES.map((l) => RESULT_TABS[l]),
   ...LOCALES.map((l) => SCOPE_TABS[l]),
+  ...LOCALES.map((l) => GALLERY_TABS[l]),
 ];
 
 /**
@@ -73,6 +86,24 @@ export const RESULT_COLUMNS = ['slug', 'order', 'value', 'label', 'note'];
 
 /** The columns of `scope_<locale>` — one row per scope line. */
 export const SCOPE_COLUMNS = ['slug', 'order', 'text'];
+
+/**
+ * The columns of `gallery_<locale>` — one row per frame.
+ *
+ * `file` and `mockup` belong to the picture, so they are the same in every
+ * language and are written into all three tabs by the script that saved the
+ * file. `alt` and `caption` are copy, and each language carries its own.
+ */
+export const GALLERY_COLUMNS = ['slug', 'order', 'file', 'alt', 'caption', 'mockup'];
+
+/**
+ * How many frames a case may carry.
+ *
+ * The grid takes three across, so twelve is four rows — a campaign, not a
+ * contact sheet. The cap is a hard error, not a trim: a case that has been
+ * given a thirteenth frame is a mistake, and a silent trim would lose one.
+ */
+export const GALLERY_MAX_FRAMES = 12;
 
 /**
  * The columns that must hold the same value in all three locale tabs.

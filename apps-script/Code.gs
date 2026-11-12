@@ -6,14 +6,19 @@
  * fills in the form. The sheet is written directly by that page, as the
  * person doing the editing.
  *
- * So this script has only the two jobs the browser cannot do for itself:
+ * So this script has only the jobs the browser cannot do for itself:
  *
  *   1. Save a picture to the Drive folder. A service account has no
  *      storage quota, and a browser cannot write to Drive without a Drive
  *      scope on the editor's account — so the picture is posted here
  *      instead. This script runs as the editor, and the editor has quota.
  *
- *   2. Ask GitHub to rebuild the site. The token lives in the script
+ *   2. Save a frame — the second picture of a case — the same way, into the
+ *      same folder. The frame's file is named after the page and the alt
+ *      text the editor typed, and its name and its mock-up flag go into
+ *      the sheet together, once the file is really there.
+ *
+ *   3. Ask GitHub to rebuild the site. The token lives in the script
  *      properties, never in the repository and never in a browser.
  *
  * ── Setting it up ───────────────────────────────────────────────────────
@@ -48,6 +53,25 @@ var CASE_TABS = {
   'zh-Hant': 'cases_ZH-HANT',
   'zh-Hans': 'cases_ZH-HANS',
 };
+
+/**
+ * The tabs the frames live in, one per language.
+ *
+ * A frame is a second picture for the case, and it lives in the same Drive
+ * folder as the banner — which is why the folder's clean-up rule below has
+ * to know about them.
+ */
+var GALLERY_TABS = {
+  en: 'gallery_EN',
+  'zh-Hant': 'gallery_ZH-HANT',
+  'zh-Hans': 'gallery_ZH-HANS',
+};
+
+/** The columns of a gallery tab. */
+var GALLERY_COLUMNS = ['slug', 'order', 'file', 'alt', 'caption', 'mockup'];
+
+/** How many frames a case may carry. */
+var GALLERY_MAX_FRAMES = 12;
 
 /** The Drive folder the case images live in. */
 function driveFolder_() {
@@ -104,6 +128,9 @@ function settings_() {
  * different name — the old picture, when the editor has uploaded a new one
  * under a new name — is deleted, so the folder does not fill up with
  * orphans.
+ *
+ * The frames live in the same folder, and they are left alone: a file the
+ * sheet names as a frame is a frame, whatever the banner is called.
  */
 function saveImage_(slug, fileName, dataUrl, isMockup) {
   var match = String(dataUrl).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/);
@@ -116,11 +143,15 @@ function saveImage_(slug, fileName, dataUrl, isMockup) {
   var bytes = Utilities.base64Decode(match[2]);
   var blob = Utilities.newBlob(bytes, match[1], fileName);
 
-  /* Clear out the old picture, whatever it was called. */
+  /* Clear out the old picture, whatever it was called — but not the frames,
+     which the sheet names and which live here too. */
+  var frames = galleryFileNames_(slug);
   var existing = target.getFiles();
   while (existing.hasNext()) {
     var old = existing.next();
-    if (old.getName() !== fileName) old.setTrashed(true);
+    if (old.getName() === fileName) continue;
+    if (frames.indexOf(old.getName()) !== -1) continue;
+    old.setTrashed(true);
   }
 
   var same = target.getFilesByName(fileName);
@@ -139,6 +170,245 @@ function saveImage_(slug, fileName, dataUrl, isMockup) {
   writeImageName_(slug, fileName, isMockup);
 
   return fileName;
+}
+
+/**
+ * A file name, in the site's own convention: lowercase, words joined by
+ * hyphens.
+ */
+function slugify_(value) {
+  return String(value == null ? '' : value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+}
+
+/**
+ * The name of a frame's file.
+ *
+ * The page title and the alt text — the two things that say what the frame
+ * is — in the site's own convention. The alt text is what the editor typed
+ * when the frame was uploaded, so the file says what the picture is without
+ * anyone having to remember it later.
+ *
+ * The order is the last part, so two frames with the same alt text do not
+ * land on the same file. It is the order the frame had when it was
+ * uploaded: reordering the frames on the page does not rename the files.
+ */
+function galleryFileName_(client, alt, order, extension) {
+  var title = slugify_(client) || 'frame';
+  var words = slugify_(alt) || 'frame';
+  var index = order < 10 ? '0' + order : String(order);
+  var suffix = extension ? '.' + extension : '.jpg';
+  return title + '-' + words + '-' + index + suffix;
+}
+
+/**
+ * The client name of a case — the page's title.
+ *
+ * Read from the sheet rather than sent by the browser, so the name of the
+ * file is built from what the sheet actually says.
+ */
+function clientName_(slug) {
+  var sheet = SpreadsheetApp.openById(scriptProperty_('SPREADSHEET_ID'));
+
+  for (var tabName in CASE_TABS) {
+    var tab = sheet.getSheetByName(CASE_TABS[tabName]);
+    if (!tab) continue;
+
+    var values = tab.getDataRange().getValues();
+    var header = values[0].map(function (h) { return String(h || '').trim(); });
+    var slugColumn = header.indexOf('slug');
+    var clientColumn = header.indexOf('client');
+    if (slugColumn === -1 || clientColumn === -1) continue;
+
+    for (var i = 1; i < values.length; i += 1) {
+      if (String(values[i][slugColumn]) !== slug) continue;
+      return String(values[i][clientColumn] || '');
+    }
+  }
+
+  return '';
+}
+
+/**
+ * The file names the sheet names for a case's frames.
+ *
+ * Used by the banner's clean-up, so the frames in the folder are not thrown
+ * away when the banner is replaced.
+ */
+function galleryFileNames_(slug) {
+  var names = [];
+  var sheet = SpreadsheetApp.openById(scriptProperty_('SPREADSHEET_ID'));
+
+  for (var tabName in GALLERY_TABS) {
+    var tab = sheet.getSheetByName(GALLERY_TABS[tabName]);
+    if (!tab) continue;
+
+    var values = tab.getDataRange().getValues();
+    var header = values[0].map(function (h) { return String(h || '').trim(); });
+    var slugColumn = header.indexOf('slug');
+    var fileColumn = header.indexOf('file');
+    if (slugColumn === -1 || fileColumn === -1) continue;
+
+    for (var i = 1; i < values.length; i += 1) {
+      if (String(values[i][slugColumn]) !== slug) continue;
+      var file = String(values[i][fileColumn] || '');
+      if (file && names.indexOf(file) === -1) names.push(file);
+    }
+  }
+
+  return names;
+}
+
+/**
+ * The file one frame has right now, as the sheet records it.
+ *
+ * Read before a new picture is saved, so the old one can be thrown away
+ * when the alt text has changed and the file has been renamed.
+ */
+function galleryFileFor_(slug, order) {
+  var sheet = SpreadsheetApp.openById(scriptProperty_('SPREADSHEET_ID'));
+
+  for (var tabName in GALLERY_TABS) {
+    var tab = sheet.getSheetByName(GALLERY_TABS[tabName]);
+    if (!tab) continue;
+
+    var values = tab.getDataRange().getValues();
+    var header = values[0].map(function (h) { return String(h || '').trim(); });
+    var slugColumn = header.indexOf('slug');
+    var orderColumn = header.indexOf('order');
+    var fileColumn = header.indexOf('file');
+    if (slugColumn === -1 || orderColumn === -1 || fileColumn === -1) continue;
+
+    for (var i = 1; i < values.length; i += 1) {
+      if (String(values[i][slugColumn]) !== slug) continue;
+      if (String(values[i][orderColumn]) !== String(order)) continue;
+      var file = String(values[i][fileColumn] || '');
+      if (file) return file;
+    }
+  }
+
+  return '';
+}
+
+/**
+ * Save a frame into the case's folder.
+ *
+ * The frame's file is named after the page and the alt text, and its name
+ * and its mock-up flag are written into all three of its tabs — together,
+ * and only once the file is really in Drive. The flag belongs to the
+ * picture, so it can never say one thing while the picture says another.
+ */
+function saveGalleryImage_(slug, order, alt, extension, dataUrl, isMockup) {
+  var match = String(dataUrl).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/);
+  if (!match) throw new Error('the frame was not sent as a base64 image');
+
+  var folder = driveFolder_();
+  var folders = folder.getFoldersByName(slug);
+  var target = folders.hasNext() ? folders.next() : folder.createFolder(slug);
+
+  var fileName = galleryFileName_(clientName_(slug), alt, order, extension);
+
+  var bytes = Utilities.base64Decode(match[2]);
+  var blob = Utilities.newBlob(bytes, match[1], fileName);
+
+  /* The frame's previous file, if the alt text has changed and the name
+     with it. It is replaced, not kept alongside. */
+  var previous = galleryFileFor_(slug, order);
+  if (previous && previous !== fileName) {
+    var old = target.getFilesByName(previous);
+    if (old.hasNext()) old.next().setTrashed(true);
+  }
+
+  var same = target.getFilesByName(fileName);
+  if (same.hasNext()) {
+    same.next().setContent(bytes);
+  } else {
+    target.createFile(blob);
+  }
+
+  writeGalleryFileName_(slug, order, fileName, isMockup);
+
+  return fileName;
+}
+
+/**
+ * Throw a frame's file away.
+ *
+ * The row goes from the sheet on the editor's side; this is the file in
+ * Drive, so the folder does not fill up with pictures nothing points at.
+ */
+function trashGalleryFile_(slug, fileName) {
+  var folder = driveFolder_();
+  var folders = folder.getFoldersByName(slug);
+  if (!folders.hasNext()) return false;
+
+  var files = folders.next().getFilesByName(fileName);
+  if (!files.hasNext()) return false;
+
+  files.next().setTrashed(true);
+  return true;
+}
+
+/**
+ * Write a frame's file name into all three of its tabs — and the mock-up
+ * flag with it.
+ *
+ * The name only appears once the file is really in Drive, so the sheet can
+ * never name a picture that is not there. The flag says whether the
+ * *picture* is generated artwork: it belongs to the picture, so it is
+ * written at the same moment as the name and never separately.
+ */
+function writeGalleryFileName_(slug, order, fileName, isMockup) {
+  var sheet = SpreadsheetApp.openById(scriptProperty_('SPREADSHEET_ID'));
+
+  for (var tabName in GALLERY_TABS) {
+    var tab = sheet.getSheetByName(GALLERY_TABS[tabName]);
+
+    /* A sheet that has never had a frame in it may not have the tab yet. */
+    if (!tab) {
+      tab = sheet.insertSheet(GALLERY_TABS[tabName]);
+      tab.getRange(1, 1, 1, GALLERY_COLUMNS.length).setValues([GALLERY_COLUMNS]);
+    }
+
+    var values = tab.getDataRange().getValues();
+    var header = values[0].map(function (h) { return String(h || '').trim(); });
+    var slugColumn = header.indexOf('slug');
+    var orderColumn = header.indexOf('order');
+    var fileColumn = header.indexOf('file');
+    var mockupColumn = header.indexOf('mockup');
+    if (slugColumn === -1 || orderColumn === -1 || fileColumn === -1) continue;
+
+    var found = false;
+    for (var i = 1; i < values.length; i += 1) {
+      if (String(values[i][slugColumn]) !== slug) continue;
+      if (String(values[i][orderColumn]) !== String(order)) continue;
+      found = true;
+      tab.getRange(i + 1, fileColumn + 1).setValue(String(fileName));
+      if (mockupColumn !== -1 && isMockup !== undefined && isMockup !== null) {
+        tab.getRange(i + 1, mockupColumn + 1).setValue(isMockup ? 'true' : 'false');
+      }
+    }
+
+    /* A frame the sheet has no row for yet — the row is written by the
+       editor's page, but a hand-made upload may arrive first. */
+    if (!found) {
+      var row = [];
+      for (var c = 0; c < GALLERY_COLUMNS.length; c += 1) row.push('');
+      row[slugColumn] = slug;
+      row[orderColumn] = String(order);
+      row[fileColumn] = String(fileName);
+      if (mockupColumn !== -1) row[mockupColumn] = isMockup ? 'true' : 'false';
+      tab.getRange(values.length + 1, 1, 1, GALLERY_COLUMNS.length).setValues([row]);
+    }
+  }
+
+  /* And a note for the editor's page, which waits for it before it writes
+     the row that names the frame. The time is part of it, so a frame that
+     is uploaded twice under the same name is still a new save. */
+  setSetting_('lastGalleryImageSaved', fileName + '|' + new Date().toISOString());
 }
 
 /**
@@ -436,6 +706,46 @@ function doPost(request) {
         String(request.parameter.mockup || 'true') === 'true',
       );
       return reply_('The picture was saved.');
+    }
+
+    if (action === 'gallery-image') {
+      var frameSlug = String(request.parameter.slug || '').trim();
+      var frameOrder = Number(request.parameter.order || 0);
+      var frameAlt = String(request.parameter.alt || '');
+      var frameExt = String(request.parameter.ext || 'jpg')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(frameSlug)) {
+        throw new Error('the slug "' + frameSlug + '" is not a valid route id');
+      }
+      if (!frameOrder || frameOrder < 1 || frameOrder > GALLERY_MAX_FRAMES) {
+        throw new Error(
+          'the frame order "' + frameOrder + '" is not between 1 and ' + GALLERY_MAX_FRAMES,
+        );
+      }
+      if (!frameExt) frameExt = 'jpg';
+      saveGalleryImage_(
+        frameSlug,
+        frameOrder,
+        frameAlt,
+        frameExt,
+        request.parameter.dataUrl || '',
+        String(request.parameter.mockup || 'true') === 'true',
+      );
+      return reply_('The frame was saved.');
+    }
+
+    if (action === 'gallery-delete') {
+      var deleteSlug = String(request.parameter.slug || '').trim();
+      var deleteFile = String(request.parameter.fileName || '').trim();
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(deleteSlug)) {
+        throw new Error('the slug "' + deleteSlug + '" is not a valid route id');
+      }
+      if (!deleteFile || deleteFile.indexOf('/') !== -1) {
+        throw new Error('the file name "' + deleteFile + '" is not valid');
+      }
+      trashGalleryFile_(deleteSlug, deleteFile);
+      return reply_('The frame was deleted.');
     }
 
     if (action === 'publish') {

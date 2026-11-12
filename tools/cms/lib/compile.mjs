@@ -1,7 +1,7 @@
 /**
  * The compiler — nine sheet tabs in, compiled case files out.
  *
- * Everything here is pure: it takes the raw values of the nine tabs and
+ * Everything here is pure: it takes the raw values of the content tabs and
  * returns the records plus the list of things that are wrong with them. No
  * network, no filesystem. That is what makes the migration testable — the
  * same input always produces the same output, so a case pushed into the
@@ -15,6 +15,9 @@
 import {
   CASE_COLUMNS,
   CASE_TABS,
+  GALLERY_COLUMNS,
+  GALLERY_MAX_FRAMES,
+  GALLERY_TABS,
   LOCALES,
   LOCALE_INDEPENDENT_COLUMNS,
   RESULT_COLUMNS,
@@ -26,7 +29,7 @@ import {
   parseBoolean,
   rowsToObjects,
 } from './schema.mjs';
-import { applyMockUpPrefix, buildRecord } from './records.mjs';
+import { applyMockUpPrefix, buildRecord, stripMockUpPrefix } from './records.mjs';
 
 /** The image path a case's file lands on. */
 function caseImagePath(slug, fileName) {
@@ -38,12 +41,18 @@ function caseImagePath(slug, fileName) {
  *
  * A tab that is missing entirely is an error in its own right: the sheet has
  * to carry all nine, because a missing tab means a missing language.
+ *
+ * The gallery tabs are the exception. A case may have no frames at all, and
+ * a sheet that has never had a frame in it need not carry the tabs — so an
+ * empty gallery tab is nothing, not a failure.
  */
-function parseTab(values, columns, tabName, errors) {
+function parseTab(values, columns, tabName, errors, { optional = false } = {}) {
   const { header, rows, missing } = rowsToObjects(values, columns);
 
   if (!values || values.length === 0) {
-    errors.push({ tab: tabName, message: 'the tab is empty — it must at least carry a header row' });
+    if (!optional) {
+      errors.push({ tab: tabName, message: 'the tab is empty — it must at least carry a header row' });
+    }
     return [];
   }
 
@@ -109,12 +118,13 @@ function comparable(column, raw) {
 }
 
 /**
- * Compile the nine tabs into records.
+ * Compile the sheet tabs into records.
  *
  * @param {object} input
  * @param {object} input.cases    the `cases_<locale>` tabs, raw values
  * @param {object} input.results  the `results_<locale>` tabs, raw values
  * @param {object} input.scope    the `scope_<locale>` tabs, raw values
+ * @param {object} [input.gallery] the `gallery_<locale>` tabs, raw values
  * @param {string[]} input.sectors   the allowed sector keys
  * @param {string[]} input.services  the allowed service keys
  * @param {boolean} [input.strict]   fail on a draft case with a bad column too
@@ -140,6 +150,14 @@ export function compile(input, { sectors = [], services = [] } = {}) {
   for (const locale of LOCALES) {
     const tab = SCOPE_TABS[locale];
     scopeRows[locale] = parseTab(input.scope?.[locale], SCOPE_COLUMNS, tab, errors);
+  }
+
+  const galleryRows = {};
+  for (const locale of LOCALES) {
+    const tab = GALLERY_TABS[locale];
+    galleryRows[locale] = parseTab(input.gallery?.[locale], GALLERY_COLUMNS, tab, errors, {
+      optional: true,
+    });
   }
 
   /* ── 2. Group by slug ───────────────────────────────────────────── */
@@ -349,6 +367,7 @@ export function compile(input, { sectors = [], services = [] } = {}) {
     /* The results and the scope lines. */
     const results = compileResults(slug, resultRows, errors, warnings);
     const scope = compileScope(slug, scopeRows, errors, warnings);
+    const gallery = compileGallery(slug, galleryRows, errors, warnings);
 
     const clientLocal = {};
     const projectLocal = {};
@@ -376,6 +395,7 @@ export function compile(input, { sectors = [], services = [] } = {}) {
         summary: Object.fromEntries(LOCALES.map((l) => [l, localised[l].summary ?? ''])),
         results,
         scope,
+        gallery,
         source,
         image: imageFile
           ? {
@@ -544,6 +564,134 @@ function compileScope(slug, scopeRows, errors, warnings) {
       });
     }
     out.push(text);
+  }
+
+  return out;
+}
+
+/**
+ * The frames of one case.
+ *
+ * Lined up by `order`, like the results and the scope lines. The file name
+ * and the mock-up flag belong to the picture, so they are the same in every
+ * language — the English one is used, and a difference is reported. The alt
+ * text and the caption are copy: a language that has not translated them yet
+ * falls back to English, which is what the site does everywhere else.
+ *
+ * A frame whose file is empty is a frame whose picture has not arrived yet.
+ * It is left out of the page rather than published as a broken image.
+ */
+function compileGallery(slug, galleryRows, errors, warnings) {
+  const perLocale = {};
+  for (const locale of LOCALES) {
+    const rows = galleryRows[locale].filter((r) => r.__values.slug === slug);
+    rows.sort((a, b) => Number(a.__values.order || 0) - Number(b.__values.order || 0));
+    perLocale[locale] = rows;
+  }
+
+  const orders = new Map();
+  for (const locale of LOCALES) {
+    for (const row of perLocale[locale]) {
+      const order = Number(row.__values.order || 0);
+      if (!order) continue;
+      if (!orders.has(order)) orders.set(order, {});
+      orders.get(order)[locale] = row.__values;
+    }
+  }
+
+  const sorted = [...orders.keys()].sort((a, b) => a - b);
+
+  if (sorted.length > GALLERY_MAX_FRAMES) {
+    errors.push({
+      tab: 'the gallery tabs',
+      slug,
+      column: 'order',
+      message: `the case has ${sorted.length} frames — a case page carries at most ${GALLERY_MAX_FRAMES}`,
+    });
+  }
+
+  const out = [];
+
+  for (const order of sorted) {
+    const rows = orders.get(order);
+
+    /* The file is the picture, and the picture is the same in every
+       language. */
+    const file = (rows.en ?? rows['zh-Hant'] ?? rows['zh-Hans'] ?? {}).file ?? '';
+    for (const locale of LOCALES) {
+      const other = rows[locale]?.file ?? '';
+      if (!other || other === file) continue;
+      warnings.push({
+        tab: GALLERY_TABS[locale],
+        slug,
+        column: 'file',
+        message: `frame ${order} names a different file in ${locale} ("${other}") — the English one is used`,
+      });
+    }
+
+    /* A frame with no file has no picture yet. It is not shown, and it is
+       not an error — the editor may still be uploading it. */
+    if (!file) {
+      warnings.push({
+        tab: 'the gallery tabs',
+        slug,
+        message: `frame ${order} has no picture yet — it is not shown until the file is there`,
+      });
+      continue;
+    }
+
+    const mockupRaw = (rows.en ?? rows['zh-Hant'] ?? rows['zh-Hans'] ?? {}).mockup ?? '';
+    const mockup = parseBoolean(mockupRaw);
+    if (mockup === null) {
+      warnings.push({
+        tab: 'the gallery tabs',
+        slug,
+        column: 'mockup',
+        message: `frame ${order} has no mock-up flag — it is read as false`,
+      });
+    }
+    for (const locale of LOCALES) {
+      const other = parseBoolean(rows[locale]?.mockup ?? '');
+      if (other === null || other === mockup) continue;
+      warnings.push({
+        tab: GALLERY_TABS[locale],
+        slug,
+        column: 'mockup',
+        message: `frame ${order} is a mock-up in one language and not in another — the English flag is used`,
+      });
+    }
+
+    /* The alt text falls back to English, and the mock-up prefix is put on
+       afterwards, so a language that has not translated it yet still says
+       "mock-up" rather than nothing at all. */
+    const englishAlt = stripMockUpPrefix(rows.en?.alt ?? '', 'en');
+    const englishCaption = rows.en?.caption ?? '';
+
+    const alt = {};
+    const caption = {};
+
+    for (const locale of LOCALES) {
+      const row = rows[locale];
+      const own = stripMockUpPrefix(row?.alt ?? '', locale);
+      alt[locale] = applyMockUpPrefix(own || englishAlt, locale, mockup === true);
+      caption[locale] = row?.caption || englishCaption;
+
+      if (!row?.alt) {
+        warnings.push({
+          tab: GALLERY_TABS[locale],
+          slug,
+          column: 'alt',
+          message: `frame ${order} has no alt text in ${locale} — it shows in English there`,
+        });
+      }
+    }
+
+    out.push({
+      src: caseImagePath(slug, file),
+      alt,
+      caption,
+      mockup: mockup === true,
+    });
   }
 
   return out;

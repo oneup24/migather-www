@@ -130,13 +130,14 @@ That means:
 
 ### 3.1 The sheet
 
-One sheet, **nine content tabs** plus a `settings` tab:
+One sheet, **twelve content tabs** plus a `settings` tab:
 
 | Tab | Holds |
 | --- | --- |
 | `cases_EN` `cases_ZH-HANT` `cases_ZH-HANS` | one row per case, one locale per tab |
 | `results_EN` `results_ZH-HANT` `results_ZH-HANS` | one row per result |
 | `scope_EN` `scope_ZH-HANT` `scope_ZH-HANS` | one row per scope line |
+| `gallery_EN` `gallery_ZH-HANT` `gallery_ZH-HANS` | one row per frame — the campaign in squares |
 | `settings` | the editor allow-list, the repository coordinates, and the last publish |
 
 The columns are in `tools/cms/lib/schema.mjs`, and the seed writes the
@@ -150,8 +151,8 @@ top.
 ### 3.2 The Drive folder
 
 One folder, with one sub-folder per case, named after the case's slug. The
-picture sits inside it. The slug is the folder name, so the sync finds the
-picture without a lookup table.
+picture sits inside it, and so do the frames. The slug is the folder name,
+so the sync finds the pictures without a lookup table.
 
 ### 3.3 The service account
 
@@ -183,6 +184,16 @@ Create credentials → OAuth client ID → Web application:**
 - **Authorised redirect URIs**: leave empty. The sign-in widget sends the
   origin itself and does its own redirect handling, so the JavaScript
   origins list is the whole requirement.
+
+> **On localhost the sign-in fails with `origin_mismatch`.** Google only
+> accepts the origins the client was told about, and `http://localhost:8899`
+> is not one of them. Adding it to the list above makes the real editor work
+> locally, against the real sheet.
+>
+> To work on the editor without Google, use the mock instead —
+> `npm run dev:editor` serves the site on `http://localhost:8899` with the
+> sign-in granted and the sheet mocked from the real compiled content.
+> Nothing is written anywhere. The same mock is behind `npm run cms:preview`.
 
 The client id is in `src/data/cms.js`, alongside the sheet id and the
 script's address. None of the three is a credential — the sheet's own
@@ -240,7 +251,7 @@ node tools/cms/seed-sheet.mjs \
   --github-owner oneup24 --github-repo migather-www
 ```
 
-This writes the nine tabs with their headers, pushes the cases in all three
+This writes the twelve tabs with their headers, pushes the cases in all three
 languages, and writes the settings tab. It is re-runnable and never
 clobbers: a case whose slug is already in a tab is left alone.
 
@@ -317,6 +328,44 @@ page writes them to all three, so they cannot drift by accident.
 
 `slug`, `order`, `text`.
 
+### `gallery_<locale>` — one row per frame
+
+`slug`, `order`, `file`, `alt`, `caption`, `mockup`.
+
+A frame is a second picture for the case — the campaign in squares, under
+the case information. The page shows three across, so a case carries **at
+most twelve frames**; a thirteenth fails the build rather than being
+silently trimmed.
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `slug` | text | The case the frame belongs to. |
+| `order` | number | Its place on the page, 1 to 12. The frames are read in this order. |
+| `file` | text | The file name inside the case's Drive folder. Written by the Apps Script, not by the editor. |
+| `alt` | text | What the picture shows. The sync prefixes `Mock-up: ` when the flag is set — the editor never types it. |
+| `caption` | text | The campaign element the frame stands for, e.g. `OOH — bus and tram`. |
+| `mockup` | dropdown | `true` / `false` — generated artwork vs a real client photograph. Written by the Apps Script, with the file. |
+
+`file` and `mockup` belong to the picture, so they are the same in every
+language and the script writes them into all three tabs. `alt` and
+`caption` are copy, and each language carries its own — a frame that has
+not been translated yet falls back to English.
+
+**The file name is the page and the alt text.** When a frame is uploaded,
+the script names the file after the case's page title and the alt text the
+editor typed, in the site's own convention — lower case, words joined by
+hyphens — and finishes with the frame's place in the order:
+
+```
+huatai-finance-hk-branding-video-shoot-01.jpg
+└─ the page title ─────┘└─ the alt text ─────┘└─┘
+                                            the order
+```
+
+The name is set once, when the frame is uploaded. Reordering the frames
+does not rename the files, and the order in a file name is the order the
+frame had when it was uploaded.
+
 ### The compiled output
 
 ```
@@ -326,7 +375,14 @@ public/media/cases/<slug>/<file> the picture, downloaded from Drive
 
 `src/data/cases.js` is a loader over those files and keeps exporting
 `sectors` and `getCase`. The picture travels with the case: the record
-carries `image: { src, alt: { en, zh-Hant, zh-Hans }, mockup }`.
+carries `image: { src, alt: { en, zh-Hant, zh-Hans }, mockup }`. So do the
+frames: the record carries `gallery: [{ src, alt, caption, mockup }]`, in
+the order the sheet lists them.
+
+A frame whose file is not in Drive is **dropped from the page** — there is
+no earlier version of a frame to fall back on, and a picture that was
+deleted should not stay on the site. The sync names it in its output, so
+the editor knows the upload did not arrive.
 
 ---
 
@@ -343,7 +399,8 @@ The sync fails the build, with the case and the column named, on:
 - a published case missing from one of the locale tabs;
 - a published case whose copy is only partly filled in one language;
 - a case with a different number of results or scope lines in different
-  languages, or a result figure that differs between them.
+  languages, or a result figure that differs between them;
+- a case with more than twelve frames.
 
 A draft case is allowed to be unfinished. That is what a draft is for.
 
@@ -357,6 +414,8 @@ A draft case is allowed to be unfinished. That is what a draft is for.
 | The editor signs in and the case list is empty | The sheet could not be read. Check that the account has access — the sheet's sharing is the gate. |
 | "The sheet could not be written" | The token's scope was not granted, or the account has no edit access to the sheet. |
 | "The picture did not reach Drive" | The Apps Script could not save it. The copy is saved; upload the picture again. The sheet still names the old picture, so the site is unchanged and still correctly labelled. |
+| "A frame did not reach Drive" | The same, for a frame. The copy is saved; upload the frame again. |
+| A frame is not on the page | Its file is not in Drive. The sync says which one, and leaves it out rather than publishing a broken image. |
 | The site does not update within a minute | The poller is not running. Open the script's address — it starts the poller and says whether it is running. |
 | The site shows the old picture | The new one did not arrive in Drive. The site keeps the old picture, with the old picture's alt text and mock-up flag, and says so in the sync output. |
 | The build failed | The sheet has something the site cannot publish — a case with no source, no picture, or a sector the site does not know. The Actions tab names the case and the column. |
@@ -392,9 +451,11 @@ source, and is labelled as a mock-up exactly when its record says so.
 | `npm run cms:seed` | The one-off migration into the Sheet and Drive. `--fixtures <dir>` writes the tabs locally instead. |
 | `npm run cms:sync` | The ongoing pull: Sheet + Drive → the compiled content. `--fixtures <dir>` reads a local copy; `--dry-run` writes nothing. |
 | `npm run cms:preview` | Renders the editor page locally with mock data, so it can be reviewed without a Google project. |
+| `npm run dev:editor` | The dev server with that same mock injected — the editor opens without a Google account. |
 | `npm run cms:editors` | Shows, adds to or removes from the editor allow-list. |
 | `npm run cms:test` | Runs the Apps Script against a mocked Drive and a mocked GitHub. |
 | `npm run cms:test:page` | Runs the editor page against mocked Google APIs. |
+| `npm run cms:test:sync` | Runs the sync against a fixture of the sheet: a picture that is not there, and a frame that is not there. |
 | `npm run check:content` | Checks the compiled content: every published case has a picture, a source, and alt text in all three languages. |
 
 The library the three share is in `tools/cms/lib/`: `schema.mjs` (the
@@ -404,3 +465,48 @@ service keys).
 
 There are no npm dependencies: the service account signs its own JWT with
 `node:crypto`. The only external tool is Pillow, which resizes the pictures.
+
+---
+
+## 9. The frames, end to end
+
+The editor adds a frame in the works page: a picture, an **alt text** and a
+**caption**, side by side. The caption names the campaign element the frame
+stands for; the alt text describes the picture. Frames can be moved earlier
+or later, and taken off the page.
+
+What happens on Save, in order:
+
+1. **The picture goes to the Apps Script** — the only party with Drive
+   quota — as base64, with the slug, the frame's place, the alt text and
+   the mock-up flag. The script names the file, saves it in the case's
+   folder, and writes the file name and the flag into all three of the
+   frame's tabs. The name only appears once the file is really in Drive, so
+   the sheet can never name a picture that is not there.
+2. **The rows are written** — the alt text and the caption, in all three
+   languages, each frame's copy going with it.
+3. **The file of a frame that was taken off the page is thrown away** in
+   Drive. The row goes from the sheet in step 2.
+
+Then the sheet's `contentChanged` stamp goes up, the poller asks GitHub to
+rebuild, and the sync compiles the frames into the case record and writes
+the pictures into `public/media/cases/<slug>/`.
+
+**One picture at a time.** The Apps Script's request carries one file, so
+the frames are uploaded one after another. Twelve frames is twelve
+round trips, each a few seconds.
+
+### Observations — things to watch, not yet decided
+
+- **The upload size.** The original file is posted as it is, and the sync
+  resizes it to 1600px in CI. A phone photograph is 3–8MB, which is a slow
+  upload on a bad connection. If an editor complains, the fix is a
+  client-side downscale to 2000px / JPEG 0.85 before the file is posted —
+  in the editor's browser, with a canvas, before it is encoded.
+- **The repository keeps a file that nothing points at.** When a frame is
+  removed, its row goes from the sheet and its file is thrown away in
+  Drive, but the copy in `public/media/cases/<slug>/` stays until
+  something deletes it. The sync could make the folder in the repository
+  mirror the sheet, and delete what no row names — it is not doing that
+  yet, so watch the folder size on the cases that have had frames taken
+  off.

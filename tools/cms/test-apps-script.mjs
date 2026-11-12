@@ -67,6 +67,7 @@ function makeFolder(name) {
         name: blob.getName(),
         bytes: blob.getBytes(),
         trashed: false,
+        getName: () => file.name,
         setTrashed: (value) => {
           file.trashed = value;
         },
@@ -122,17 +123,59 @@ function makeSheet(rows) {
     }),
   };
 
+  /* The gallery tabs — one per language, each with a row for the first
+     frame of the case. */
+  const galleryValues = {
+    gallery_EN: [
+      ['slug', 'order', 'file', 'alt', 'caption', 'mockup'],
+      ['acme-hk-2026', '1', '', 'A frame', 'A caption', ''],
+    ],
+    'gallery_ZH-HANT': [
+      ['slug', 'order', 'file', 'alt', 'caption', 'mockup'],
+      ['acme-hk-2026', '1', '', '一幅畫格', '一個說明', ''],
+    ],
+    'gallery_ZH-HANS': [
+      ['slug', 'order', 'file', 'alt', 'caption', 'mockup'],
+      ['acme-hk-2026', '1', '', '一幅画格', '一个说明', ''],
+    ],
+  };
+
+  const galleryTab = (values) => ({
+    getDataRange: () => ({ getValues: () => values.map((row) => [...row]) }),
+    getRange: (row, column, numRows = 1, numColumns = 1) => ({
+      setValue: (value) => {
+        values[row - 1][column - 1] = String(value);
+      },
+      setValues: (block) => {
+        block.forEach((line, r) => {
+          line.forEach((cell, c) => {
+            values[row - 1 + r][column - 1 + c] = String(cell);
+          });
+        });
+      },
+    }),
+  });
+
   return {
     getSheetByName: (name) => {
       if (name === 'settings') return tab;
       if (name.startsWith('cases_')) return casesTab;
+      if (name.startsWith('gallery_')) return galleryTab(galleryValues[name]);
       return null;
+    },
+    insertSheet: (name) => {
+      const values = [[]];
+      galleryValues[name] = values;
+      return galleryTab(values);
     },
     get values() {
       return values;
     },
     get caseValues() {
       return caseValues;
+    },
+    get galleryValues() {
+      return galleryValues;
     },
   };
 }
@@ -306,6 +349,104 @@ console.log('The Apps Script, against a mocked Drive and a mocked GitHub.\n');
     }),
   });
   check('no folder was made for a bad slug', context.__root.children.length === 0);
+}
+
+/* ── 2b. A frame is filed in the case's folder ───────────────────────── */
+{
+  console.log('\nSaving a frame');
+  const context = load(makeContext());
+  const reply = context.doPost({
+    parameter: formFields({
+      action: 'gallery-image',
+      slug: 'acme-hk-2026',
+      order: '1',
+      alt: 'Branding video — shoot',
+      ext: 'jpg',
+      mockup: 'true',
+      dataUrl: 'data:image/jpeg;base64,AAAA',
+    }),
+  });
+
+  check('the reply says it saved', /saved/i.test(String(reply.body ?? reply)), String(reply.body ?? reply));
+
+  const caseFolder = context.__root.children.find((child) => child.name === 'acme-hk-2026');
+  const frames = caseFolder?.children ?? [];
+  check('the frame is in the case folder', frames.length === 1, JSON.stringify(frames.map((f) => f.name)));
+
+  /* The name is the page title and the alt text, in lower case. */
+  check(
+    'the file is named after the page and the alt text',
+    frames[0]?.name === 'acme-hk-branding-video-shoot-01.jpg',
+    frames[0]?.name,
+  );
+  check('the bytes were kept', frames[0]?.bytes === 'AAAA', String(frames[0]?.bytes));
+
+  /* The name goes into every language's tab, with the flag. */
+  for (const tab of ['gallery_EN', 'gallery_ZH-HANT', 'gallery_ZH-HANS']) {
+    const row = context.__sheet.galleryValues[tab][1];
+    check(`the name is written into ${tab}`, row[2] === 'acme-hk-branding-video-shoot-01.jpg', row[2]);
+    check(`the mock-up flag is written into ${tab}`, row[5] === 'true', row[5]);
+  }
+
+  /* The copy of the other languages is left alone. */
+  check(
+    'the copy of another language is not touched',
+    context.__sheet.galleryValues['gallery_ZH-HANT'][1][3] === '一幅畫格',
+    context.__sheet.galleryValues['gallery_ZH-HANT'][1][3],
+  );
+
+  check('the save was stamped', String(setting(context, 'lastGalleryImageSaved')).length > 0);
+}
+
+/* ── 2c. The frames are not thrown away with the old banner ─────────── */
+{
+  console.log('\nReplacing the banner');
+  const context = load(makeContext());
+
+  /* A frame first. */
+  context.doPost({
+    parameter: formFields({
+      action: 'gallery-image',
+      slug: 'acme-hk-2026',
+      order: '1',
+      alt: 'A frame',
+      ext: 'jpg',
+      mockup: 'true',
+      dataUrl: 'data:image/jpeg;base64,AAAA',
+    }),
+  });
+
+  /* Then the banner, under a name of its own. */
+  context.doPost({
+    parameter: formFields({
+      action: 'image',
+      slug: 'acme-hk-2026',
+      fileName: 'acme-hk-2026.jpg',
+      dataUrl: 'data:image/jpeg;base64,BBBB',
+    }),
+  });
+
+  const caseFolder = context.__root.children.find((child) => child.name === 'acme-hk-2026');
+  const names = (caseFolder?.children ?? []).map((file) => file.name);
+  check('the frame is still there', names.includes('acme-hk-a-frame-01.jpg'), JSON.stringify(names));
+  check('the banner is there too', names.includes('acme-hk-2026.jpg'), JSON.stringify(names));
+}
+
+/* ── 2d. A frame with no order, or one that is too many, is refused ─── */
+{
+  console.log('\nRefusing a frame that does not belong');
+  const context = load(makeContext());
+  context.doPost({
+    parameter: formFields({
+      action: 'gallery-image',
+      slug: 'acme-hk-2026',
+      order: '13',
+      alt: 'Too many',
+      ext: 'jpg',
+      dataUrl: 'data:image/jpeg;base64,AA',
+    }),
+  });
+  check('no folder was made for a frame past the cap', context.__root.children.length === 0);
 }
 
 /* ── 3. Publishing dispatches, and reports the outcome ────────────────── */

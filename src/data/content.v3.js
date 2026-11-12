@@ -134,6 +134,23 @@ export const contentV3 = {
   },
 
   /* ───────────────────────────────────────────────────────────────────────
+     The case gallery — the run of frames under the case information.
+
+     The gallery is structure, not claim: a label, a line, a count and a
+     disclosure. The frames themselves carry their own mock-up flags and
+     alt text in `src/data/media.js`.
+     ─────────────────────────────────────────────────────────────────────── */
+  gallery: {
+    label: { en: 'Gallery', 'zh-Hant': '圖片', 'zh-Hans': '图片' },
+    statement: {
+      en: 'The campaign, frame by frame.',
+      'zh-Hant': '逐格看見這個項目。',
+      'zh-Hans': '逐格看见这个项目。',
+    },
+    frames: { en: 'frames', 'zh-Hant': '張', 'zh-Hans': '张' },
+  },
+
+  /* ───────────────────────────────────────────────────────────────────────
      The closing call to action — the brief, in three lines.
 
      The old "Next step" section was a claim and a button. This one is a
@@ -205,6 +222,18 @@ export const contentV3 = {
      */
     bannerNote: {
       en: 'Placeholder artwork — not a photograph of this campaign.',
+      'zh-Hant': '佔位視覺——並非該項目的真實照片。',
+      'zh-Hans': '占位视觉——并非该项目的真实照片。',
+    },
+    /**
+     * The note under a case gallery.
+     *
+     * Its own string rather than `gridAlt` reused: the gallery carries
+     * several frames, so it is photographs in the plural, and the section
+     * says so once for the whole grid rather than under every tile.
+     */
+    galleryNote: {
+      en: 'Placeholder artwork — not photographs of this campaign.',
       'zh-Hant': '佔位視覺——並非該項目的真實照片。',
       'zh-Hans': '占位视觉——并非该项目的真实照片。',
     },

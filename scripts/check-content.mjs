@@ -144,6 +144,35 @@ for (const file of files) {
     }
   }
 
+  /* The frames, and their alt text. */
+  for (const [index, frame] of (record.gallery ?? []).entries()) {
+    if (!frame.src) {
+      fail(slug, `frame ${index + 1} has no file`);
+      continue;
+    }
+    if (!frame.src.startsWith('/media/cases/')) {
+      fail(slug, `the frame path "${frame.src}" is not under /media/cases/`);
+    }
+    if (!existsSync(join(PUBLIC_DIR, frame.src))) {
+      fail(slug, `the frame file ${frame.src} is not in the repository`);
+    }
+    for (const locale of LOCALES) {
+      const alt = frame.alt?.[locale];
+      if (!alt) {
+        note(slug, `frame ${index + 1} has no alt text in ${locale} — it falls back to the English alt text`);
+        continue;
+      }
+      const prefix = MOCK_UP_PREFIX[locale];
+      const startsWithPrefix = alt.toLowerCase().startsWith(prefix.toLowerCase());
+      if (frame.mockup && !startsWithPrefix) {
+        fail(slug, `the alt text of frame ${index + 1} in ${locale} does not say it is a mock-up`);
+      }
+      if (!frame.mockup && startsWithPrefix) {
+        fail(slug, `the alt text of frame ${index + 1} in ${locale} still carries the mock-up prefix`);
+      }
+    }
+  }
+
   orders.push(record.order);
   records.push(record);
 }
