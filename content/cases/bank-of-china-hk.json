@@ -34,7 +34,11 @@
         "zh-Hant": "自然搜尋網站流量",
         "zh-Hans": "自然搜索网站流量"
       },
-      "note": null
+      "note": {
+        "en": "Organic, without paid social budget",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
     },
     {
       "value": "+38%",
@@ -43,7 +47,11 @@
         "zh-Hant": "獨立訪客停留時間",
         "zh-Hans": "独立访客停留时间"
       },
-      "note": null
+      "note": {
+        "en": "Organic, without paid social budget",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
     },
     {
       "value": "+10%",
