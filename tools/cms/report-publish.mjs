@@ -84,7 +84,9 @@ const writes = [
   /* Which publish the status belongs to. Two publishes in a row both end
      in `ok`, so the status alone cannot say which one it is. */
   ['lastPublishStatusAt', new Date().toISOString()],
-  ...(OPTIONS.message ? [['lastPublishMessage', OPTIONS.message]] : []),
+  /* The message is written every time, empty included — so a failure does
+     not leave its explanation sitting next to a later success. */
+  ['lastPublishMessage', OPTIONS.message],
 ];
 
 for (const [key, value] of writes) {
