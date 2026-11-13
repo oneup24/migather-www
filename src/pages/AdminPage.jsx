@@ -542,13 +542,17 @@ export default function AdminPage() {
         const row = {
           slug,
           client: form.client,
-          /* The local names are copy, not shared fields: the client's own
-             name and the project's name are written in the language being
-             edited, and the other languages keep what they have. Writing
-             this language's name into all three would quietly flatten a
-             translation the moment an editor saved from another tab. */
-          clientLocal: each === locale ? form.clientLocal : (existing?.clientLocal ?? ''),
-          projectLocal: each === locale ? form.projectLocal : (existing?.projectLocal ?? ''),
+          /* The local names are copy, not shared fields — but the sheet
+             wants them filled in in every language or in none. So a name
+             typed in one language goes to the languages that have none,
+             and is left alone where a language has its own: an editor
+             working in English must not flatten a translation that is
+             already there, and must not leave the sheet half filled
+             either. */
+          clientLocal:
+            each === locale ? form.clientLocal : existing?.clientLocal || form.clientLocal,
+          projectLocal:
+            each === locale ? form.projectLocal : existing?.projectLocal || form.projectLocal,
           sector: form.sector,
           services: form.services,
           partnershipSince: form.partnershipSince,
