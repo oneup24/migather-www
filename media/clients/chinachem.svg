@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="137"
+   height="137"
+   id="svg4462"
+   version="1.1"
+   inkscape:version="0.48.1 r9760"
+   sodipodi:docname="SinoGroup logo.svg">
+  <defs
+     id="defs4464" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="114.31044"
+     inkscape:cy="48.791767"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="470"
+     inkscape:window-height="450"
+     inkscape:window-x="44"
+     inkscape:window-y="58"
+     inkscape:window-maximized="0"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <metadata
+     id="metadata4467">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-299.03116,-375.45859)">
+    <g
+       id="g3497"
+       transform="matrix(3.0955461,0,0,-3.0955461,365.11178,375.45859)">
+      <path
+         d="m 0,0 c -11.79,0 -21.347,-9.558 -21.347,-21.348 0,-11.789 9.557,-21.345 21.347,-21.345 11.789,0 21.346,9.556 21.346,21.345 C 21.346,-9.558 11.789,0 0,0"
+         style="fill:#f1471d;fill-opacity:1;fill-rule:nonzero;stroke:none"
+         id="path3499"
+         inkscape:connector-curvature="0" />
+    </g>
+    <g
+       id="g3501"
+       transform="matrix(3.0955461,0,0,-3.0955461,400.41745,400.28641)">
+      <path
+         d="M 0,0 -10.976,5.733 C -22.47,1.032 -23.351,-4.66 -19.902,-10.94 c 3.858,-7.026 6.417,-9.416 -2.911,-15.656 l 11.837,-5.791 c 2.961,1.368 14.813,5.655 8.155,17.324 C -7.778,-6.375 -7.106,-4.397 0,0"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none"
+         id="path3503"
+         inkscape:connector-curvature="0" />
+    </g>
+  </g>
+</svg>

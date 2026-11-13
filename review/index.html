@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Migather website v3.0 — design preview</title>
+<style>
+  :root {
+    --ink: #1c1c1c;
+    --muted: #6b6b6b;
+    --surface: #f6f4f1;
+    --rule: #dedbd6;
+    --blue: #016da9;
+    --crimson: #950534;
+    --paper: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 32px 96px; }
+  header.top { padding: 72px 0 40px; border-bottom: 1px solid var(--rule); }
+  .eyebrow {
+    font-family: "Jost", "Inter", sans-serif;
+    font-size: 11.5px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+    font-weight: 400; font-size: clamp(2rem, 4.4vw, 3.2rem); line-height: 1.1;
+    margin: 18px 0 0; letter-spacing: -0.015em;
+  }
+  h1 em { font-style: normal; color: var(--crimson); }
+  .lede { max-width: 62ch; margin: 22px 0 0; color: #3d3d3d; font-size: 17px; }
+  .notice {
+    margin: 36px 0 0; border-left: 3px solid var(--crimson);
+    background: var(--surface); padding: 18px 22px;
+  }
+  .notice strong {
+    display: block; font-family: "Jost", "Inter", sans-serif;
+    font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--crimson); margin-bottom: 6px;
+  }
+  .notice p { margin: 0; font-size: 14.5px; color: #3d3d3d; }
+  .block { padding-top: 56px; }
+  h2 {
+    font-family: "Jost", "Inter", sans-serif;
+    font-size: 13px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    margin: 0;
+  }
+  .note { margin: 6px 0 24px; color: var(--muted); font-size: 14px; }
+  .grid {
+    display: grid; gap: 26px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+  .card { margin: 0; }
+  .card img {
+    display: block; width: 100%; height: auto;
+    border: 1px solid var(--rule); background: var(--surface);
+  }
+  .card figcaption {
+    margin-top: 9px; font-size: 13px; color: var(--muted);
+    font-family: "Jost", "Inter", sans-serif; letter-spacing: 0.04em;
+  }
+  .card--sheet img { border-color: var(--rule); }
+  footer.top {
+    margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--rule);
+    color: var(--muted); font-size: 13.5px;
+  }
+  footer.top p { margin: 0 0 8px; }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 18px 64px; }
+    header.top { padding: 44px 0 30px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="eyebrow">Migather Limited · Website v3.0 · Design preview</div>
+      <h1>Big-agency standards,<br /><em>from people who answer the phone.</em></h1>
+      <p class="lede">
+        Every screen of the rebuilt website — 10 pages in English, 繁體中文 and
+        简体中文, at desktop and phone width. Click any screen to open it full size.
+      </p>
+
+      <div class="notice">
+        <strong>Mock-up imagery — not client photography</strong>
+        <p>
+          Every photograph in this build is generated placeholder artwork, not
+          client photography. It is labelled on screen, in the alt text, in the
+          footer of every page and on each case page. It sits directly beside
+          real, sourced client results, which is exactly why it is labelled.
+          The site is <b>not publishable</b> until that artwork is replaced with
+          real client photography, or the pages that use it are removed.
+        </p>
+      </div>
+    </header>
+
+    <section class="block">
+      <h2>Contact sheets</h2>
+      <p class="note">All ten pages on one sheet, per language.</p>
+      <div class="grid">
+      <figure class="card card--sheet">
+        <a href="sheet-en.png" target="_blank" rel="noreferrer">
+          <img loading="eager" src="sheet-en.png" alt="English — all 10 pages" />
+        </a>
+        <figcaption>English — all 10 pages</figcaption>
+      </figure>
+      <figure class="card card--sheet">
+        <a href="sheet-zh-Hant.png" target="_blank" rel="noreferrer">
+          <img loading="eager" src="sheet-zh-Hant.png" alt="繁體中文 — all 10 pages" />
+        </a>
+        <figcaption>繁體中文 — all 10 pages</figcaption>
+      </figure>
+      <figure class="card card--sheet">
+        <a href="sheet-zh-Hans.png" target="_blank" rel="noreferrer">
+          <img loading="eager" src="sheet-zh-Hans.png" alt="简体中文 — all 10 pages" />
+        </a>
+        <figcaption>简体中文 — all 10 pages</figcaption>
+      </figure>
+      </div>
+    </section>
+
+  <section class="block">
+    <h2>English · English</h2>
+    <p class="note">Desktop, 1440 × 900.</p>
+    <div class="grid">
+      <figure class="card">
+        <a href="full/en/home.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/home.jpg" alt="Mock-up screen — Homepage" loading="lazy" />
+        </a>
+        <figcaption>Homepage</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/en/work.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/work.jpg" alt="Mock-up screen — Work index" loading="lazy" />
+        </a>
+        <figcaption>Work index</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/en/work-huatai.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/work-huatai.jpg" alt="Mock-up screen — Case — Huatai Finance HK" loading="lazy" />
+        </a>
+        <figcaption>Case — Huatai Finance HK</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/en/work-christies.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/work-christies.jpg" alt="Mock-up screen — Case — Christie&#x27;s Auction" loading="lazy" />
+        </a>
+        <figcaption>Case — Christie&#x27;s Auction</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/en/services.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/services.jpg" alt="Mock-up screen — Services" loading="lazy" />
+        </a>
+        <figcaption>Services</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/en/about.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/about.jpg" alt="Mock-up screen — About" loading="lazy" />
+        </a>
+        <figcaption>About</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/en/careers.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/careers.jpg" alt="Mock-up screen — Careers" loading="lazy" />
+        </a>
+        <figcaption>Careers</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/en/contact.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/contact.jpg" alt="Mock-up screen — Contact" loading="lazy" />
+        </a>
+        <figcaption>Contact</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/en/legal-privacy.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/legal-privacy.jpg" alt="Mock-up screen — Privacy Policy" loading="lazy" />
+        </a>
+        <figcaption>Privacy Policy</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/en/not-found.jpg" target="_blank" rel="noreferrer">
+          <img src="full/en/not-found.jpg" alt="Mock-up screen — 404 page" loading="lazy" />
+        </a>
+        <figcaption>404 page</figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="block">
+    <h2>English · English — phone</h2>
+    <p class="note">Phone, 390 × 844.</p>
+    <div class="grid">
+      <figure class="card">
+        <a href="full/mobile-en/home.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/home.jpg" alt="Mock-up screen — Homepage" loading="lazy" />
+        </a>
+        <figcaption>Homepage</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-en/work.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/work.jpg" alt="Mock-up screen — Work index" loading="lazy" />
+        </a>
+        <figcaption>Work index</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-en/work-huatai.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/work-huatai.jpg" alt="Mock-up screen — Case — Huatai Finance HK" loading="lazy" />
+        </a>
+        <figcaption>Case — Huatai Finance HK</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-en/work-christies.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/work-christies.jpg" alt="Mock-up screen — Case — Christie&#x27;s Auction" loading="lazy" />
+        </a>
+        <figcaption>Case — Christie&#x27;s Auction</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-en/services.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/services.jpg" alt="Mock-up screen — Services" loading="lazy" />
+        </a>
+        <figcaption>Services</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-en/about.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/about.jpg" alt="Mock-up screen — About" loading="lazy" />
+        </a>
+        <figcaption>About</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-en/careers.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/careers.jpg" alt="Mock-up screen — Careers" loading="lazy" />
+        </a>
+        <figcaption>Careers</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-en/contact.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/contact.jpg" alt="Mock-up screen — Contact" loading="lazy" />
+        </a>
+        <figcaption>Contact</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-en/legal-privacy.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/legal-privacy.jpg" alt="Mock-up screen — Privacy Policy" loading="lazy" />
+        </a>
+        <figcaption>Privacy Policy</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-en/not-found.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-en/not-found.jpg" alt="Mock-up screen — 404 page" loading="lazy" />
+        </a>
+        <figcaption>404 page</figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="block">
+    <h2>繁體中文 · Traditional Chinese</h2>
+    <p class="note">Desktop, 1440 × 900.</p>
+    <div class="grid">
+      <figure class="card">
+        <a href="full/zh-Hant/home.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/home.jpg" alt="Mock-up screen — Homepage" loading="lazy" />
+        </a>
+        <figcaption>Homepage</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hant/work.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/work.jpg" alt="Mock-up screen — Work index" loading="lazy" />
+        </a>
+        <figcaption>Work index</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hant/work-huatai.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/work-huatai.jpg" alt="Mock-up screen — Case — Huatai Finance HK" loading="lazy" />
+        </a>
+        <figcaption>Case — Huatai Finance HK</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hant/work-christies.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/work-christies.jpg" alt="Mock-up screen — Case — Christie&#x27;s Auction" loading="lazy" />
+        </a>
+        <figcaption>Case — Christie&#x27;s Auction</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hant/services.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/services.jpg" alt="Mock-up screen — Services" loading="lazy" />
+        </a>
+        <figcaption>Services</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hant/about.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/about.jpg" alt="Mock-up screen — About" loading="lazy" />
+        </a>
+        <figcaption>About</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hant/careers.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/careers.jpg" alt="Mock-up screen — Careers" loading="lazy" />
+        </a>
+        <figcaption>Careers</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hant/contact.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/contact.jpg" alt="Mock-up screen — Contact" loading="lazy" />
+        </a>
+        <figcaption>Contact</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hant/legal-privacy.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/legal-privacy.jpg" alt="Mock-up screen — Privacy Policy" loading="lazy" />
+        </a>
+        <figcaption>Privacy Policy</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hant/not-found.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hant/not-found.jpg" alt="Mock-up screen — 404 page" loading="lazy" />
+        </a>
+        <figcaption>404 page</figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="block">
+    <h2>繁體中文 · Traditional Chinese — phone</h2>
+    <p class="note">Phone, 390 × 844.</p>
+    <div class="grid">
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/home.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/home.jpg" alt="Mock-up screen — Homepage" loading="lazy" />
+        </a>
+        <figcaption>Homepage</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/work.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/work.jpg" alt="Mock-up screen — Work index" loading="lazy" />
+        </a>
+        <figcaption>Work index</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/work-huatai.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/work-huatai.jpg" alt="Mock-up screen — Case — Huatai Finance HK" loading="lazy" />
+        </a>
+        <figcaption>Case — Huatai Finance HK</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/work-christies.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/work-christies.jpg" alt="Mock-up screen — Case — Christie&#x27;s Auction" loading="lazy" />
+        </a>
+        <figcaption>Case — Christie&#x27;s Auction</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/services.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/services.jpg" alt="Mock-up screen — Services" loading="lazy" />
+        </a>
+        <figcaption>Services</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/about.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/about.jpg" alt="Mock-up screen — About" loading="lazy" />
+        </a>
+        <figcaption>About</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/careers.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/careers.jpg" alt="Mock-up screen — Careers" loading="lazy" />
+        </a>
+        <figcaption>Careers</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/contact.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/contact.jpg" alt="Mock-up screen — Contact" loading="lazy" />
+        </a>
+        <figcaption>Contact</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/legal-privacy.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/legal-privacy.jpg" alt="Mock-up screen — Privacy Policy" loading="lazy" />
+        </a>
+        <figcaption>Privacy Policy</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hant/not-found.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hant/not-found.jpg" alt="Mock-up screen — 404 page" loading="lazy" />
+        </a>
+        <figcaption>404 page</figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="block">
+    <h2>简体中文 · Simplified Chinese</h2>
+    <p class="note">Desktop, 1440 × 900.</p>
+    <div class="grid">
+      <figure class="card">
+        <a href="full/zh-Hans/home.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/home.jpg" alt="Mock-up screen — Homepage" loading="lazy" />
+        </a>
+        <figcaption>Homepage</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hans/work.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/work.jpg" alt="Mock-up screen — Work index" loading="lazy" />
+        </a>
+        <figcaption>Work index</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hans/work-huatai.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/work-huatai.jpg" alt="Mock-up screen — Case — Huatai Finance HK" loading="lazy" />
+        </a>
+        <figcaption>Case — Huatai Finance HK</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hans/work-christies.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/work-christies.jpg" alt="Mock-up screen — Case — Christie&#x27;s Auction" loading="lazy" />
+        </a>
+        <figcaption>Case — Christie&#x27;s Auction</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hans/services.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/services.jpg" alt="Mock-up screen — Services" loading="lazy" />
+        </a>
+        <figcaption>Services</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hans/about.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/about.jpg" alt="Mock-up screen — About" loading="lazy" />
+        </a>
+        <figcaption>About</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hans/careers.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/careers.jpg" alt="Mock-up screen — Careers" loading="lazy" />
+        </a>
+        <figcaption>Careers</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hans/contact.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/contact.jpg" alt="Mock-up screen — Contact" loading="lazy" />
+        </a>
+        <figcaption>Contact</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hans/legal-privacy.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/legal-privacy.jpg" alt="Mock-up screen — Privacy Policy" loading="lazy" />
+        </a>
+        <figcaption>Privacy Policy</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/zh-Hans/not-found.jpg" target="_blank" rel="noreferrer">
+          <img src="full/zh-Hans/not-found.jpg" alt="Mock-up screen — 404 page" loading="lazy" />
+        </a>
+        <figcaption>404 page</figcaption>
+      </figure>
+    </div>
+  </section>
+  <section class="block">
+    <h2>简体中文 · Simplified Chinese — phone</h2>
+    <p class="note">Phone, 390 × 844.</p>
+    <div class="grid">
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/home.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/home.jpg" alt="Mock-up screen — Homepage" loading="lazy" />
+        </a>
+        <figcaption>Homepage</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/work.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/work.jpg" alt="Mock-up screen — Work index" loading="lazy" />
+        </a>
+        <figcaption>Work index</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/work-huatai.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/work-huatai.jpg" alt="Mock-up screen — Case — Huatai Finance HK" loading="lazy" />
+        </a>
+        <figcaption>Case — Huatai Finance HK</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/work-christies.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/work-christies.jpg" alt="Mock-up screen — Case — Christie&#x27;s Auction" loading="lazy" />
+        </a>
+        <figcaption>Case — Christie&#x27;s Auction</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/services.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/services.jpg" alt="Mock-up screen — Services" loading="lazy" />
+        </a>
+        <figcaption>Services</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/about.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/about.jpg" alt="Mock-up screen — About" loading="lazy" />
+        </a>
+        <figcaption>About</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/careers.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/careers.jpg" alt="Mock-up screen — Careers" loading="lazy" />
+        </a>
+        <figcaption>Careers</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/contact.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/contact.jpg" alt="Mock-up screen — Contact" loading="lazy" />
+        </a>
+        <figcaption>Contact</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/legal-privacy.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/legal-privacy.jpg" alt="Mock-up screen — Privacy Policy" loading="lazy" />
+        </a>
+        <figcaption>Privacy Policy</figcaption>
+      </figure>
+      <figure class="card">
+        <a href="full/mobile-zh-Hans/not-found.jpg" target="_blank" rel="noreferrer">
+          <img src="full/mobile-zh-Hans/not-found.jpg" alt="Mock-up screen — 404 page" loading="lazy" />
+        </a>
+        <figcaption>404 page</figcaption>
+      </figure>
+    </div>
+  </section>
+
+    <footer class="top">
+      <p><b>Migather Limited</b> — Performance Digital Creative and Media Agency · Hong Kong &amp; China · Media Solutions Expert</p>
+      <p>Screens captured 4 November 2026 from the build in <code>main</code>. Review order and what to look for: <code>docs/REVIEW_GUIDE.md</code>.</p>
+      <p>16 sourced cases · 27-client roster · 9 routes × 3 locales · 75-URL sitemap. No figure on the site is unsourced.</p>
+    </footer>
+  </div>
+</body>
+</html>
