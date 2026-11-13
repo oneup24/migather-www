@@ -676,8 +676,16 @@ check('it carries the bytes', String(image[0]?.fields?.dataUrl ?? '').startsWith
   const after = await evaluate(`window.__writes.length`);
 
   const message = await evaluate(`document.body.textContent`);
-  check('the save is refused', after === before, `${after - before} writes`);
-  check('it says what is missing', /deck and slide/.test(message), message.match(/[^.]*deck and slide[^.]*\./)?.[0] ?? 'no message');
+  check('the copy is saved anyway', after > before, `${after - before} writes`);
+
+  /* And it is saved as a draft: a case being written is a draft. */
+  const draft = JSON.parse(
+    await evaluate(`JSON.stringify(window.__writes.filter(w => String(w.range || '').includes('cases_')).map(w => (w.values || []).map(r => r[12])).flat().slice(-3))`),
+  );
+  check('it is saved as a draft', draft.length === 3 && draft.every((v) => v === 'false'), JSON.stringify(draft));
+
+  check('it says what is missing', /not on the site yet/.test(message), message.match(/[^.]*not on the site yet[^.]*\./)?.[0] ?? 'no message');
+  check('it names the deck and slide', /deck and slide/.test(message), message.match(/[^.]*deck and slide[^.]*\./)?.[0] ?? 'no message');
 }
 
 /* There is no publish button: the sheet is the trigger. */

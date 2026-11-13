@@ -540,28 +540,32 @@ export default function AdminPage() {
          not the end of the save. */
       const failedFrames = await saveGallery(token, form.slug, gallery, removedFrames);
 
-      const published = form.published ? 'true' : 'false';
-
       /* A case that is on the site has to be publishable.
          The sheet refuses a published case with no deck and slide, no
          picture or no summary — and it refuses the whole build, not just
-         that case, so one unfinished case stops every case from
-         updating. The build's own message lives in the sheet, which an
-         editor is not going to read, so the check is made here first. */
-      if (published === 'true') {
-        const missing = [];
-        if (!form.source?.trim()) missing.push('the deck and slide it came from');
-        if (!uploadedFileName && !form.image?.trim()) missing.push('a picture');
-        if (!form.summary?.trim()) missing.push('a summary');
+         that case, so one unfinished case stops every case from updating.
+         The build's own message lives in the sheet, which an editor is
+         not going to read.
 
-        if (missing.length) {
-          throw new Error(
-            t({
-              en: `This case is on the site, but it has no ${missing.join(', no ')}. The site cannot publish a case like that, and it would stop every case from updating. Fill it in, or take it off the site until it is ready.`,
-              'zh-Hant': `此案例已設定在網站上，但缺少${missing.join('、')}。網站無法發布這樣的案例，而且會令所有案例無法更新。請補上，或暫時從網站移除。`,
-              'zh-Hans': `此案例已设定在网站上，但缺少${missing.join('、')}。网站无法发布这样的案例，而且会令所有案例无法更新。请补上，或暂时从网站移除。`,
-            }),
-          );
+         So the case is saved as a draft instead. Refusing the save
+         outright would throw away everything the editor has typed, and a
+         case being written is a draft — that is what a draft is for. It
+         does not go on the site until it can. */
+      let published = form.published ? 'true' : 'false';
+      let heldBack = '';
+
+      if (published === 'true') {
+        const needs = [];
+        if (!form.source?.trim()) needs.push('the deck and slide it came from');
+        if (!uploadedFileName && !form.image?.trim()) needs.push('a picture');
+        if (!form.summary?.trim()) needs.push('a summary');
+
+        if (needs.length) {
+          published = 'false';
+          const last = needs[needs.length - 1];
+          const list =
+            needs.length === 1 ? last : `${needs.slice(0, -1).join(', ')} and ${last}`;
+          heldBack = list;
         }
       }
 
@@ -635,7 +639,19 @@ export default function AdminPage() {
                 'zh-Hans': `文字已保存，但有 ${failedFrames.length} 幅画格未能上传到 Drive——请重新上传。若是首次使用，辅助程序可能尚未重新部署。`,
               }),
         );
+      } else if (heldBack) {
+        /* The case is on the site, and the site cannot take it yet. It is
+           saved as a draft — with everything the editor typed — and it will
+           go on the site when the editor turns it on and it is ready. */
+        setError(
+          t({
+            en: `Saved as a draft. The case is not on the site yet: it still needs ${heldBack}. Fill that in and turn it on the site again.`,
+            'zh-Hant': `已以草稿形式儲存。此案例暫時未出現在網站上：仍需要${heldBack}。請補上後再設定在網站上。`,
+            'zh-Hans': `已以草稿形式保存。此案例暂时未出现在网站上：仍需要${heldBack}。请补上后再设定在网站上。`,
+          }),
+        );
       } else {
+
         setNotice(
           t({
             en: 'Saved. The site rebuilds by itself within a minute — there is nothing to press.',
