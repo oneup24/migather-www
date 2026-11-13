@@ -1,0 +1,145 @@
+{
+  "slug": "testing-hk-2026",
+  "order": 16,
+  "client": "TESTING HK 2026v1",
+  "clientLocal": {
+    "en": "TESTING HK 2026v local name",
+    "zh-Hant": "TESTING HK 2026v local name",
+    "zh-Hans": "TESTING HK 2026v local name"
+  },
+  "projectLocal": {
+    "en": "TESTING HK 2026v1 project name",
+    "zh-Hant": "TESTING HK 2026v1 project name",
+    "zh-Hans": "TESTING HK 2026v1 project name"
+  },
+  "sector": "lifestyle",
+  "services": [
+    "shopper-marketing",
+    "social-seeding"
+  ],
+  "partnershipSince": {
+    "en": "2026",
+    "zh-Hant": "2026",
+    "zh-Hans": "2026"
+  },
+  "featured": false,
+  "published": true,
+  "summary": {
+    "en": "A new case, added from the works editor, to see whether the whole path works.",
+    "zh-Hant": "A new case, added from the works editor, to see whether the whole path works.",
+    "zh-Hans": "A new case, added from the works editor, to see whether the whole path works."
+  },
+  "results": [
+    {
+      "value": "+101",
+      "label": {
+        "en": "1123123a",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      },
+      "note": {
+        "en": "TESTING HK 2026v1",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
+    },
+    {
+      "value": "+38%",
+      "label": {
+        "en": "aaaa",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      },
+      "note": {
+        "en": "vqqv",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
+    }
+  ],
+  "scope": [
+    {
+      "en": "KOL",
+      "zh-Hant": "",
+      "zh-Hans": ""
+    },
+    {
+      "en": "socila media",
+      "zh-Hant": "",
+      "zh-Hans": ""
+    },
+    {
+      "en": "google ad",
+      "zh-Hant": "",
+      "zh-Hans": ""
+    }
+  ],
+  "gallery": [
+    {
+      "src": "/media/cases/testing-hk-2026/frame-testing-hk-2026v1-01.jpg",
+      "alt": {
+        "en": "Mock-up: TESTING HK 2026v1",
+        "zh-Hant": "樣機：TESTING HK 2026v1",
+        "zh-Hans": "样机：TESTING HK 2026v1"
+      },
+      "caption": {
+        "en": "TESTING HK 2026v1",
+        "zh-Hant": "TESTING HK 2026v1",
+        "zh-Hans": "TESTING HK 2026v1"
+      },
+      "mockup": true
+    },
+    {
+      "src": "/media/cases/testing-hk-2026/frame-testing-hk-2026v1-2-02.png",
+      "alt": {
+        "en": "Mock-up: TESTING HK 2026v1-2",
+        "zh-Hant": "樣機：TESTING HK 2026v1-2",
+        "zh-Hans": "样机：TESTING HK 2026v1-2"
+      },
+      "caption": {
+        "en": "TESTING HK 2026v1-2",
+        "zh-Hant": "TESTING HK 2026v1-2",
+        "zh-Hans": "TESTING HK 2026v1-2"
+      },
+      "mockup": true
+    },
+    {
+      "src": "/media/cases/testing-hk-2026/frame-testing-hk-2026v1-3-03.png",
+      "alt": {
+        "en": "Mock-up: TESTING HK 2026v1-3",
+        "zh-Hant": "樣機：TESTING HK 2026v1-3",
+        "zh-Hans": "样机：TESTING HK 2026v1-3"
+      },
+      "caption": {
+        "en": "-3",
+        "zh-Hant": "-3",
+        "zh-Hans": "-3"
+      },
+      "mockup": true
+    },
+    {
+      "src": "/media/cases/testing-hk-2026/frame-111-04.png",
+      "alt": {
+        "en": "Mock-up: 111",
+        "zh-Hant": "樣機：111",
+        "zh-Hans": "样机：111"
+      },
+      "caption": {
+        "en": "222",
+        "zh-Hant": "222",
+        "zh-Hans": "222"
+      },
+      "mockup": true
+    }
+  ],
+  "source": "TESTING — the editor, 2026",
+  "image": {
+    "src": "/media/cases/testing-hk-2026/testing-hk-2026.png",
+    "alt": {
+      "en": "Mock-up: a Hong Kong shopping street at dusk.",
+      "zh-Hant": "樣機：Mock-up: a Hong Kong shopping street at dusk.",
+      "zh-Hans": "样机：Mock-up: a Hong Kong shopping street at dusk."
+    },
+    "mockup": true
+  }
+}

@@ -60,7 +60,11 @@
         "zh-Hant": "",
         "zh-Hans": ""
       },
-      "note": null
+      "note": {
+        "en": "Google Ad",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
     }
   ],
   "scope": [

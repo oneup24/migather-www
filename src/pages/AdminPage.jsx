@@ -409,7 +409,12 @@ export default function AdminPage() {
       mockup: true,
       source: '',
       featured: false,
-      published: true,
+      /* A new case starts as a draft. A case that is on the site has to be
+         publishable — a deck and slide to come from, a picture and a
+         summary — and a case that has just been named is none of those
+         yet. Publishing it straight away would stop the whole build, not
+         just this case. */
+      published: false,
     });
     setResults([]);
     setScope([]);
@@ -419,9 +424,9 @@ export default function AdminPage() {
 
     setNotice(
       t({
-        en: 'A new case. Fill it in and press Save — it will be written to the sheet and the site will pick it up by itself.',
-        'zh-Hant': '新增案例。填寫後按儲存——內容會寫入表格，網站會自行更新。',
-        'zh-Hans': '新增案例。填写后按保存——内容会写入表格，网站会自行更新。',
+        en: 'A new case, as a draft — it is not on the site until you say so. Fill it in and press Save.',
+        'zh-Hant': '新增案例，先以草稿形式——在你確認前不會出現在網站上。填寫後按儲存。',
+        'zh-Hans': '新增案例，先以草稿形式——在你确认前不会出现在网站上。填写后按保存。',
       }),
     );
   }
@@ -486,6 +491,9 @@ export default function AdminPage() {
 
   async function handleSave() {
     if (!session || !form) return;
+    /* When the save happened, so the build it set off can be told from an
+       earlier one. */
+    const savedAt = Date.now();
     setBusy(true);
     setError('');
     setNotice('');
@@ -533,6 +541,29 @@ export default function AdminPage() {
       const failedFrames = await saveGallery(token, form.slug, gallery, removedFrames);
 
       const published = form.published ? 'true' : 'false';
+
+      /* A case that is on the site has to be publishable.
+         The sheet refuses a published case with no deck and slide, no
+         picture or no summary — and it refuses the whole build, not just
+         that case, so one unfinished case stops every case from
+         updating. The build's own message lives in the sheet, which an
+         editor is not going to read, so the check is made here first. */
+      if (published === 'true') {
+        const missing = [];
+        if (!form.source?.trim()) missing.push('the deck and slide it came from');
+        if (!uploadedFileName && !form.image?.trim()) missing.push('a picture');
+        if (!form.summary?.trim()) missing.push('a summary');
+
+        if (missing.length) {
+          throw new Error(
+            t({
+              en: `This case is on the site, but it has no ${missing.join(', no ')}. The site cannot publish a case like that, and it would stop every case from updating. Fill it in, or take it off the site until it is ready.`,
+              'zh-Hant': `此案例已設定在網站上，但缺少${missing.join('、')}。網站無法發布這樣的案例，而且會令所有案例無法更新。請補上，或暫時從網站移除。`,
+              'zh-Hans': `此案例已设定在网站上，但缺少${missing.join('、')}。网站无法发布这样的案例，而且会令所有案例无法更新。请补上，或暂时从网站移除。`,
+            }),
+          );
+        }
+      }
 
       /* The case row, in every language. The copy of this language is
          written here; the shared fields are written everywhere, because the
@@ -619,10 +650,59 @@ export default function AdminPage() {
       setGallery(gallery.map((frame) => ({ ...frame, newFile: null })));
       setRemovedFrames([]);
       await loadSheet(token);
+
+      /* And the build this set off. */
+      watchPublish(savedAt);
     } catch (failure) {
       setError(failure.message ?? String(failure));
     } finally {
       setBusy(false);
+    }
+  }
+
+  /**
+   * Watch the build that the save set off.
+   *
+   * The sheet's settings tab carries the outcome: `lastPublishStatus` is
+   * `dispatched` while the build runs, and `ok` or `failed` when it ends.
+   * The stamp beside it says which publish a status belongs to, so a status
+   * left over from an earlier build is not mistaken for this one.
+   *
+   * Without this the editor would see "saved" and a site that quietly did
+   * not change — which is the one thing an editor cannot be left to guess
+   * about. The poller runs every minute and the build takes another minute
+   * or so, so this waits for up to three minutes and then gives up
+   * quietly.
+   */
+  async function watchPublish(from) {
+    for (let i = 0; i < 36; i += 1) {
+      await sleep(5000);
+
+      const at = await readSetting(session.accessToken, 'lastPublishStatusAt');
+      if (!at || Date.parse(at) < from) continue;
+
+      const status = await readSetting(session.accessToken, 'lastPublishStatus');
+      if (status === 'failed') {
+        const message = await readSetting(session.accessToken, 'lastPublishMessage');
+        setError(
+          t({
+            en: `The site could not be published — the sheet is not in a state the site can publish. ${message}`,
+            'zh-Hant': `網站無法發布——表格的狀態無法發布。${message}`,
+            'zh-Hans': `网站无法发布——表格的状态无法发布。${message}`,
+          }),
+        );
+        return;
+      }
+      if (status === 'ok') {
+        setNotice(
+          t({
+            en: 'Published. The site is up to date.',
+            'zh-Hant': '已發布。網站已是最新。',
+            'zh-Hans': '已发布。网站已是最新。',
+          }),
+        );
+        return;
+      }
     }
   }
 

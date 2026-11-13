@@ -229,14 +229,19 @@ export async function writeRowBySlug(spreadsheetId, accessToken, tab, columns, r
   const line = columns.map((column) => row[column] ?? '');
 
   if (target === -1) {
+    /* The case is not in this tab yet, so its row goes at the end.
+       Writing the header and the row from the top of the tab would
+       overwrite the first case in it — the write starts at A1, and the
+       row lands on row 2. That is how a case went missing from the sheet
+       once already: a case was added, and the first case in the tab was
+       silently replaced by it. */
     const header = current[0] ?? columns;
     const width = Math.max(header.length, columns.length);
-    const padded = [header, line].map((r) => {
-      const copy = r.slice();
-      while (copy.length < width) copy.push('');
-      return copy;
-    });
-    await writeTab(spreadsheetId, accessToken, tab, padded);
+    const padded = line.slice();
+    while (padded.length < width) padded.push('');
+
+    const range = `${tab}!A${current.length + 1}`;
+    await writeTab(spreadsheetId, accessToken, range, [padded]);
     return { written: 'appended' };
   }
 

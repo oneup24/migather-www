@@ -38,7 +38,11 @@
         "zh-Hant": "曝光量對比計劃",
         "zh-Hans": "曝光量对比计划"
       },
-      "note": null
+      "note": {
+        "en": "Metric tracked in the deck; the figure is not legible in the source file",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
     },
     {
       "value": "+45%",
@@ -47,7 +51,11 @@
         "zh-Hant": "點擊量對比計劃",
         "zh-Hans": "点击量对比计划"
       },
-      "note": null
+      "note": {
+        "en": "Metric tracked in the deck; the figure is not legible in the source file",
+        "zh-Hant": "",
+        "zh-Hans": ""
+      }
     },
     {
       "value": "+55%",

@@ -588,8 +588,12 @@ check('it carries the bytes', String(image[0]?.fields?.dataUrl ?? '').startsWith
   check('it asks for the client', openedState.client === 'Acme HK', openedState.client);
   check('it starts empty', openedState.summary === '', openedState.summary);
   check('there is a control for publishing it', openedState.published !== 'no control', openedState.published);
+  /* A case that has just been named is not ready to be on the site. */
+  check('it starts as a draft', openedState.published === 'false', openedState.published);
 
-  /* Fill it in and publish it. */
+  /* Fill it in and publish it. A case that is on the site needs a picture
+     as well as the copy and the deck — the sheet refuses to publish one
+     without, and it refuses the whole build rather than that case. */
   await evaluate(`(() => {
     const set = (selector, value) => {
       const node = document.querySelector(selector);
@@ -603,6 +607,17 @@ check('it carries the bytes', String(image[0]?.fields?.dataUrl ?? '').startsWith
     const published = document.getElementById('published');
     Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(published, 'true');
     published.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await sleep(300);
+
+  /* The picture. */
+  await evaluate(`(() => {
+    const input = document.querySelector('input[type=file]');
+    const file = new File([new Uint8Array([7, 7, 7])], 'acme.jpg', { type: 'image/jpeg' });
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
   })()`);
   await sleep(300);
 
@@ -633,6 +648,36 @@ check('it carries the bytes', String(image[0]?.fields?.dataUrl ?? '').startsWith
     'it writes the source — a case with no source does not publish',
     caseRows.every((w) => String(lastRow(w)[11] ?? '') === 'Deck p.9'),
   );
+}
+
+/* ── A case that is on the site but is not ready ─────────────────────────
+   The sheet refuses a published case with no deck and slide, no picture or
+   no summary — and it refuses the whole build, not just that case, so one
+   unfinished case stops every case from updating. The editor has to say
+   so at the point of the mistake, because the build's own message lives in
+   the sheet, which an editor is not going to read. */
+{
+  console.log('\nA case that is on the site but is not ready');
+  await evaluate(`(() => {
+    const set = (selector, value) => {
+      const node = document.querySelector(selector);
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(node, value);
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    set('#source', '');
+    const published = document.getElementById('published');
+    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(published, 'true');
+    published.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await sleep(300);
+
+  const before = await evaluate(`window.__writes.length`);
+  await saveAndWait();
+  const after = await evaluate(`window.__writes.length`);
+
+  const message = await evaluate(`document.body.textContent`);
+  check('the save is refused', after === before, `${after - before} writes`);
+  check('it says what is missing', /deck and slide/.test(message), message.match(/[^.]*deck and slide[^.]*\./)?.[0] ?? 'no message');
 }
 
 /* There is no publish button: the sheet is the trigger. */
