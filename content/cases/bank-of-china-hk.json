@@ -1,7 +1,7 @@
 {
   "slug": "bank-of-china-hk",
   "order": 2,
-  "client": "Bank of China",
+  "client": "Bank of China--------",
   "clientLocal": {
     "en": "中銀香港",
     "zh-Hant": "中銀香港",
@@ -90,7 +90,36 @@
       "zh-Hans": ""
     }
   ],
-  "gallery": [],
+  "gallery": [
+    {
+      "src": "/media/cases/bank-of-china-hk/bank-of-china-9gy-01.png",
+      "alt": {
+        "en": "Mock-up: 9gy",
+        "zh-Hant": "樣機：9gy",
+        "zh-Hans": "样机：9gy"
+      },
+      "caption": {
+        "en": "9g7",
+        "zh-Hant": "9g7",
+        "zh-Hans": "9g7"
+      },
+      "mockup": true
+    },
+    {
+      "src": "/media/cases/bank-of-china-hk/bank-of-china-mmmloll-02.png",
+      "alt": {
+        "en": "Mock-up: mmmloll",
+        "zh-Hant": "樣機：mmmloll",
+        "zh-Hans": "样机：mmmloll"
+      },
+      "caption": {
+        "en": "79868787",
+        "zh-Hant": "79868787",
+        "zh-Hans": "79868787"
+      },
+      "mockup": true
+    }
+  ],
   "source": "LIBRARY 2026 Q4/Agency Credential Deck Showcases/Performance First Group branding project 2025Q1.pptx — slide 11",
   "image": {
     "src": "/media/cases/bank-of-china-hk/case-boc.jpg",
