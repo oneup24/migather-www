@@ -447,8 +447,10 @@ function writeImageName_(slug, fileName, isMockup) {
   }
 
   /* And a note for the editor's page, which waits for it before it writes
-     the row that names the picture. */
-  setSetting_('lastImageSaved', fileName);
+     the row that names the picture. The time is part of it, so the page can
+     tell this save from the last one — it uploads the same file name again
+     and again, and a stamp that did not move would tell it nothing. */
+  setSetting_('lastImageSaved', fileName + '|' + new Date().toISOString());
 }
 
 /**

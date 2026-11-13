@@ -498,8 +498,12 @@ export default function AdminPage() {
          into the sheet once the file is really there, so the sheet can
          never name a picture that was not saved. */
       let uploadedFileName = '';
+      let pictureFailed = false;
       if (newFile) {
         const fileName = `${form.slug}${newFile.name.slice(newFile.name.lastIndexOf('.'))}`;
+        /* What the stamp says now, so the wait can tell this upload from
+           the last one. */
+        const before = await readSetting(session.accessToken, 'lastImageSaved');
         const base64 = await readAsBase64(newFile);
         await postToScript(CONFIG.scriptUrl, {
           action: 'image',
@@ -510,25 +514,23 @@ export default function AdminPage() {
           mockup: form.mockup ? 'true' : 'false',
           dataUrl: `data:${newFile.type || 'image/jpeg'};base64,${base64}`,
         });
-        const saved = await waitForImage(fileName);
+        const saved = await waitForImage(before);
         if (!saved) {
-          /* The picture did not arrive. Saying so is the whole point — a
-             silent failure here leaves the sheet naming a picture that is
-             not there, and the site shows the old one with the new
-             copy. */
-          throw new Error(
-            t({
-              en: 'The picture did not reach Drive. The copy has been saved; the picture can be uploaded again.',
-              'zh-Hant': '圖片未能上載到 Drive。文字已儲存，圖片可以重新上載。',
-              'zh-Hans': '图片未能上传到 Drive。文字已保存，图片可以重新上传。',
-            }),
-          );
+          /* The picture did not arrive. This is not a reason to lose the
+             copy: the case row below is written either way, with the old
+             picture, and the editor is told to upload it again. A silent
+             failure here would leave the sheet naming a picture that is
+             not there, and the site showing the old one with the new
+             copy — with nothing said. */
+          pictureFailed = true;
+        } else {
+          uploadedFileName = fileName;
         }
-        uploadedFileName = fileName;
       }
 
-      /* The frames. */
-      await saveGallery(token, form.slug, gallery, removedFrames);
+      /* The frames. The same rule: a frame that does not arrive is a note,
+         not the end of the save. */
+      const failedFrames = await saveGallery(token, form.slug, gallery, removedFrames);
 
       const published = form.published ? 'true' : 'false';
 
@@ -540,8 +542,13 @@ export default function AdminPage() {
         const row = {
           slug,
           client: form.client,
-          clientLocal: form.clientLocal,
-          projectLocal: form.projectLocal,
+          /* The local names are copy, not shared fields: the client's own
+             name and the project's name are written in the language being
+             edited, and the other languages keep what they have. Writing
+             this language's name into all three would quietly flatten a
+             translation the moment an editor saved from another tab. */
+          clientLocal: each === locale ? form.clientLocal : (existing?.clientLocal ?? ''),
+          projectLocal: each === locale ? form.projectLocal : (existing?.projectLocal ?? ''),
           sector: form.sector,
           services: form.services,
           partnershipSince: form.partnershipSince,
@@ -577,13 +584,31 @@ export default function AdminPage() {
          never picks the change up before it is all there. */
       await writeSetting(token, 'contentChanged', new Date().toISOString());
 
-      setNotice(
-        t({
-          en: 'Saved. The site rebuilds by itself within a minute — there is nothing to press.',
-          'zh-Hant': '已儲存。網站會在一分鐘內自動更新，沒有其他需要按的按鈕。',
-          'zh-Hans': '已保存。网站会在一分钟内自动更新，没有其他需要按的按钮。',
-        }),
-      );
+      if (pictureFailed || failedFrames.length) {
+        /* The copy is saved either way — the site will pick it up. What did
+           not arrive is a picture, and the editor has to put it back in. */
+        setError(
+          pictureFailed
+            ? t({
+                en: 'The copy was saved, but the picture did not reach Drive — upload it again. If this is the first time, the helper script may not have been redeployed yet.',
+                'zh-Hant': '文字已儲存，但圖片未能上載到 Drive——請重新上載。若是首次使用，輔助程式可能尚未重新部署。',
+                'zh-Hans': '文字已保存，但图片未能上传到 Drive——请重新上传。若是首次使用，辅助程序可能尚未重新部署。',
+              })
+            : t({
+                en: `The copy was saved, but ${failedFrames.length} frame(s) did not reach Drive — upload them again. If this is the first time, the helper script may not have been redeployed yet.`,
+                'zh-Hant': `文字已儲存，但有 ${failedFrames.length} 幅畫格未能上載到 Drive——請重新上載。若是首次使用，輔助程式可能尚未重新部署。`,
+                'zh-Hans': `文字已保存，但有 ${failedFrames.length} 幅画格未能上传到 Drive——请重新上传。若是首次使用，辅助程序可能尚未重新部署。`,
+              }),
+        );
+      } else {
+        setNotice(
+          t({
+            en: 'Saved. The site rebuilds by itself within a minute — there is nothing to press.',
+            'zh-Hant': '已儲存。網站會在一分鐘內自動更新，沒有其他需要按的按鈕。',
+            'zh-Hans': '已保存。网站会在一分钟内自动更新，没有其他需要按的按钮。',
+          }),
+        );
+      }
       setNewSlug('');
       /* The frames are in Drive now, and the files that were taken off the
          page have been thrown away. */
@@ -637,15 +662,26 @@ export default function AdminPage() {
    * The rows are written after that, with the copy of every language, so
    * the sheet names the pictures that are there and the copy that goes with
    * them.
+   *
+   * A frame that does not arrive is returned, not thrown: the copy around
+   * it still has to be saved, and an editor who loses their typing because
+   * one picture did not make it is an editor who stops using the form.
+   *
+   * Returns the frames that failed, by their place in the order.
    */
   async function saveGallery(token, caseSlug, frames, removed) {
-    if (!frames.length && !removed.length) return;
+    if (!frames.length && !removed.length) return [];
+
+    const failed = [];
 
     /* The pictures first: the script has to write the file name into a row
        before the row can name it. */
     for (const frame of frames) {
       if (!frame.newFile) continue;
 
+      /* What the stamp says now, so the wait can tell this upload from
+         the last one. */
+      const before = await readSetting(session.accessToken, 'lastGalleryImageSaved');
       const base64 = await readAsBase64(frame.newFile);
       await postToScript(CONFIG.scriptUrl, {
         action: 'gallery-image',
@@ -659,16 +695,8 @@ export default function AdminPage() {
         dataUrl: `data:${frame.newFile.type || 'image/jpeg'};base64,${base64}`,
       });
 
-      const saved = await waitForGalleryImage();
-      if (!saved) {
-        throw new Error(
-          t({
-            en: 'A frame did not reach Drive. The copy has been saved; the frame can be uploaded again.',
-            'zh-Hant': '畫格未能上載到 Drive。文字已儲存，畫格可以重新上載。',
-            'zh-Hans': '画格未能上传到 Drive。文字已保存，画格可以重新上传。',
-          }),
-        );
-      }
+      const saved = await waitForGalleryImage(before);
+      if (!saved) failed.push(frame.order);
     }
 
     /* The names the script gave the files. */
@@ -688,6 +716,8 @@ export default function AdminPage() {
         fileName: file,
       });
     }
+
+    return failed;
   }
 
   /**
@@ -777,11 +807,21 @@ export default function AdminPage() {
    * browser cannot read the script's reply, so the sheet is how the two
    * sides talk.
    */
-  async function waitForImage(fileName) {
+  /**
+   * Wait for the script to confirm a picture.
+   *
+   * The script writes the picture's name into the sheet once the file is
+   * really in Drive, and stamps `lastImageSaved` so this can see it. The
+   * stamp carries the time as well as the name, and the page compares it
+   * with the one it read before the upload — the same file name goes up
+   * again and again, and a stamp that had not moved would tell the page
+   * nothing about this attempt.
+   */
+  async function waitForImage(before) {
     const deadline = Date.now() + 45000;
     while (Date.now() < deadline) {
       const saved = await readSetting(session.accessToken, 'lastImageSaved');
-      if (saved === fileName) return true;
+      if (saved && saved !== before) return true;
       await sleep(1500);
     }
     return false;
@@ -790,16 +830,14 @@ export default function AdminPage() {
   /**
    * Wait for the script to confirm a frame.
    *
-   * The script writes the frame's file name into the sheet once the file is
-   * really in Drive, and stamps `lastGalleryImageSaved` so this can see it.
-   * The stamp carries the time as well as the name, so a frame uploaded
-   * twice under the same name is still a new save.
+   * The same, with the frame's stamp. It carries the time as well as the
+   * name, so a frame uploaded twice under the same name is still a new save.
    */
-  async function waitForGalleryImage() {
+  async function waitForGalleryImage(before) {
     const deadline = Date.now() + 45000;
     while (Date.now() < deadline) {
       const saved = await readSetting(session.accessToken, 'lastGalleryImageSaved');
-      if (saved) return true;
+      if (saved && saved !== before) return true;
       await sleep(1500);
     }
     return false;

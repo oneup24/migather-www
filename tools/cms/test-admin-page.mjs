@@ -173,6 +173,9 @@ let id = 0;
 const pending = new Map();
 socket.addEventListener('message', (event) => {
   const message = JSON.parse(event.data);
+  if (message.method === 'Runtime.consoleAPICalled' && message.params.type === 'error') {
+    console.log('PAGE ERROR:', (message.params.args ?? []).map((a) => a.value ?? a.description ?? '').join(' ').slice(0, 300));
+  }
   if (message.id && pending.has(message.id)) {
     const promise = pending.get(message.id);
     pending.delete(message.id);
@@ -245,11 +248,12 @@ const MOCK = `
        really in Drive. The mock does the same, so the page's wait ends. */
     if (fields.action === 'image') {
       const row = window.__fixture.settings.find(function (r) { return r[0] === 'lastImageSaved'; });
-      if (row) row[1] = fields.fileName;
+      if (row) row[1] = fields.fileName + '|' + Date.now();
     }
 
-    /* And the same for a frame. */
-    if (fields.action === 'gallery-image') {
+    /* And the same for a frame — unless the helper script is the old one,
+       which does not know what to do with a frame at all. */
+    if (fields.action === 'gallery-image' && !window.__scriptIsOld) {
       const row = window.__fixture.settings.find(function (r) { return r[0] === 'lastGalleryImageSaved'; });
       if (row) row[1] = (fields.fileName || 'frame') + '|' + Date.now();
     }
@@ -340,9 +344,11 @@ async function saveAndWait() {
 
   await evaluate(`Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Save').click()`);
 
-  /* Wait for it to start, and then to finish. */
+  /* Wait for it to start, and then to finish. A save that waits for a
+     picture that is never going to arrive takes the full wait the page
+     allows — 45 seconds — so the ceiling here has to be longer than that. */
   for (let i = 0; i < 20 && !(await isDisabled()); i += 1) await sleep(100);
-  for (let i = 0; i < 120 && (await isDisabled()); i += 1) await sleep(500);
+  for (let i = 0; i < 300 && (await isDisabled()); i += 1) await sleep(500);
 
   return !(await isDisabled());
 }
@@ -352,10 +358,12 @@ async function saveAndWait() {
 console.log('The works editor page, against mocked Google APIs.\n');
 
 await send('Page.navigate', { url: 'http://localhost:4176/en/admin' }, sessionId);
-await sleep(1200);
+await sleep(2500);
 await evaluate(MOCK);
 await send('Page.reload', {}, sessionId);
-await sleep(1200);
+/* The page has to be mounted before the mock is injected — the mock
+   replaces the fetch, and the app mounts with it. */
+await sleep(2500);
 await evaluate(MOCK);
 
 /* The page must not be configured in this build, so it says so. */
@@ -502,6 +510,57 @@ check('it carries the bytes', String(image[0]?.fields?.dataUrl ?? '').startsWith
 
   const withCaption = rows.filter((w) => JSON.stringify(w.values || '').includes('Branding video'));
   check('the caption was written', withCaption.length > 0, `${withCaption.length} writes carried it`);
+}
+
+/* ── A frame that does not arrive ───────────────────────────────────────
+   The helper script that is still the old one does not know what to do
+   with a frame: it answers with an error the browser cannot read, and the
+   frame never lands in Drive. The copy around it must still be saved —
+   an editor who loses their typing because one picture did not make it is
+   an editor who stops using the form. */
+{
+  console.log('\nA frame that does not reach Drive');
+  await evaluate(`window.__scriptIsOld = true;`);
+
+  /* Something to lose. */
+  await evaluate(`(() => {
+    const areas = document.querySelectorAll('textarea');
+    const set = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set;
+    set.call(areas[0], 'A summary that must survive a picture that did not arrive.');
+    areas[0].dispatchEvent(new Event('input', { bubbles: true }));
+  })()`);
+  await sleep(200);
+
+  /* A frame, with a picture. */
+  await evaluate(`document.getElementById('addFrame').click()`);
+  await sleep(300);
+  await evaluate(`(() => {
+    const input = document.getElementById('frame-file-0');
+    const file = new File([new Uint8Array([1, 2, 3])], 'frame.jpg', { type: 'image/jpeg' });
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  await sleep(300);
+
+  await saveAndWait();
+
+  const after = JSON.parse(
+    await evaluate(`JSON.stringify({
+      summaryWrite: window.__writes.filter(w => JSON.stringify(w.values || '').includes('must survive a picture')).length,
+      stamp: window.__writes.filter(w => String(w.range || '').startsWith('settings')).length,
+      error: document.body.textContent.includes('did not reach Drive'),
+      notice: document.body.textContent.includes('Saved. The site rebuilds'),
+    })`),
+  );
+
+  check('the copy was written anyway', after.summaryWrite > 0, `${after.summaryWrite} writes carried it`);
+  check('the change was stamped, so the site still rebuilds', after.stamp > 0, `${after.stamp} writes`);
+  check('the editor was told the frame did not arrive', after.error);
+  check('the page did not say everything was saved', !after.notice);
+
+  await evaluate(`window.__scriptIsOld = false;`);
 }
 
 /* ── A new case, from nothing ───────────────────────────────────────────
